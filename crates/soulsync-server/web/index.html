@@ -780,6 +780,10 @@ details.adv summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--mu
 details.adv summary span{margin-left:8px;font-weight:400;color:var(--faint)}
 details.adv .field{margin-top:12px}
 .center-msg{padding:96px 16px;text-align:center;color:var(--muted)}
+.center-msg .spin{display:inline-block;width:22px;height:22px;opacity:.6}
+/* Changing runs shows the next one as it is, without the entrance. */
+.snap .reveal,.snap .row.enter,.snap .tile.enter,.snap .pane{animation:none!important}
+.snap .row.enter .seg::before{transition:none!important}
 
 /* ===== motion */
 @keyframes rise{from{opacity:.001;transform:translateY(12px)}}
@@ -997,7 +1001,7 @@ rando: { title: "What gets randomized", lead: "What the preset says, and what yo
       group: { traits: "Pokémon traits", starters: "Starters, static Pokémon and trades", moves: "Moves", trainers: "Trainers", wild: "Wild Pokémon", tms: "TMs, HMs and tutors", items: "Items", misc: "Other" },
       opt: { starter_1: "First starter", starter_2: "Second starter", starter_3: "Third starter", limit_pokemon: "Only Pokémon of some generations", limit_gen1: "Generation 1 (Kanto)", limit_gen2: "Generation 2 (Johto)", limit_gen3: "Generation 3 (Hoenn)", limit_gen4: "Generation 4 (Sinnoh)", limit_gen5: "Generation 5 (Unova)", limit_relatives: "Their evolutions of other generations too", update_base_stats_generation: "Stats up to generation", update_moves_generation: "Moves up to generation", level_alike_speed: "Levelling speed", moves_at_start_count: "Moves at level 1", movesets_good_attacks: "Fixed share of good attacks", movesets_good_attacks_percent: "Share of good attacks", tm_good_attacks: "Fixed share of good attacks on TMs", tm_good_attacks_percent: "Good attacks on TMs", tutor_good_attacks: "Fixed share of good attacks from tutors", tutor_good_attacks_percent: "Good attacks from tutors", trainers_fully_evolved_level: "Fully evolved from level", trainer_levels: "Change the trainers' levels", trainer_levels_percent: "Trainers' levels by", more_boss_pokemon: "More Pokémon for bosses", more_important_pokemon: "More Pokémon for important trainers", more_regular_pokemon: "More Pokémon for regular trainers", elite_unique_pokemon: "Pokémon only the League has, each", wild_levels: "Change wild Pokémon's levels", wild_levels_percent: "Wild levels by", min_catch_rate_level: "Catch rate step", static_levels: "Change static Pokémon's levels", static_levels_percent: "Static levels by", base_stats: "Base stats", base_stats_follow_evolutions: "Stats follow evolutions", update_base_stats: "Stats as in newer games", types: "Types", abilities: "Abilities", abilities_follow_evolutions: "Abilities follow evolutions", allow_wonder_guard: "Allow Wonder Guard", evolutions: "Evolutions", change_impossible_evolutions: "Trade evolutions without trading", easier_evolutions: "Easier evolutions", no_time_evolutions: "No time-of-day evolutions", starters: "Starters", statics: "Static Pokémon (legendaries, gifts)", trades: "In-game trades", update_moves: "Moves as in newer games", random_move_power: "Random move power", random_move_accuracy: "Random move accuracy", random_move_pp: "Random move PP", random_move_types: "Random move types", movesets: "Level-up moves", trainers: "Trainer Pokémon", rival_keeps_starter: "Rival keeps their starter", trainers_similar_strength: "Similar strength as the original", trainers_no_legendaries: "No legendaries for trainers", trainers_fully_evolved: "Fully evolved from a level on", random_trainer_names: "Random trainer names", random_trainer_classes: "Random trainer classes", wild: "Wild Pokémon", wild_rule: "Rule for wild Pokémon", wild_no_legendaries: "No wild legendaries", wild_held_items: "Random held items", tm_moves: "Moves on the TMs", tm: "Who learns which TM", full_hm: "Every Pokémon learns every HM", tutor_moves: "Moves of the tutors", tutor: "Who learns from tutors", field_items: "Items on the ground", shops: "Shop items", base_stats_random_growth: "Evolutions gain stats at random", level_alike: "Same levelling speed for all", level_alike_except: "Who keeps levelling slowly", two_types: "Every Pokémon has two types", no_trapping_abilities: "No trapping abilities", no_negative_abilities: "No abilities that hurt their owner", no_bad_abilities: "No useless abilities", two_abilities: "Every Pokémon has two abilities", similar_abilities_together: "Similar abilities count as one", evolutions_similar_strength: "Evolutions of similar strength", evolutions_same_type: "Evolutions keep a type", evolutions_three_stages: "Three stages at most", evolutions_force_change: "Every evolution changes", statics_limit_main_legendaries: "Story legendaries get no stronger", statics_limit_600: "The strongest become any Pokémon", static_forms: "Other forms as static Pokémon", trade_nicknames: "Random nicknames in trades", trade_trainers: "Random original trainers in trades", trade_ivs: "Random IVs in trades", trade_items: "Random held items in trades", random_move_categories: "Random physical or special", moves_at_start: "Several moves from level 1", order_moves_by_damage: "Stronger attacks are learnt later", no_broken_moves: "No moves of fixed damage", trainers_weighted_types: "Types as common as among Pokémon", no_early_wonder_guard: "No early Wonder Guard", better_trainer_moves: "Better moves for trainers", trainer_forms: "Other forms for trainers", double_battles: "Double battles only", boss_items: "Held items for bosses", important_items: "Held items for important trainers", regular_items: "Held items for regular trainers", consumable_items_only: "Only items that are used up", sensible_items_only: "Only items that suit the Pokémon", strongest_only_items: "Only the strongest Pokémon holds one", wild_seasons: "Every season has its own Pokémon", min_catch_rate: "Higher catch rates", wild_good_held_items: "No bad held items", balance_shaking_grass: "Shaking grass suits the level", wild_forms: "Other forms in the wild", tm_keep_learnt: "Level-up moves stay learnable by TM", tm_keep_field: "Field moves stay on their TMs", tm_follow_evolutions: "TMs follow evolutions", tm_no_broken: "No fixed-damage moves on TMs", tutor_keep_learnt: "Level-up moves stay learnable from tutors", tutor_keep_field: "Field moves stay with the tutors", tutor_follow_evolutions: "Tutors follow evolutions", tutor_no_broken: "No fixed-damage moves from tutors", field_good_items: "No bad items on the ground", shop_good_items: "No bad items in shops", shop_no_usual: "No usual goods in special shops", shop_no_overpowered: "No overpowered items in shops", shop_fair_prices: "Prices match the items", shop_evolution_items: "Evolution items can always be bought", shop_battle_items: "X items can always be bought", pickup: "Items from Pickup", pickup_good_items: "No bad items from Pickup", no_irregular_forms: "No forms that only last a battle", national_dex: "National Pokédex from the start", update_type_effectiveness: "Type chart of newer games", challenge_mode: "Always Challenge Mode", ban_lucky_egg: "No Lucky Egg among random items", no_free_lucky_egg: "No Lucky Egg as a gift", ban_maniac_items: "No big items to sell", run_without_shoes: "Run without Running Shoes", no_low_hp_music: "No music change at low HP" },
       val: { custom: "chosen here", medium_fast: "medium fast", medium_slow: "medium slow", fast: "fast", slow: "slow", erratic: "erratic", fluctuating: "fluctuating", unchanged: "as in the game", random: "random", shuffle: "shuffled", none: "none", random_follow_evolutions: "random, kept through evolutions", random_every_level: "random at every level", random_two_evolutions: "random with two evolutions", swap: "legendaries and others swapped among themselves", similar_strength: "random, similar strength", given: "random Pokémon you receive", both: "random on both sides", random_prefer_type: "random, own type preferred", metronome: "Metronome only", distributed: "random, evenly spread", distributed_main: "evenly spread in the main story", type_themed: "one type per trainer", type_themed_gyms: "one type for gyms and the League", area_mapping: "random per area", global_mapping: "every species replaced by another", catch_em_all: "every species can be found", "wild_rule.type_themed": "one type per area", full: "every Pokémon learns every one", random_even: "random, evenly spread", legendaries: "legendary Pokémon", strong_legendaries: "strong legendary Pokémon", nobody: "nobody" } },
-    compat: { unchanged: "as in the original game", random_prefer_type: "random, own type preferred", random: "random", full: "every Pokémon learns every one" }, asFile: v => `as in the file (${v})`, yes: "yes", no: "no", tmMoves: "The moves on the TMs are randomized as well.", presetBad: "Settings file cannot be read:", freshBusy: "Randomizing…", freshDone: "Done. The game is starting.", freshNeed: "Choose the original ROM, the randomizer and its settings first.", freshWhy: { missing: "A file is missing:", running: "DeSmuME is still open. Close it and try again.", java: "Java could not be started.", download: "The randomizer or Java could not be downloaded. Check your internet connection and try again.", randomizer: "The randomizer did not produce a ROM.", preset: "The randomizer settings cannot be read.", save: "Rare Candies could not be added to the starting save.", write: "A file could not be written.", wine: "The game is ready, but Wine is missing to open DeSmuME on this Mac. Install Wine Stable, then press Continue.", emulator: "The game is ready, but DeSmuME could not be started." }, sLeave: "Pause run", myRuns: "Your runs", runsLead: "Runs you were in. Paused runs keep everything and continue where you left them.", runResume: "Resume", runSwitch: "Switch", runDrop: "Remove", runDropSure: "Click again", runHere: "this computer", runNow: "playing", runMissing: "That run no longer exists on its server, so it was removed from the list.", runOffline: "The server of that run cannot be reached right now. Try again in a moment.", runLast: s => `played ${s}`, sLeaveSure: "Click again to pause", sLeaveHint: "Stops syncing and returns to the setup. The run stays on the server and under Your runs, to resume any time.",
+    compat: { unchanged: "as in the original game", random_prefer_type: "random, own type preferred", random: "random", full: "every Pokémon learns every one" }, asFile: v => `as in the file (${v})`, yes: "yes", no: "no", tmMoves: "The moves on the TMs are randomized as well.", presetBad: "Settings file cannot be read:", freshBusy: "Randomizing…", freshDone: "Done. The game is starting.", freshNeed: "Choose the original ROM, the randomizer and its settings first.", freshWhy: { missing: "A file is missing:", running: "DeSmuME is still open. Close it and try again.", java: "Java could not be started.", download: "The randomizer or Java could not be downloaded. Check your internet connection and try again.", randomizer: "The randomizer did not produce a ROM.", preset: "The randomizer settings cannot be read.", save: "Rare Candies could not be added to the starting save.", write: "A file could not be written.", wine: "The game is ready, but Wine is missing to open DeSmuME on this Mac. Install Wine Stable, then press Continue.", emulator: "The game is ready, but DeSmuME could not be started." }, sLeave: "Pause run", myRuns: "Your runs", runsLead: "Runs you were in. Paused runs keep everything and continue where you left them.", runResume: "Resume", runSwitch: "Switch", runDrop: "Remove", runDropSure: "Click again", runHere: "this computer", runNow: "playing", runMissing: "That run no longer exists on its server, so it was removed from the list.", runOffline: "The server of that run cannot be reached right now. Try again in a moment.", runLast: s => `played ${s}`, sLeaveSure: "Click again to pause", sLeaveHint: "Stops syncing and returns to the setup. The run stays on the server and under Your runs, to resume any time.", nextHint: "Run lost? Next attempt randomizes your game again with the run's settings, sets out your starting save and opens it. Links and history are cleared, the code stays. Close DeSmuME first.", nextDo: n => `Start attempt ${n + 1}`,
     phase: { idle: "Not running", connecting: "Connecting", waiting: "Waiting for your first in-game save", live: "Live, every in-game save is sent", error: "Stopped" },
     tabJoin: "Join a run", tabNew: "New run", code: "Run code", codeHelp: "Your partner sees this code after creating the run.", openRun: "Open run",
     caps: "Level caps", capsPh: "13, 18, 24, 30", capsHelp: "One level per gym, in order. Leave empty to play without caps.", create: "Create run",
@@ -1073,7 +1077,7 @@ rando: { title: "Was gewürfelt wird", lead: "Was die Vorauswahl sagt und was du
       group: { traits: "Eigenschaften der Pokémon", starters: "Starter, feste Pokémon und Tausche", moves: "Attacken", trainers: "Trainer", wild: "Wilde Pokémon", tms: "TMs, VMs und Attackenlehrer", items: "Items", misc: "Sonstiges" },
       opt: { starter_1: "Erster Starter", starter_2: "Zweiter Starter", starter_3: "Dritter Starter", limit_pokemon: "Nur Pokémon bestimmter Generationen", limit_gen1: "Generation 1 (Kanto)", limit_gen2: "Generation 2 (Johto)", limit_gen3: "Generation 3 (Hoenn)", limit_gen4: "Generation 4 (Sinnoh)", limit_gen5: "Generation 5 (Einall)", limit_relatives: "Auch ihre Entwicklungen aus anderen Generationen", update_base_stats_generation: "Werte bis Generation", update_moves_generation: "Attacken bis Generation", level_alike_speed: "Level-Tempo", moves_at_start_count: "Attacken auf Level 1", movesets_good_attacks: "Fester Anteil guter Angriffe", movesets_good_attacks_percent: "Anteil guter Angriffe", tm_good_attacks: "Fester Anteil guter Angriffe auf TMs", tm_good_attacks_percent: "Gute Angriffe auf TMs", tutor_good_attacks: "Fester Anteil guter Angriffe beim Attackenlehrer", tutor_good_attacks_percent: "Gute Angriffe beim Attackenlehrer", trainers_fully_evolved_level: "Voll entwickelt ab Level", trainer_levels: "Level der Trainer ändern", trainer_levels_percent: "Trainer-Level um", more_boss_pokemon: "Mehr Pokémon für Bosse", more_important_pokemon: "Mehr Pokémon für wichtige Trainer", more_regular_pokemon: "Mehr Pokémon für normale Trainer", elite_unique_pokemon: "Pokémon, die nur die Liga hat, je Mitglied", wild_levels: "Level wilder Pokémon ändern", wild_levels_percent: "Wilde Level um", min_catch_rate_level: "Stufe der Fangrate", static_levels: "Level fester Pokémon ändern", static_levels_percent: "Feste Level um", base_stats: "Basiswerte", base_stats_follow_evolutions: "Werte folgen Entwicklungen", update_base_stats: "Werte wie in neueren Spielen", types: "Typen", abilities: "Fähigkeiten", abilities_follow_evolutions: "Fähigkeiten folgen Entwicklungen", allow_wonder_guard: "Wunderwache erlauben", evolutions: "Entwicklungen", change_impossible_evolutions: "Tausch-Entwicklungen ohne Tausch", easier_evolutions: "Leichtere Entwicklungen", no_time_evolutions: "Keine Entwicklungen nach Tageszeit", starters: "Starter", statics: "Feste Pokémon (Legendäre, Geschenke)", trades: "Tausche im Spiel", update_moves: "Attacken wie in neueren Spielen", random_move_power: "Zufällige Stärke", random_move_accuracy: "Zufällige Genauigkeit", random_move_pp: "Zufällige AP", random_move_types: "Zufällige Attacken-Typen", movesets: "Attacken beim Levelaufstieg", trainers: "Pokémon der Trainer", rival_keeps_starter: "Rivale behält seinen Starter", trainers_similar_strength: "Ähnlich stark wie im Original", trainers_no_legendaries: "Keine Legendären bei Trainern", trainers_fully_evolved: "Ab einem Level voll entwickelt", random_trainer_names: "Zufällige Trainernamen", random_trainer_classes: "Zufällige Trainerklassen", wild: "Wilde Pokémon", wild_rule: "Regel für wilde Pokémon", wild_no_legendaries: "Keine wilden Legendären", wild_held_items: "Zufällige getragene Items", tm_moves: "Attacken auf den TMs", tm: "Wer welche TM lernt", full_hm: "Jedes Pokémon lernt jede VM", tutor_moves: "Attacken der Attackenlehrer", tutor: "Wer vom Attackenlehrer lernt", field_items: "Items am Boden", shops: "Items in Läden", base_stats_random_growth: "Entwicklungen legen zufällig bei Werten zu", level_alike: "Alle leveln gleich schnell", level_alike_except: "Wer langsam weiterlevelt", two_types: "Jedes Pokémon hat zwei Typen", no_trapping_abilities: "Keine Fähigkeiten, die am Wechseln hindern", no_negative_abilities: "Keine Fähigkeiten, die dem Besitzer schaden", no_bad_abilities: "Keine nutzlosen Fähigkeiten", two_abilities: "Jedes Pokémon hat zwei Fähigkeiten", similar_abilities_together: "Gleichartige Fähigkeiten zählen als eine", evolutions_similar_strength: "Entwicklungen ähnlich stark", evolutions_same_type: "Entwicklungen behalten einen Typ", evolutions_three_stages: "Höchstens drei Stufen", evolutions_force_change: "Jede Entwicklung ändert sich", statics_limit_main_legendaries: "Legendäre der Story werden nicht stärker", statics_limit_600: "Die Stärksten werden zu beliebigen Pokémon", static_forms: "Andere Formen als feste Pokémon", trade_nicknames: "Zufällige Spitznamen bei Tauschen", trade_trainers: "Zufällige Originaltrainer bei Tauschen", trade_ivs: "Zufällige DVs bei Tauschen", trade_items: "Zufällige getragene Items bei Tauschen", random_move_categories: "Zufällig physisch oder speziell", moves_at_start: "Mehrere Attacken ab Level 1", order_moves_by_damage: "Stärkere Attacken werden später gelernt", no_broken_moves: "Keine Attacken mit festem Schaden", trainers_weighted_types: "Typen so häufig wie bei den Pokémon", no_early_wonder_guard: "Keine frühe Wunderwache", better_trainer_moves: "Bessere Attacken für Trainer", trainer_forms: "Andere Formen bei Trainern", double_battles: "Nur Doppelkämpfe", boss_items: "Getragene Items für Bosse", important_items: "Getragene Items für wichtige Trainer", regular_items: "Getragene Items für normale Trainer", consumable_items_only: "Nur Items, die verbraucht werden", sensible_items_only: "Nur Items, die zum Pokémon passen", strongest_only_items: "Nur das stärkste Pokémon trägt eins", wild_seasons: "Jede Jahreszeit hat eigene Pokémon", min_catch_rate: "Höhere Fangraten", wild_good_held_items: "Keine schlechten getragenen Items", balance_shaking_grass: "Raschelndes Gras passt zum Level", wild_forms: "Andere Formen in der Wildnis", tm_keep_learnt: "Level-Attacken bleiben per TM lernbar", tm_keep_field: "Feld-Attacken bleiben auf ihren TMs", tm_follow_evolutions: "TMs folgen Entwicklungen", tm_no_broken: "Keine Attacken mit festem Schaden auf TMs", tutor_keep_learnt: "Level-Attacken bleiben beim Attackenlehrer lernbar", tutor_keep_field: "Feld-Attacken bleiben bei den Attackenlehrern", tutor_follow_evolutions: "Attackenlehrer folgen Entwicklungen", tutor_no_broken: "Keine Attacken mit festem Schaden beim Attackenlehrer", field_good_items: "Keine schlechten Items am Boden", shop_good_items: "Keine schlechten Items in Läden", shop_no_usual: "Keine üblichen Waren in besonderen Läden", shop_no_overpowered: "Keine übermächtigen Items in Läden", shop_fair_prices: "Preise passen zu den Items", shop_evolution_items: "Entwicklungs-Items sind immer zu kaufen", shop_battle_items: "X-Items sind immer zu kaufen", pickup: "Items durch Mitnahme", pickup_good_items: "Keine schlechten Items durch Mitnahme", no_irregular_forms: "Keine Formen, die nur im Kampf bestehen", national_dex: "Nationaler Pokédex von Anfang an", update_type_effectiveness: "Typen-Tabelle neuerer Spiele", challenge_mode: "Immer Herausforderungs-Modus", ban_lucky_egg: "Kein Glücks-Ei unter zufälligen Items", no_free_lucky_egg: "Kein geschenktes Glücks-Ei", ban_maniac_items: "Keine großen Verkaufs-Items", run_without_shoes: "Rennen ohne Turboschuhe", no_low_hp_music: "Keine andere Musik bei wenig KP" },
       val: { custom: "selbst gewählt", medium_fast: "mittelschnell", medium_slow: "mittellangsam", fast: "schnell", slow: "langsam", erratic: "sprunghaft", fluctuating: "schwankend", unchanged: "wie im Spiel", random: "zufällig", shuffle: "gemischt", none: "keine", random_follow_evolutions: "zufällig, bleibt über Entwicklungen", random_every_level: "zufällig bei jedem Level", random_two_evolutions: "zufällig mit zwei Entwicklungen", swap: "Legendäre und andere untereinander getauscht", similar_strength: "zufällig, ähnlich stark", given: "zufällig, was du bekommst", both: "zufällig auf beiden Seiten", random_prefer_type: "zufällig, eigener Typ bevorzugt", metronome: "nur Metronom", distributed: "zufällig, gleichmäßig verteilt", distributed_main: "gleichmäßig in der Hauptstory", type_themed: "ein Typ pro Trainer", type_themed_gyms: "ein Typ für Arenen und Liga", area_mapping: "zufällig pro Gebiet", global_mapping: "jede Art durch eine andere ersetzt", catch_em_all: "jede Art ist zu finden", "wild_rule.type_themed": "ein Typ pro Gebiet", full: "jedes Pokémon lernt jede", random_even: "zufällig, gleichmäßig verteilt", legendaries: "Legendäre", strong_legendaries: "starke Legendäre", nobody: "niemand" } },
-    compat: { unchanged: "wie im Originalspiel", random_prefer_type: "zufällig, eigener Typ bevorzugt", random: "zufällig", full: "jedes Pokémon lernt jede" }, asFile: v => `wie in der Datei (${v})`, yes: "ja", no: "nein", tmMoves: "Die Attacken auf den TMs werden außerdem zufällig verteilt.", presetBad: "Einstellungsdatei nicht lesbar:", freshBusy: "Wird gewürfelt…", freshDone: "Fertig. Das Spiel startet.", freshNeed: "Wähle zuerst Original-ROM, Randomizer und Einstellungen aus.", freshWhy: { missing: "Eine Datei fehlt:", running: "DeSmuME ist noch offen. Schließe es und versuch es nochmal.", java: "Java ließ sich nicht starten.", download: "Randomizer oder Java ließen sich nicht laden. Prüf deine Internetverbindung und versuch es nochmal.", randomizer: "Der Randomizer hat keine ROM erzeugt.", preset: "Die Randomizer-Einstellungen sind nicht lesbar.", save: "Die Sonderbonbons ließen sich nicht in den Start-Spielstand legen.", write: "Eine Datei ließ sich nicht schreiben.", wine: "Das Spiel ist fertig, aber auf diesem Mac fehlt Wine, um DeSmuME zu öffnen. Installiere Wine Stable und drück dann Weiterspielen.", emulator: "Das Spiel ist fertig, aber DeSmuME ließ sich nicht starten." }, sLeave: "Run pausieren", myRuns: "Meine Runs", runsLead: "Runs, in denen du warst. Pausierte Runs behalten alles und gehen dort weiter, wo ihr aufgehört habt.", runResume: "Fortsetzen", runSwitch: "Wechseln", runDrop: "Entfernen", runDropSure: "Nochmal klicken", runHere: "dieser Computer", runNow: "läuft", runMissing: "Diesen Run gibt es auf seinem Server nicht mehr, er wurde aus der Liste entfernt.", runOffline: "Der Server dieses Runs ist gerade nicht erreichbar. Versuch es gleich nochmal.", runLast: s => `gespielt ${s}`, sLeaveSure: "Zum Pausieren nochmal klicken", sLeaveHint: "Beendet den Sync und führt zurück zur Einrichtung. Der Run bleibt auf dem Server und unter Meine Runs, du kannst ihn jederzeit fortsetzen.",
+    compat: { unchanged: "wie im Originalspiel", random_prefer_type: "zufällig, eigener Typ bevorzugt", random: "zufällig", full: "jedes Pokémon lernt jede" }, asFile: v => `wie in der Datei (${v})`, yes: "ja", no: "nein", tmMoves: "Die Attacken auf den TMs werden außerdem zufällig verteilt.", presetBad: "Einstellungsdatei nicht lesbar:", freshBusy: "Wird gewürfelt…", freshDone: "Fertig. Das Spiel startet.", freshNeed: "Wähle zuerst Original-ROM, Randomizer und Einstellungen aus.", freshWhy: { missing: "Eine Datei fehlt:", running: "DeSmuME ist noch offen. Schließe es und versuch es nochmal.", java: "Java ließ sich nicht starten.", download: "Randomizer oder Java ließen sich nicht laden. Prüf deine Internetverbindung und versuch es nochmal.", randomizer: "Der Randomizer hat keine ROM erzeugt.", preset: "Die Randomizer-Einstellungen sind nicht lesbar.", save: "Die Sonderbonbons ließen sich nicht in den Start-Spielstand legen.", write: "Eine Datei ließ sich nicht schreiben.", wine: "Das Spiel ist fertig, aber auf diesem Mac fehlt Wine, um DeSmuME zu öffnen. Installiere Wine Stable und drück dann Weiterspielen.", emulator: "Das Spiel ist fertig, aber DeSmuME ließ sich nicht starten." }, sLeave: "Run pausieren", myRuns: "Meine Runs", runsLead: "Runs, in denen du warst. Pausierte Runs behalten alles und gehen dort weiter, wo ihr aufgehört habt.", runResume: "Fortsetzen", runSwitch: "Wechseln", runDrop: "Entfernen", runDropSure: "Nochmal klicken", runHere: "dieser Computer", runNow: "läuft", runMissing: "Diesen Run gibt es auf seinem Server nicht mehr, er wurde aus der Liste entfernt.", runOffline: "Der Server dieses Runs ist gerade nicht erreichbar. Versuch es gleich nochmal.", runLast: s => `gespielt ${s}`, sLeaveSure: "Zum Pausieren nochmal klicken", sLeaveHint: "Beendet den Sync und führt zurück zur Einrichtung. Der Run bleibt auf dem Server und unter Meine Runs, du kannst ihn jederzeit fortsetzen.", nextHint: "Run verloren? Nächster Versuch würfelt dein Spiel mit den Einstellungen des Runs neu, legt deinen Start-Spielstand bereit und öffnet es. Links und Verlauf werden geleert, der Code bleibt. Schließe DeSmuME vorher.", nextDo: n => `Versuch ${n + 1} starten`,
     phase: { idle: "Läuft nicht", connecting: "Verbinde", waiting: "Warte auf dein erstes Speichern im Spiel", live: "Live, jedes Speichern im Spiel wird gesendet", error: "Gestoppt" },
     tabJoin: "Run beitreten", tabNew: "Neuer Run", code: "Run-Code", codeHelp: "Dein Partner sieht den Code, nachdem er den Run erstellt hat.", openRun: "Run öffnen",
     caps: "Level-Caps", capsPh: "13, 18, 24, 30", capsHelp: "Ein Level pro Arena, der Reihe nach. Leer lassen, um ohne Caps zu spielen.", create: "Run erstellen",
@@ -1107,6 +1111,10 @@ const localPost = (path, body) => fetch("/api/local/" + path, { method: "POST", 
 const VIEWS = ["links", "encounters", "team", "timeline", "types", "rules", "settings"];
 let view = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "links";
 let state = null, conn = "offline", sprites = window.SOULSYNC_SPRITES || null, mounted = false;
+// The last state of each run seen, so going back to one shows it at once; and
+// whether the page is changing runs, which skips the entrance animations.
+const seen = new Map();
+let switching = false;
 const theme = store.get("soulsync.theme");
 if (theme) document.documentElement.dataset.theme = theme;
 
@@ -1180,6 +1188,23 @@ function sidebarHtml() {
     <nav class="slinks"><a href="https://github.com/hildlabs/SoulSync" target="_blank" rel="noopener">${ICON.github}${t().source}</a></nav>
     <div class="ver">${build ? `${local.update.version ? `v${esc(local.update.version)}  ·  ` : ""}Build ${build}  ·  ` : ""}GPL-3.0</div>`;
 }
+// Goes to another run of this app. The page changes at once, from what it last
+// saw of that run if it was here before; the app follows in the background.
+async function switchRun(ref) {
+  const was = { code: codeFromPath, srv: SRV, state };
+  switching = true; setupUi.runErr = "";
+  codeFromPath = ref.code; SRV = ref.server || ""; state = seen.get(ref.code) || null; mounted = false;
+  render(); enter();
+  const r = await localPost("resume", ref).catch(() => null);
+  if (r && r.ok) { local = await r.json(); updateSidebar(); return; }
+  // The app could not switch: back to where it was.
+  const why = r ? await r.text() : "";
+  setupUi.runErr = why === "missing" ? t().runMissing : why || t().offline;
+  const s = await fetch("/api/local/state").catch(() => null);
+  if (s && s.ok) local = await s.json();
+  codeFromPath = was.code; SRV = was.srv; state = was.state; mounted = false;
+  render(); if (codeFromPath) enter(); else if (socket) { socket.onclose = null; socket.close(); socket = null; }
+}
 function bindSidebar() {
   const el = $("#sbar");
   if (!el) return;
@@ -1190,18 +1215,9 @@ function bindSidebar() {
       return;
     }
     if (!local) return;
+    for (const x of el.querySelectorAll(".srun")) x.classList.toggle("on", x === b);
     b.classList.add("busy");
-    const r = await localPost("resume", { code: b.dataset.code, server: b.dataset.server }).catch(() => null);
-    if (r && r.ok) {
-      local = await r.json(); setupUi.runErr = "";
-      codeFromPath = local.code; SRV = local.server || ""; state = null; mounted = false;
-      render(); enter(); return;
-    }
-    const why = r ? await r.text() : "";
-    setupUi.runErr = why === "missing" ? t().runMissing : why === "offline" ? t().runOffline : why || t().offline;
-    const s = await fetch("/api/local/state").catch(() => null);
-    if (s && s.ok) local = await s.json();
-    render();
+    switchRun({ code: b.dataset.code, server: b.dataset.server });
   };
   const nr = $("#newrun");
   if (nr) {
@@ -1779,6 +1795,12 @@ function mount() {
   mounted = true;
   applyLayout();
   showView();
+  if (switching) {
+    switching = false;
+    document.documentElement.classList.add("snap");
+    // Whatever stood there by then is not new: it must not rise in afterwards.
+    setTimeout(() => { for (const el of $app.querySelectorAll(".enter,.reveal")) el.classList.remove("enter", "reveal"); document.documentElement.classList.remove("snap"); }, 900);
+  }
 }
 
 /* ---------- Overview layout: each viewer folds, hides and orders the sections */
@@ -2008,6 +2030,12 @@ function updateSettings() {
     [t().fLang, `<span class="pair" id="lang2"><button type="button" data-l="en" aria-pressed="${lang === "en"}">English</button><button type="button" data-l="de" aria-pressed="${lang === "de"}">Deutsch</button></span>`],
     [t().fTheme, `<button type="button" id="theme2">${t().theme}</button>`],
   ])}</div></section>`;
+  const fin = state.finished;
+  // The next attempt: with a game SoulSync makes, it makes the next one too.
+  const f = local && local.fresh, pr = f && f.progress, rolling = !!(pr && pr.state === "rolling");
+  const rolls = !!(f && f.original && f.original.ok && (f.run || (f.preset && f.options && f.options.ok)));
+  const freshNote = () => !pr ? "" : pr.state === "done" ? `<p>${f.awaiting ? t().freshAwait : t().freshDone}</p>` : pr.state === "failed" ? `<p class="bad">${t().freshWhy[pr.why] || pr.why}${pr.detail ? " " + esc(pr.detail) : ""}</p>` : "";
+  const nextBtn = () => `<button type="button" class="btn2 hot" id="next"${rolling ? " disabled" : ""}>${rolling ? fetchText(f) : t().nextDo(state.attempt || 1)}</button>`;
   if (local) {
     const rom = local.rom, save = local.save;
     const gamePick = kind => local.dialogs ? `<button type="button" data-fresh="${kind}">${t().freshPick}</button>` : "";
@@ -2016,15 +2044,15 @@ function updateSettings() {
       [t().fRom, `${rom ? `<span title="${esc(rom.path)}">${name(rom.path)}</span>${rom.ok ? `  ·  ${esc(rom.label[lang])}` : ""}` : "–"}${gamePick("rom")}`],
       [t().fSave, `${save ? `<span title="${esc(save.path)}">${name(save.path)}</span>${save.ok ? `  ·  ${t().saveOk(esc(save.trainer), save.badges, save.pokemon)}` : ""}` : "–"}${gamePick("save")}`],
     ])}</div>${local.dialogs ? `<p>${t().sGameHint}</p>` : ""}</section>
-    <section class="rblock glass"><h2>${t().sRun}</h2><div style="margin-top:6px">${kv([
+    <section class="rblock glass" id="runsec"><h2>${t().sRun}</h2><div style="margin-top:6px">${kv([
       [t().code, `<span class="mono">${esc(state.code)}</span>`],
       [t().sSync, `<i class="dot ${local.phase}"></i>${t().phase[local.phase] || local.phase}${local.message ? `  ·  ${esc(local.message)}` : ""}`],
       [t().sServer, local.server ? esc(local.server) : t().sLocal],
       [t().sBuild, local.update && local.update.build ? `${local.update.version ? `${esc(local.update.version)}  ·  ` : ""}Build ${local.update.build}` : "–"],
       ...(local.update && local.update.build ? [[`${t().sChannel}<br><small>${t().sChannelHint}</small>`, `<span class="pair" id="channel"><button type="button" data-p="0" aria-pressed="${!local.update.preview}">${t().sStable}</button><button type="button" data-p="1" aria-pressed="${!!local.update.preview}">${t().sPreview}</button></span>`]] : []),
       [t().sDex, !local.dex ? "–" : local.dex.error ? `<span class="bad" title="${esc(local.dex.error)}">${t().sDexBad}: ${esc(local.dex.error)}</span>` : t().sDexOk(local.dex.moves)],
-    ])}</div><p>${t().sLeaveHint}</p><button type="button" class="btn2" id="leave">${t().sLeave}</button></section>`;
-    if (runsHtml(false)) html += `<section class="rblock glass" id="myruns">${runsHtml(false)}</section>`;
+    ])}</div><p>${t().sLeaveHint} ${t().nextHint}</p>${freshNote()}<div class="btnrow"><button type="button" class="btn2" id="leave">${t().sLeave}</button>${nextBtn()}</div>
+    <p>${fin ? `${t().ended[fin]} ${t().endChange}` : t().endLead}</p><div class="btnrow"><button type="button" class="btn2${fin === "won" ? " on" : ""}" id="endWon">${t().endWon}</button><button type="button" class="btn2${fin === "lost" ? " on" : ""}" id="endLost">${t().endLost}</button></div></section>`;
     if (local.live) html += `<section class="rblock glass"><h2>${t().sLive}</h2><div style="margin-top:6px">${kv([
       [t().sSync, `<i class="dot ${local.live.active ? "live" : "idle"}"></i>${!local.live.active ? t().sLiveOff : local.live.foreign ? t().sLiveForeign : t().sLiveOn}`],
       [t().sLua, t().sLuaState[local.live.lua] || "–"],
@@ -2036,27 +2064,7 @@ function updateSettings() {
     const repNote = r.busy ? `<p>${r.dump ? t().repBusyDump : t().repBusy}</p>` : r.error ? `<p class="bad">${t().repFail} ${esc(r.error)}</p>` : r.path ? `<p>${t().repDone(`<span class="mono">${esc(r.path)}</span>`)}</p>${r.dump && !r.dumped ? `<p class="bad">${t().repNoDump}</p>` : ""}` : "";
     html += `<section class="rblock glass" id="repsec"><h2>${t().rep}</h2><p>${t().repLead}</p><label class="check"><input type="checkbox" id="repDump"${canDump ? "" : " disabled"}${canDump && r.want ? " checked" : ""}> ${t().repDump}</label>${canDump ? "" : `<p><small>${t().repDumpOff}</small></p>`}${repNote}<button type="button" class="btn2" id="report"${r.busy ? " disabled" : ""}>${r.busy ? t().repBusy : t().repDo}</button></section>`;
   }
-  const fin = state.finished;
-  html += `<section class="rblock glass"><h2>${t().attempt(state.attempt || 1)}</h2>${fin ? `<p>${t().ended[fin]} ${t().endChange}</p>` : `<p>${t().endLead}</p>`}<div class="btnrow"><button type="button" class="btn2${fin === "won" ? " on" : ""}" id="endWon">${t().endWon}</button><button type="button" class="btn2${fin === "lost" ? " on" : ""}" id="endLost">${t().endLost}</button></div><p>${t().rRetry}</p><button type="button" class="btn2" id="retry">${t().retry}</button></section>`;
-  if (local && local.fresh) {
-    const f = local.fresh, pr = f.progress, busy = pr && pr.state === "rolling";
-    const pickBtn = kind => local.dialogs ? `<button type="button" data-fresh="${kind}">${t().freshPick}</button>` : "";
-    const file = (p, kind) => `${p ? `<span title="${esc(p)}">${name(p)}</span>` : "–"}${pickBtn(kind)}`;
-    const opt = f.options, ok = opt && opt.ok, r = f.rando || {};
-    const ready = f.original && f.original.ok && (f.run || (f.preset && ok));
-    const note = !pr ? "" : pr.state === "done" ? `<p>${f.awaiting ? t().freshAwait : t().freshDone}</p>` : pr.state === "failed" ? `<p class="bad">${t().freshWhy[pr.why] || pr.why}${pr.detail ? " " + esc(pr.detail) : ""}</p>` : "";
-    const saveRow = (f.template && f.template.ok ? t().freshKept(esc(f.template.trainer), f.template.pokemon) : f.awaiting ? t().freshAwait : t().freshNone) + (f.candies_due ? `<br><small>${t().candiesDue(f.candies_due)}</small>` : "");
-    const optionsHtml = () => `<h3 style="margin-top:14px">${t().freshOptions}</h3>${opt && !ok ? `<p class="bad">${t().presetBad} ${esc(opt.error)}</p>` : `<p>${t().freshOptLead}</p>`}${randoHtml(ok ? opt.options : null, r, "fresh")}<div style="margin-top:6px">${kv([
-      [`${t().fCandies}<br><small>${t().fCandiesHint}</small>`, `<input type="number" min="0" max="999" step="1" id="candies" value="${+f.candies || 0}">`],
-    ])}</div>`;
-    html += `<section class="rblock glass" id="freshsec"><h2>${t().fresh}</h2><p>${t().freshLead}</p><div style="margin-top:6px">${kv([
-      [t().freshOriginal, file(f.original && f.original.path, "original")],
-      [t().freshRando, f.own ? `${t().randoOwnShort}<br><small>${t().randoOwnHint}</small>` : `${f.randomizer ? `<span title="${esc(f.randomizer)}">${name(f.randomizer)}</span>` : esc(f.builtin ? f.builtin.name : "–")}${pickBtn("randomizer")}`],
-      [t().freshPreset, file(f.preset, "preset")],
-      [t().freshSave, `${saveRow}${f.template && f.template.ok ? `<button type="button" data-fresh="untemplate" id="untemplate">${t().freshDrop}</button>` : ""}<button type="button" data-fresh="template">${t().freshKeep}</button>`],
-    ])}</div><p>${t().freshSaveHint}</p>
-    ${f.run ? `<h3 style="margin-top:14px">${t().runRando}</h3><div style="margin-top:6px">${kv([[t().fPreset, esc(f.run.name)], [`${t().fCandies}<br><small>${t().runCandiesHint}</small>`, `<input type="number" min="0" max="999" step="1" id="runCandies" value="${runCandies == null ? +f.run.candies || 0 : runCandies}">`]])}</div><p>${t().runRandoHint}</p>` : optionsHtml()}${note}${ready ? "" : `<p>${t().freshNeed}</p>`}<button type="button" class="btn2" id="fresh"${ready && !busy ? "" : " disabled"}>${busy ? fetchText(f) : t().freshDo}</button></section>`;
-  }
+  if (!local) html += `<section class="rblock glass"><h2>${t().attempt(state.attempt || 1)}</h2>${fin ? `<p>${t().ended[fin]} ${t().endChange}</p>` : `<p>${t().endLead}</p>`}<div class="btnrow"><button type="button" class="btn2${fin === "won" ? " on" : ""}" id="endWon">${t().endWon}</button><button type="button" class="btn2${fin === "lost" ? " on" : ""}" id="endLost">${t().endLost}</button></div><p>${t().rRetry}</p><button type="button" class="btn2" id="retry">${t().retry}</button></section>`;
   if (!local) html += `<section class="rblock glass"><h2>${t().setup}</h2><ol class="steps"><li>${t().step1}</li><li>${t().step2}<div class="cmd"><code>${esc(syncCmd())}</code><button type="button">${t().copy}</button></div></li><li>${t().step3}</li></ol></section>`;
   el.innerHTML = html;
   $("#lang2", el).onclick = e => { const b = e.target.closest("button"); if (b && b.dataset.l !== lang) setLang(b.dataset.l); };
@@ -2087,7 +2095,7 @@ function updateSettings() {
     if (window.SoulSyncDemoFinish) { window.SoulSyncDemoFinish(outcome); el._sig = ""; updateSettings(); }
     else fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/finish?outcome=${outcome}`, { method: "POST" }).catch(() => {}).finally(() => { el._sig = ""; updateSettings(); });
   });
-  confirmButton($("#retry"), t().retry, t().retrySure, btn => {
+  if ($("#retry")) confirmButton($("#retry"), t().retry, t().retrySure, btn => {
     btn.disabled = true;
     if (window.SoulSyncDemoRestart) { window.SoulSyncDemoRestart(); btn.disabled = false; btn.classList.remove("arm"); btn.textContent = t().retry; }
     else fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt`, { method: "POST" }).catch(() => {}).finally(() => { el._sig = ""; updateSettings(); });
@@ -2110,21 +2118,24 @@ function updateSettings() {
     const n = Math.max(0, Math.min(999, Math.round(+runC.value) || 0));
     await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/candies?n=${n}`, { method: "POST" }).catch(() => {});
   };
-  const fresh = $("#fresh");
-  if (fresh && !fresh.disabled) confirmButton(fresh, t().freshDo, t().freshSure, async btn => {
+  const next = $("#next");
+  if (next && !next.disabled) confirmButton(next, t().nextDo(state.attempt || 1), rolls ? t().freshSure : t().retrySure, async btn => {
     btn.disabled = true;
-    const from = state.attempt || 1, f = local.fresh;
+    const from = state.attempt || 1;
+    if (!rolls) {
+      await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt`, { method: "POST" }).catch(() => {});
+      el._sig = ""; return updateSettings();
+    }
     // A new game is a new attempt; one player starting over starts it for
     // everyone, who then only randomize their own game. If someone else
     // already started it, this game is for that one.
     let attempt = from;
-    if (!(f.rolled > 0 && from > f.rolled) && state.code && !window.SoulSyncDemoRestart) {
+    if (!(f.rolled > 0 && from > f.rolled) && state.code) {
       const a = await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt?from=${from}`, { method: "POST" }).then(x => x.json()).catch(() => null);
       attempt = a && a.attempt || from + 1;
     }
     await takeLocal(await localPost("fresh", { attempt }).catch(() => null));
   });
-  if ($("#myruns", el)) bindRuns($("#myruns", el), () => { el._sig = ""; updateSettings(); });
   const leave = $("#leave");
   if (leave) confirmButton(leave, t().sLeave, t().sLeaveSure, async () => { await localPost("leave").catch(() => {}); location.reload(); });
 }
@@ -2787,7 +2798,7 @@ function updateActions() {
   };
   const go = (v, then) => { view = v; try { history.replaceState(null, "", "#" + v); } catch {} showView(); if (then) nextFrame(then); };
   const gf = $("#gofresh", el);
-  if (gf) gf.onclick = () => go("settings", () => { const s = $("#freshsec"); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  if (gf) gf.onclick = () => go("settings", () => { const s = $("#runsec"); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); });
   $("#gotypes", el).onclick = () => go("types");
 }
 
@@ -2901,14 +2912,14 @@ function render() {
   document.documentElement.lang = lang;
   if (!codeFromPath) return local ? renderSetup() : renderStart();
   if (!state) {
-    $app.innerHTML = frame(`<p class="center-msg">${conn === "missing" ? t().missing : ""}</p>`);
+    $app.innerHTML = frame(`<p class="center-msg">${conn === "missing" ? t().missing : `<i class="spin"></i>`}</p>`);
     bindChrome(); updateStatus(); mounted = false; return;
   }
   if (!mounted) mount();
   updateStatus(); updatePlayers(); updateSetup(); updateLinks(); updateRail(); updateEncounters(); updateTeam(); updateTimeline(); updateTypes(); updateRules(); updateSettings(); loadSpecies(); updateCard(); updateSidebar();
 }
 
-function apply(next) { state = next; conn = "live"; render(); }
+function apply(next) { state = next; conn = "live"; if (next && next.code) seen.set(next.code, next); render(); }
 
 // The one connection to the run on screen. A run left behind is closed: the
 // server lets one address hold only so many, and kept ones would block the next.
@@ -2927,7 +2938,7 @@ function connect() {
       const r = await fetch(path).catch(() => null);
       if (r && r.status === 404) {
         // The app remembers a run its server no longer has: back to the setup.
-        if (local) { setupUi.error = t().missing; await localPost("leave").catch(() => {}); local.code = null; codeFromPath = undefined; state = null; mounted = false; render(); return; }
+        if (local) { setupUi.error = t().missing; await localPost("leave").catch(() => {}); const d = await localPost("drop", { code: code.toUpperCase(), server: SRV }).catch(() => null); if (d && d.ok) local = await d.json(); local.code = null; codeFromPath = undefined; state = null; mounted = false; render(); return; }
         conn = "missing"; render(); return;
       }
     }
