@@ -207,6 +207,12 @@ button:active{transform:scale(.97)}
 .play small{display:block;font-size:11.5px;font-weight:500;opacity:.85;margin-top:-2px}
 .play::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);background-size:250% 100%;animation:shine 3.8s ease-in-out infinite;pointer-events:none}
 .play.full{width:100%;justify-content:center}
+/* DeSmuME is open already: a calm, non-clickable status instead of the call to action. */
+.play.on,.play.on:disabled{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--text);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ok) 45%,transparent);filter:none;opacity:1;cursor:default}
+.play.on::after{display:none}
+.play.on .dot{position:relative;flex:none;width:12px;height:12px;margin:0 4px;border-radius:50%;background:var(--ok)}
+.play.on .dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ok);animation:ping 2.4s var(--out) infinite}
+.play.on small{color:var(--muted);opacity:1}
 .sq{position:relative;display:grid;place-items:center;width:58px;height:58px;border-radius:16px;border:1px solid var(--edge);background:var(--glass);backdrop-filter:blur(14px);color:var(--muted);transition:all .25s var(--out)}
 .sq:hover{color:var(--text);border-color:var(--edge-hi);transform:translateY(-2px)}
 .sq svg{width:22px;height:22px}
@@ -979,7 +985,7 @@ const T = {
     layEdit: "Customise", layDone: "Done", layReset: "Reset", layHint: "Fold a section with its arrow. Here you can also move and hide sections; this window remembers it.", layUp: "Move up", layDown: "Move down", layEye: "Show or hide", layFold: "Fold or unfold",
     tabs: { links: "Overview", encounters: "Encounters", team: "Team", timeline: "Timeline", types: "Types", rules: "Rules", settings: "Settings" },
     live: "Right now", liveSrc: "live from DeSmuME", inBattle: "In battle", exploring: "Exploring", offlineP: "Offline", wild: "wild", idleWild: n => `When ${n} meets a wild Pokémon, it shows up here with its catch chance.`, foeTrainer: "trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Show level-up moves and details", foeOf: n => `Opponent of ${n}`, foeMoves: "Possible moves", foeUpTo: n => `up to Lv ${n}`, foeCan: "possible", foeMore: n => `+${n} more`, foeOpen: "Level-up moves and details",
-    badgesT: "Badges", play: "Continue", playSub: "opens DeSmuME with your save", playOk: "DeSmuME is starting…", playFail: "DeSmuME could not be started", playWine: "Install Wine Stable first (needed on a Mac)", newRun: "New run", newRunSure: "Click again: this run pauses", source: "Source on GitHub",
+    badgesT: "Badges", play: "Continue", playSub: "opens DeSmuME with your save", playOk: "DeSmuME is starting…", playOn: "Game running", playOnSub: "DeSmuME is open already", playFail: "DeSmuME could not be started", playWine: "Install Wine Stable first (needed on a Mac)", newRun: "New run", newRunSure: "Click again: this run pauses", source: "Source on GitHub",
     soulLink: n => `Soul Link  ·  ${n} players`, seedOwn: "Seed per player", encAll: "All", encFind: "Search area or Pokémon", encNone: "Nothing matches.", teamLead: "Every pair shares its fate. Click a Pokémon for its moves and stats.", teamEmpty: "No linked pair is in the team yet.", look: "Appearance", fLang: "Language", fTheme: "Light or dark",
     area: "Area", status: "Status",
     hint: { team: "linked and in play", boxed: "linked, both resting", open: "one catch is still missing", lost: "fainted or not caught, both are out" },
@@ -1055,7 +1061,7 @@ rando: { title: "What gets randomized", lead: "What the preset says, and what yo
     layEdit: "Anpassen", layDone: "Fertig", layReset: "Zurücksetzen", layHint: "Bereiche klappst du mit ihrem Pfeil ein. Hier kannst du sie auch verschieben und ausblenden; dieses Fenster merkt es sich.", layUp: "Nach vorn", layDown: "Nach hinten", layEye: "Ein- oder ausblenden", layFold: "Ein- oder ausklappen",
     tabs: { links: "Übersicht", encounters: "Begegnungen", team: "Team", timeline: "Verlauf", types: "Typen", rules: "Regeln", settings: "Einstellungen" },
     live: "Gerade unterwegs", liveSrc: "live aus DeSmuME", inBattle: "Im Kampf", exploring: "Unterwegs", offlineP: "Offline", wild: "wild", idleWild: n => `Sobald ${n} auf ein wildes Pokémon trifft, erscheint es hier mit Fangchance.`, foeTrainer: "Trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Lernset und Details zeigen", foeOf: n => `Gegner von ${n}`, foeMoves: "Mögliche Attacken", foeUpTo: n => `bis Lv ${n}`, foeCan: "möglich", foeMore: n => `+${n} weitere`, foeOpen: "Lernset und Details",
-    badgesT: "Orden", play: "Weiterspielen", playSub: "öffnet DeSmuME mit deinem Spielstand", playOk: "DeSmuME startet…", playFail: "DeSmuME ließ sich nicht starten", playWine: "Installiere zuerst Wine Stable (nötig auf dem Mac)", newRun: "Neuer Run", newRunSure: "Nochmal klicken: dieser Run pausiert", source: "Quellcode auf GitHub",
+    badgesT: "Orden", play: "Weiterspielen", playSub: "öffnet DeSmuME mit deinem Spielstand", playOk: "DeSmuME startet…", playOn: "Spiel läuft", playOnSub: "DeSmuME ist schon geöffnet", playFail: "DeSmuME ließ sich nicht starten", playWine: "Installiere zuerst Wine Stable (nötig auf dem Mac)", newRun: "Neuer Run", newRunSure: "Nochmal klicken: dieser Run pausiert", source: "Quellcode auf GitHub",
     soulLink: n => `Soul Link  ·  ${n} Spieler`, seedOwn: "Seeds pro Spieler", encAll: "Alle", encFind: "Gebiet oder Pokémon suchen", encNone: "Nichts gefunden.", teamLead: "Jedes Paar teilt sein Schicksal. Klick auf ein Pokémon zeigt Attacken und Werte.", teamEmpty: "Noch kein verbundenes Paar im Team.", look: "Darstellung", fLang: "Sprache", fTheme: "Hell oder dunkel",
     area: "Gebiet", status: "Status",
     hint: { team: "verbunden und im Einsatz", boxed: "verbunden, beide in der Box", open: "ein Fang fehlt noch", lost: "besiegt oder nicht gefangen, beide raus" },
@@ -2905,7 +2911,7 @@ function updateRail() {
   const seeds = state.seeds && state.seeds.length ? state.seeds : [state.seed];
   const shared = state.settings.shared_seed || seeds.length < 2;
   const chip = (v, hl) => `<span class="tag${hl ? " hl" : ""}">${v}</span>`;
-  const html = [chip(ts().soulLink(seats()), true), games.length ? chip(`Pokémon ${esc(games.join(" / "))}  ·  ${t().gen(5)}`) : "", seeds[0] != null ? chip(shared ? `${t().kSeed} <span class="mono">${esc(seeds[0])}</span>` : t().seedOwn) : ""].join("");
+  const html = [chip(ts().soulLink(seats()), true), games.length ? chip(`Pokémon ${esc(games.join(" / "))}  ·  ${t().gen(5)}`) : "", seeds[0] != null ? chip(shared ? `${solo() ? "Seed" : t().kSeed} <span class="mono">${esc(seeds[0])}</span>` : t().seedOwn) : ""].join("");
   const el = $("#chips");
   if (el._h !== html) { el._h = html; el.innerHTML = html; el.title = shared ? "" : seeds.map((v, i) => `${seatName(i)}: ${v}`).join("\n"); }
   updateActions();
@@ -2925,11 +2931,13 @@ function updateActions() {
   // Someone started the next attempt: this game belongs to the last one.
   const behind = fresh && fresh.rolled > 0 && state.attempt > fresh.rolled && !(fresh.progress && fresh.progress.state === "rolling");
   const rolling = fresh && fresh.progress && fresh.progress.state === "rolling" ? fetchText(fresh) : "";
-  const sig = [lang, can, !!fresh, behind && state.attempt, rolling].join("|");
+  // The game is open already: say so instead of offering to open it twice.
+  const on = can && local.running;
+  const sig = [lang, can, on, !!fresh, behind && state.attempt, rolling].join("|");
   if (el._sig === sig) return;
   el._sig = sig;
   el.hidden = !can && !fresh;
-  el.innerHTML = `${rolling ? `<button type="button" class="play" disabled>${ICON.retry}<span>${t().making}<small>${rolling}</small></span></button>` : behind ? `<button type="button" class="play" id="reroll">${ICON.retry}<span>${t().rollNow(state.attempt)}<small>${t().rollNowSub}</small></span></button>` : can ? `<button type="button" class="play" id="play">${ICON.play}<span>${t().play}<small>${t().playSub}</small></span></button>` : ""}
+  el.innerHTML = `${rolling ? `<button type="button" class="play" disabled>${ICON.retry}<span>${t().making}<small>${rolling}</small></span></button>` : behind ? `<button type="button" class="play" id="reroll">${ICON.retry}<span>${t().rollNow(state.attempt)}<small>${t().rollNowSub}</small></span></button>` : on ? `<button type="button" class="play on" disabled aria-disabled="true"><i class="dot" aria-hidden="true"></i><span>${t().playOn}<small>${t().playOnSub}</small></span></button>` : can ? `<button type="button" class="play" id="play">${ICON.play}<span>${t().play}<small>${t().playSub}</small></span></button>` : ""}
     ${fresh ? `<button type="button" class="sq retry" id="gofresh" aria-label="${t().fresh}">${ICON.retry}<span class="tip">${t().fresh}</span></button>` : ""}
     <button type="button" class="sq" id="gotypes" aria-label="${t().tabs.types}">${ICON.types}<span class="tip">${t().tabs.types}</span></button>`;
   const reroll = $("#reroll", el);
