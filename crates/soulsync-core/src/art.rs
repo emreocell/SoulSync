@@ -218,6 +218,49 @@ fn lz(src: &[u8]) -> Option<Vec<u8>> {
     Some(out)
 }
 
+/// The game's icon from the DS menu, 32 × 32, as PNG. Every DS ROM has
+/// one in its banner: the header points to it at 0x68; the picture is 4×4
+/// tiles of 8×8 pixels at 4 bits each, followed by 16 BGR555 colours of
+/// which the first is transparent.
+pub fn banner_icon<R: Read + Seek>(rom: &mut R) -> Option<Vec<u8>> {
+    use std::io::SeekFrom;
+    let mut at = [0u8; 4];
+    rom.seek(SeekFrom::Start(0x68)).ok()?;
+    rom.read_exact(&mut at).ok()?;
+    let banner = u64::from(u32::from_le_bytes(at));
+    if banner == 0 {
+        return None;
+    }
+    let mut data = [0u8; 0x240];
+    rom.seek(SeekFrom::Start(banner + 0x20)).ok()?;
+    rom.read_exact(&mut data).ok()?;
+    let (bitmap, palette) = data.split_at(0x200);
+    let colour = |i: usize| -> [u8; 4] {
+        if i == 0 {
+            return [0; 4];
+        }
+        let c = u16::from_le_bytes([palette[i * 2], palette[i * 2 + 1]]);
+        let ch = |v: u16| ((v & 31) * 255 / 31) as u8;
+        [ch(c), ch(c >> 5), ch(c >> 10), 255]
+    };
+    let mut rgba = vec![0u8; 32 * 32 * 4];
+    for (k, byte) in bitmap.iter().enumerate() {
+        let (tile, within) = (k / 32, k % 32);
+        let (tx, ty) = (tile % 4, tile / 4);
+        let (y, x) = (within / 4, within % 4 * 2);
+        for (dx, index) in [(0, byte & 0xF), (1, byte >> 4)] {
+            let px = tx * 8 + x + dx;
+            let py = ty * 8 + y;
+            let o = (py * 32 + px) * 4;
+            rgba[o..o + 4].copy_from_slice(&colour(usize::from(index)));
+        }
+    }
+    // A blank icon is no icon.
+    rgba.chunks(4)
+        .any(|p| p[3] != 0)
+        .then(|| png(32, 32, &rgba))
+}
+
 /// An RGBA picture as PNG, stored without compression: the icons are tiny.
 pub fn png(w: u32, h: u32, rgba: &[u8]) -> Vec<u8> {
     let mut raw = Vec::with_capacity(rgba.len() + h as usize);
@@ -302,5 +345,25 @@ mod tests {
         assert_eq!(&p[..8], b"\x89PNG\r\n\x1a\n");
         assert_eq!(&p[12..16], b"IHDR");
         assert_eq!(crc32(b"IEND"), 0xAE42_6082);
+    }
+
+    #[test]
+    fn reads_the_banner_icon() {
+        let mut rom = vec![0u8; 0x1000];
+        rom[0x68..0x6C].copy_from_slice(&0x800u32.to_le_bytes());
+        // The first pixel of the second tile in colour 1, pure red.
+        rom[0x800 + 0x20 + 32] = 0x01;
+        rom[0x800 + 0x220 + 2..0x800 + 0x220 + 4].copy_from_slice(&0x001Fu16.to_le_bytes());
+        let p = banner_icon(&mut std::io::Cursor::new(&rom)).unwrap();
+        assert_eq!(&p[16..24], &[0, 0, 0, 32, 0, 0, 0, 32]);
+        // No banner, no icon; a blank one neither.
+        rom[0x68..0x6C].copy_from_slice(&0u32.to_le_bytes());
+        assert!(banner_icon(&mut std::io::Cursor::new(&rom)).is_none());
+        let blank = {
+            let mut r = vec![0u8; 0x1000];
+            r[0x68..0x6C].copy_from_slice(&0x800u32.to_le_bytes());
+            r
+        };
+        assert!(banner_icon(&mut std::io::Cursor::new(&blank)).is_none());
     }
 }

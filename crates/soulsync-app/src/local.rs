@@ -1887,6 +1887,34 @@ async fn sprite(
     picture(local, id, false).await
 }
 
+/// The DS-menu icon of the game being played, or with `?of=original` of
+/// the original ROM, for the setup and the settings.
+async fn rom_icon(
+    State(local): State<Local>,
+    axum::extract::Query(q): axum::extract::Query<std::collections::HashMap<String, String>>,
+) -> Response {
+    let path = {
+        let inner = local.inner.lock().unwrap();
+        let c = &inner.config;
+        if q.get("of").map(String::as_str) == Some("original") {
+            c.original.clone()
+        } else {
+            c.rom.clone()
+        }
+    };
+    let png = tokio::task::spawn_blocking(move || {
+        let mut f = std::fs::File::open(path?).ok()?;
+        soulsync_core::art::banner_icon(&mut f)
+    })
+    .await
+    .ok()
+    .flatten();
+    match png {
+        Some(png) => ([(header::CONTENT_TYPE, "image/png")], png).into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
 async fn item_icon(
     State(local): State<Local>,
     axum::extract::Path(id): axum::extract::Path<u16>,
@@ -1987,6 +2015,7 @@ pub fn routes(server: soulsync_server::AppState, own: String) -> Router {
         .route("/api/local/fresh", post(fresh))
         .route("/api/local/play", post(play))
         .route("/api/local/sprite/{id}", get(sprite))
+        .route("/api/local/romicon", get(rom_icon))
         .route("/api/local/item/{id}", get(item_icon))
         .layer(axum::middleware::from_fn(guard))
         .with_state(local)

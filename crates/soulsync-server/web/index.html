@@ -795,6 +795,8 @@ dialog.rdlg::backdrop{background:rgba(var(--shade),.55);backdrop-filter:blur(6px
 .cart::before{content:"";position:absolute;left:7px;right:7px;top:7px;height:23px;border-radius:4px;background:linear-gradient(135deg,var(--a),#3A2440 50%,var(--b))}
 .cart::after{content:"";position:absolute;left:10px;right:10px;bottom:5px;height:5px;background:repeating-linear-gradient(90deg,#C9A24A 0 3px,transparent 3px 5px)}
 .romc.off .cart{filter:grayscale(1);opacity:.5}
+/* The game's own DS-menu icon, 32 px drawn at twice the size with hard pixels. */
+.romicon{flex:none;width:64px;height:64px;border-radius:10px;image-rendering:pixelated;border:1px solid var(--edge-hi);box-shadow:0 6px 18px -8px rgba(0,0,0,.6);background:var(--ov-1)}
 .romc>div{flex:1;min-width:0}
 .romc b{display:block;font-weight:600}
 .romc small{display:block;color:var(--muted);font-size:12px}
@@ -1727,6 +1729,9 @@ function openRules(u, rom, done) {
   if (!d.open) d.showModal();
 }
 
+// The DS-menu icon read from the chosen ROM; the drawn cartridge where it
+// cannot be read.
+const romIcon = (of, path) => `<img class="romicon" alt="" width="64" height="64" src="/api/local/romicon?of=${of}&p=${encodeURIComponent(path || "")}" onerror="this.outerHTML='<span class=&quot;cart&quot;></span>'">`;
 function renderSetup() {
   const u = setupUi, fr = local.fresh || {}, rom = fr.original && fr.original.ok ? fr.original : local.rom;
   if (!u.rules) u.rules = RULES_NEW.slice();
@@ -1739,7 +1744,7 @@ function renderSetup() {
     <div class="filerow"><input id="f-${kind}" autocomplete="off" spellcheck="false" placeholder="${t().fPathPh}" value="${f ? esc(f.path) : ""}">${local.dialogs ? `<button type="button" data-pick="${kind}">${t().browse}</button>` : ""}</div>
     ${f ? `<small class="${f.ok ? "ok" : "bad"}">${f.ok ? "✓ " + okText : kind === "rom" || kind === "original" ? t().romBad : t().saveBad}</small>` : ""}</div>`;
   const cart = rom && rom.ok
-    ? `<div class="romc ok"><span class="cart"></span><div><b>${esc(rom.label[lang])}</b><small class="ok">✓ ${t().gen(rom.generation)}</small></div></div>`
+    ? `<div class="romc ok">${romIcon(rom === fr.original ? "original" : "rom", rom.path)}<div><b>${esc(rom.label[lang])}</b><small class="ok">✓ ${t().gen(rom.generation)}</small></div></div>`
     : `<div class="romc off"><span class="cart"></span><div><b>${t().fRom}</b><small>${t().romBad}</small></div></div>`;
   $app.innerHTML = frame(`<main class="stage-page"><form class="form" id="setupf">
     <div class="fhead"><h1>${t().setupTitle}</h1><p class="lead">${t().setupLead}</p></div>
