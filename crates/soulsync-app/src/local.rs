@@ -340,6 +340,16 @@ fn find_desmume(save: &Path) -> Option<(&Path, u16)> {
     })
 }
 
+/// The DeSmuME to open the current game with: the one chosen in the setup,
+/// else one next to the save. A game kept elsewhere, such as one played
+/// before SoulSync made its games next to DeSmuME, has no DeSmuME beside it.
+fn emulator_of(c: &Config) -> Option<PathBuf> {
+    c.emulator
+        .clone()
+        .filter(|e| e.is_file())
+        .or_else(|| c.save.as_deref().and_then(desmume_exe))
+}
+
 /// The DeSmuME that plays `save`, to check on and to start.
 fn desmume_exe(save: &Path) -> Option<PathBuf> {
     let (dir, _) = find_desmume(save)?;
@@ -722,8 +732,7 @@ impl Local {
             "phase": inner.phase,
             "message": inner.message,
             "art": c.rom.is_some() || c.original.is_some(),
-            "play": c.rom.as_deref().is_some_and(Path::exists)
-                && c.save.as_deref().and_then(desmume_exe).is_some(),
+            "play": c.rom.as_deref().is_some_and(Path::exists) && emulator_of(c).is_some(),
             "running": inner.running,
             "dex": inner.dex.as_ref().map(|d| match d {
                 Ok(moves) => serde_json::json!({ "moves": moves }),
@@ -1798,26 +1807,20 @@ async fn leave(State(local): State<Local>) -> Json<serde_json::Value> {
 /// Notes whether the DeSmuME of the game being played is open, so the
 /// dashboard can show that instead of offering to open it a second time.
 fn watch_emulator(local: &Local) {
-    let save = local.inner.lock().unwrap().config.save.clone();
-    let running = save
-        .as_deref()
-        .and_then(desmume_exe)
-        .is_some_and(|exe| crate::fresh::running(&exe));
+    let exe = emulator_of(&local.inner.lock().unwrap().config);
+    let running = exe.is_some_and(|exe| crate::fresh::open(&exe));
     local.inner.lock().unwrap().running = running;
 }
 
 /// Opens the game being played in DeSmuME.
 async fn play(State(local): State<Local>) -> Reply {
-    let (rom, save) = {
+    let (rom, exe) = {
         let inner = local.inner.lock().unwrap();
-        (inner.config.rom.clone(), inner.config.save.clone())
+        (inner.config.rom.clone(), emulator_of(&inner.config))
     };
     let rom = rom.filter(|r| r.exists()).ok_or_else(|| bad("rom"))?;
     give_due_candies(&local);
-    let exe = save
-        .as_deref()
-        .and_then(desmume_exe)
-        .ok_or_else(|| bad("emulator"))?;
+    let exe = exe.ok_or_else(|| bad("emulator"))?;
     crate::fresh::play(&exe, &rom).map_err(|why| {
         bad(match why {
             crate::fresh::Why::Wine => "wine",
@@ -2408,5 +2411,27 @@ mod tests {
             [("HYPNO-0002", 2), ("ZORUA-0001", 3)],
             "a run keeps its place when played again"
         );
+    }
+
+    #[test]
+    fn opens_a_game_kept_away_from_desmume() {
+        let dir = std::env::temp_dir().join(format!("soulsync-emu-{}", std::process::id()));
+        let (game, emu) = (dir.join("Rando"), dir.join("SoulSync"));
+        std::fs::create_dir_all(game.join("Battery")).unwrap();
+        std::fs::create_dir_all(&emu).unwrap();
+        let mut exe = vec![0u8; 0x90];
+        exe[0x3C] = 0x80;
+        exe[0x80..0x86].copy_from_slice(b"PE\0\0\x64\x86");
+        let desmume = emu.join("DeSmuME_0.9.13_x64.exe");
+        std::fs::write(&desmume, &exe).unwrap();
+        let mut c = Config {
+            save: Some(game.join("Battery").join("SoulLink_3P.dsv")),
+            ..Config::default()
+        };
+        // Nothing next to the save, and none chosen: nothing to open it with.
+        assert_eq!(emulator_of(&c), None);
+        c.emulator = Some(desmume.clone());
+        assert_eq!(emulator_of(&c), Some(desmume));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

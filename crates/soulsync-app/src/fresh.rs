@@ -101,6 +101,19 @@ pub fn quiet(command: &mut Command) -> &mut Command {
 /// writes its save on exit like on Windows, and its process names the
 /// `.exe`. Other emulators are left alone.
 pub fn running(exe: &Path) -> bool {
+    listed(exe, false)
+}
+
+/// Whether the program at `exe` is open with a window, for the dashboard to
+/// say the game runs. A DeSmuME that is closing, or hangs on its way out
+/// after the window is gone, still shows in the task list for a while but
+/// is no game one can play: on Windows only a process with a window title
+/// counts.
+pub fn open(exe: &Path) -> bool {
+    listed(exe, true)
+}
+
+fn listed(exe: &Path, windowed: bool) -> bool {
     let Some(name) = exe.file_name().and_then(|n| n.to_str()) else {
         return false;
     };
@@ -111,8 +124,13 @@ pub fn running(exe: &Path) -> bool {
                 .output()
                 .is_ok_and(|o| o.status.success());
     }
-    quiet(Command::new("tasklist").args(["/NH", "/FO", "CSV", "/FI"]))
-        .arg(format!("IMAGENAME eq {name}"))
+    let mut command = Command::new("tasklist");
+    command.args(["/NH", "/FO", "CSV", "/FI"]);
+    command.arg(format!("IMAGENAME eq {name}"));
+    if windowed {
+        command.args(["/FI", "WINDOWTITLE ne N/A"]);
+    }
+    quiet(&mut command)
         .output()
         .map(|o| {
             String::from_utf8_lossy(&o.stdout)
