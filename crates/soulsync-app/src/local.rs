@@ -1088,6 +1088,21 @@ async fn pick(State(local): State<Local>, Json(pick): Json<Pick>) -> Reply {
                 }
             }
             apply(c, set);
+            // A save chosen by hand in a run, begun without SoulSync's
+            // starting save, has no Rare Candies yet: it gets the run's
+            // once DeSmuME is closed, as the first save of a new game does.
+            if kind == Kind::Save && c.code.is_some() {
+                let count = c.run_rando.as_ref().map_or(c.candies.0, |r| r.candies);
+                let empty = c.save.as_deref().is_some_and(|p| {
+                    load(p).is_ok()
+                        && std::fs::read(p).is_ok_and(|s| {
+                            soulsync_core::bag::medicine(&s, soulsync_core::bag::RARE_CANDY) == 0
+                        })
+                });
+                if count > 0 && empty {
+                    c.candies_due = c.save.clone().map(|save| CandiesDue { save, count });
+                }
+            }
             let playing = c.code.is_some() && matches!(kind, Kind::Rom | Kind::Save);
             if playing {
                 c.remember(now_ms());
@@ -1178,6 +1193,28 @@ async fn fresh(State(local): State<Local>, body: Option<Json<Fresh>>) -> Reply {
     Ok(Json(local.view()))
 }
 
+/// Moves the game of a run next to the DeSmuME chosen in the setup when it
+/// lies elsewhere. DeSmuME keeps a game's save in the `Battery` folder next
+/// to itself, whatever folder the ROM is in: a game left in an older folder
+/// would get its starting save and Rare Candies there, while DeSmuME opens
+/// another save, and the sync would watch a file nobody plays.
+fn relocate_beside_emulator(c: &mut Config) -> bool {
+    let (Some(emulator), Some(code)) = (c.emulator.clone().filter(|e| e.is_file()), c.code.clone())
+    else {
+        return false;
+    };
+    let battery = emulator.parent().map(|d| d.join("Battery"));
+    if c.save.as_deref().and_then(Path::parent) == battery.as_deref() {
+        return false;
+    }
+    let Some((rom, save)) = game_paths(&emulator, &code) else {
+        return false;
+    };
+    c.rom = Some(rom);
+    c.save = Some(save);
+    true
+}
+
 /// Randomizes the ROM anew, puts the starting save in place and opens the
 /// game; with `sync`, the sync starts again afterwards. The run's own
 /// randomizer settings win over the player's.
@@ -1191,6 +1228,10 @@ fn begin_fresh(
         let mut inner = local.inner.lock().unwrap();
         if inner.fresh == Some(Progress::Rolling) {
             return Ok(());
+        }
+        if relocate_beside_emulator(&mut inner.config) {
+            inner.config.remember(now_ms());
+            write_config(&inner.config);
         }
         let c = &inner.config;
         let need = |p: &Option<PathBuf>, what| p.clone().ok_or_else(|| bad(what));
@@ -2432,6 +2473,34 @@ mod tests {
         assert_eq!(emulator_of(&c), None);
         c.emulator = Some(desmume.clone());
         assert_eq!(emulator_of(&c), Some(desmume));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn moves_a_game_next_to_the_chosen_desmume() {
+        let dir = std::env::temp_dir().join(format!("soulsync-move-{}", std::process::id()));
+        let emu = dir.join("SoulSync");
+        std::fs::create_dir_all(&emu).unwrap();
+        let desmume = emu.join("DeSmuME_0.9.13_x64.exe");
+        std::fs::write(&desmume, b"MZ").unwrap();
+        let old = dir.join("Rando").join("Battery").join("SoulLink_3P.dsv");
+        let mut c = Config {
+            code: Some("LATIAS-6810".into()),
+            save: Some(old),
+            emulator: Some(desmume),
+            ..Config::default()
+        };
+        assert!(relocate_beside_emulator(&mut c));
+        assert_eq!(
+            c.save,
+            Some(emu.join("Battery").join("SoulSync-LATIAS-6810.dsv"))
+        );
+        assert_eq!(
+            c.rom,
+            Some(emu.join("Roms").join("SoulSync-LATIAS-6810.nds"))
+        );
+        // Already there: left alone.
+        assert!(!relocate_beside_emulator(&mut c));
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
