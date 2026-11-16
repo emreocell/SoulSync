@@ -11,6 +11,10 @@ on:
       version:
         description: "Version to release, such as 0.1.0"
         required: true
+      mac:
+        description: "Also build the Mac app"
+        type: boolean
+        default: false
 
 jobs:
   check:
@@ -90,7 +94,11 @@ jobs:
   # is attached to the release the Windows job made; the app on a Mac does
   # not update itself yet. It is signed ad hoc only, so macOS asks once
   # before opening it, see docs/mac.md.
+  # The Mac version is on hold, and macOS runners can queue for a long time
+  # and then get cancelled, which turned whole runs red. So it is built only
+  # when asked for: Run workflow with "Also build the Mac app" ticked.
   mac-app:
+    if: github.event_name == 'workflow_dispatch' && inputs.mac
     runs-on: macos-latest
     needs: windows-app
     permissions:
