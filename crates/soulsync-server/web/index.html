@@ -321,7 +321,8 @@ button:active{transform:scale(.97)}
 .fteam i{width:10px;height:10px;border-radius:50%;background:var(--muted);box-shadow:inset 0 -3px 0 color-mix(in srgb,#000 25%,transparent)}
 .fteam i.on{background:var(--danger)}
 .fteam i.out{background:var(--ov-2);box-shadow:none}
-.fmvs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:12px}
+.fcap{margin:12px 0 0;font-size:11px;color:var(--faint)}
+.fmvs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:6px}
 .fmv{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:7px;padding:6px 9px;border-radius:var(--r-sm);background:var(--ov-1);font-size:12px}
 .fmv b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fmv .pw{font:400 15px var(--pix);color:var(--muted)}
@@ -977,7 +978,7 @@ const T = {
     ballHave: (b, n) => `${b}: ${n} in the bag`,
     layEdit: "Customise", layDone: "Done", layReset: "Reset", layHint: "Fold a section with its arrow. Here you can also move and hide sections; this window remembers it.", layUp: "Move up", layDown: "Move down", layEye: "Show or hide", layFold: "Fold or unfold",
     tabs: { links: "Overview", encounters: "Encounters", team: "Team", timeline: "Timeline", types: "Types", rules: "Rules", settings: "Settings" },
-    live: "Right now", liveSrc: "live from DeSmuME", inBattle: "In battle", exploring: "Exploring", offlineP: "Offline", wild: "wild", idleWild: n => `When ${n} meets a wild Pokémon, it shows up here with its catch chance.`, foeTrainer: "trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Show level-up moves and details", foeOf: n => `Opponent of ${n}`, foeMoves: "Its moves", foeOpen: "Level-up moves and details",
+    live: "Right now", liveSrc: "live from DeSmuME", inBattle: "In battle", exploring: "Exploring", offlineP: "Offline", wild: "wild", idleWild: n => `When ${n} meets a wild Pokémon, it shows up here with its catch chance.`, foeTrainer: "trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Show level-up moves and details", foeOf: n => `Opponent of ${n}`, foeMoves: "Possible moves", foeUpTo: n => `up to Lv ${n}`, foeCan: "possible", foeMore: n => `+${n} more`, foeOpen: "Level-up moves and details",
     badgesT: "Badges", play: "Continue", playSub: "opens DeSmuME with your save", playOk: "DeSmuME is starting…", playFail: "DeSmuME could not be started", playWine: "Install Wine Stable first (needed on a Mac)", newRun: "New run", newRunSure: "Click again: this run pauses", source: "Source on GitHub",
     soulLink: n => `Soul Link  ·  ${n} players`, seedOwn: "Seed per player", encAll: "All", encFind: "Search area or Pokémon", encNone: "Nothing matches.", teamLead: "Every pair shares its fate. Click a Pokémon for its moves and stats.", teamEmpty: "No linked pair is in the team yet.", look: "Appearance", fLang: "Language", fTheme: "Light or dark",
     area: "Area", status: "Status",
@@ -1053,7 +1054,7 @@ rando: { title: "What gets randomized", lead: "What the preset says, and what yo
     ballHave: (b, n) => `${b}: ${n} im Beutel`,
     layEdit: "Anpassen", layDone: "Fertig", layReset: "Zurücksetzen", layHint: "Bereiche klappst du mit ihrem Pfeil ein. Hier kannst du sie auch verschieben und ausblenden; dieses Fenster merkt es sich.", layUp: "Nach vorn", layDown: "Nach hinten", layEye: "Ein- oder ausblenden", layFold: "Ein- oder ausklappen",
     tabs: { links: "Übersicht", encounters: "Begegnungen", team: "Team", timeline: "Verlauf", types: "Typen", rules: "Regeln", settings: "Einstellungen" },
-    live: "Gerade unterwegs", liveSrc: "live aus DeSmuME", inBattle: "Im Kampf", exploring: "Unterwegs", offlineP: "Offline", wild: "wild", idleWild: n => `Sobald ${n} auf ein wildes Pokémon trifft, erscheint es hier mit Fangchance.`, foeTrainer: "Trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Lernset und Details zeigen", foeOf: n => `Gegner von ${n}`, foeMoves: "Seine Attacken", foeOpen: "Lernset und Details",
+    live: "Gerade unterwegs", liveSrc: "live aus DeSmuME", inBattle: "Im Kampf", exploring: "Unterwegs", offlineP: "Offline", wild: "wild", idleWild: n => `Sobald ${n} auf ein wildes Pokémon trifft, erscheint es hier mit Fangchance.`, foeTrainer: "Trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Lernset und Details zeigen", foeOf: n => `Gegner von ${n}`, foeMoves: "Mögliche Attacken", foeUpTo: n => `bis Lv ${n}`, foeCan: "möglich", foeMore: n => `+${n} weitere`, foeOpen: "Lernset und Details",
     badgesT: "Orden", play: "Weiterspielen", playSub: "öffnet DeSmuME mit deinem Spielstand", playOk: "DeSmuME startet…", playFail: "DeSmuME ließ sich nicht starten", playWine: "Installiere zuerst Wine Stable (nötig auf dem Mac)", newRun: "Neuer Run", newRunSure: "Nochmal klicken: dieser Run pausiert", source: "Quellcode auf GitHub",
     soulLink: n => `Soul Link  ·  ${n} Spieler`, seedOwn: "Seeds pro Spieler", encAll: "Alle", encFind: "Gebiet oder Pokémon suchen", encNone: "Nichts gefunden.", teamLead: "Jedes Paar teilt sein Schicksal. Klick auf ein Pokémon zeigt Attacken und Werte.", teamEmpty: "Noch kein verbundenes Paar im Team.", look: "Darstellung", fLang: "Sprache", fTheme: "Hell oder dunkel",
     area: "Gebiet", status: "Status",
@@ -2380,6 +2381,16 @@ function activeFoe(snap) {
   return foes.find(f => !f.battle || f.battle.hp > 0) || foes[foes.length - 1] || null;
 }
 
+// What an opponent may know: the moves its learnset in the player's ROM
+// has up to its level, the latest first, each once. Its real moves stay
+// unknown, as in the game.
+function possibleMoves(p, dex) {
+  const ls = dex && dex.learnsets && dex.learnsets[p.species - 1], lv = p.battle ? p.battle.level : 100;
+  if (!ls) return [];
+  const seen = new Set();
+  return ls.filter(([l]) => l <= lv).reverse().filter(([, id]) => !seen.has(id) && seen.add(id));
+}
+
 function isFoe(seat, p) {
   const pl = state && state.players[seat], snap = pl && pl.snapshot;
   return !!(snap && (snap.foes || []).some(f => f.pid === p.pid));
@@ -2458,7 +2469,7 @@ function cardHtml(seat, p, dex) {
   let note = "";
   if (dex === undefined) note = `<p class="mon-note">${c.loading}</p>`;
   else if (!dex) note = `<p class="mon-note">${c.noDex}</p>`;
-  if (!p.moves || !p.moves.length) return head + `<p class="mon-note" style="padding-bottom:22px">${c.noMoves}</p>`;
+  if (!foe && (!p.moves || !p.moves.length)) return head + `<p class="mon-note" style="padding-bottom:22px">${c.noMoves}</p>`;
 
   const fx = (k, v, more = "", icon = "") => `<div class="fx">${icon}<div><span>${k}</span><b>${v}</b>${more}</div></div>`;
   const facts = `<section><h3>${c.facts}</h3>
@@ -2466,13 +2477,18 @@ function cardHtml(seat, p, dex) {
     ${fx(c.nature, esc(c.natures[p.nature] || "#" + p.nature), natFx)}
     ${fx(c.ability, esc(ab ? ab.name : "#" + p.ability), ab && ab.text ? `<small>${esc(ab.text)}</small>` : "")}</section>`;
 
-  const known = new Set(p.moves.map(m => m.id));
-  const cards = p.moves.map(m => {
-    const i = info(m.id), max = i ? Math.floor(i.pp * (5 + m.pp_ups) / 5) : null;
-    // An opponent's PP as the game started the battle, not as it stands: the most.
-    return foe ? moveCard(m.id, i, max, null) : moveCard(m.id, i, m.pp, max);
-  });
-  while (cards.length < 4) cards.push(`<div class="mvc free">${c.free}</div>`);
+  // An opponent shows what it may know, not its moves: the latest four of
+  // its learnset up to its level, as a trainer's Pokémon without a moveset
+  // of its own knows them; the rest are listed beside.
+  const can = foe ? possibleMoves(p, dex) : [];
+  const known = new Set(foe ? can.map(([, id]) => id) : p.moves.map(m => m.id));
+  const cards = foe
+    ? can.slice(0, 4).map(([, id]) => { const i = info(id); return moveCard(id, i, i ? i.pp : null, null); })
+    : p.moves.map(m => {
+      const i = info(m.id), max = i ? Math.floor(i.pp * (5 + m.pp_ups) / 5) : null;
+      return moveCard(m.id, i, m.pp, max);
+    });
+  while (!foe && cards.length < 4) cards.push(`<div class="mvc free">${c.free}</div>`);
 
   let stats = "";
   if (p.stats && b) {
@@ -2481,7 +2497,7 @@ function cardHtml(seat, p, dex) {
     const rows = [row(c.hp, b.max_hp, ""), ...STATS.map((k, i) => row(c.st[k], p.stats[k], up === down ? "" : i === up ? "up" : i === down ? "dn" : ""))];
     stats = `<h3 class="gap">${c.stats}<em>${c.total} ${all.reduce((a, x) => a + x, 0)}</em></h3><div class="sts2"><div class="sts">${rows.slice(0, 3).join("")}</div><div class="sts">${rows.slice(3).join("")}</div></div>`;
   } else stats = `<h3 class="gap">${c.stats}</h3><p class="mon-note" style="margin:0;padding:0">${c.noStats}</p>`;
-  const moves = `<section><h3>${foe ? t().foeMoves : c.moves}<em>${c.of(p.moves.length)}</em></h3><div class="mvg">${cards.join("")}</div>${stats}</section>`;
+  const moves = `<section><h3>${foe ? t().foeMoves : c.moves}<em>${foe ? (b ? t().foeUpTo(b.level) : "") : c.of(p.moves.length)}</em></h3><div class="mvg">${cards.join("")}</div>${stats}</section>`;
 
   let learn = "";
   const ls = dex && dex.learnsets && dex.learnsets[p.species - 1];
@@ -2493,7 +2509,7 @@ function cardHtml(seat, p, dex) {
     const name = id => { const i = info(id); return esc(i ? i.name : c.moveN(id)); };
     const row = ([l, id]) => {
       const i = info(id), cls = known.has(id) ? "has" : l <= lv ? "past" : "";
-      return `<div class="lsr ${cls}"><span class="l">${t().lv} ${l || "–"}</span><b>${name(id)}</b>${known.has(id) ? `<span class="nx">${c.knows}</span>` : i && i.type ? tyChip(i.type) : "<span></span>"}</div>`;
+      return `<div class="lsr ${cls}"><span class="l">${t().lv} ${l || "–"}</span><b>${name(id)}</b>${known.has(id) ? `<span class="nx">${foe ? t().foeCan : c.knows}</span>` : i && i.type ? tyChip(i.type) : "<span></span>"}</div>`;
     };
     const next = nx ? `<div class="lsn"><span>${c.nextUp}</span><div><span class="l">${t().lv} ${nx[0]}</span><b>${name(nx[1])}</b>${info(nx[1]) && info(nx[1]).type ? tyChip(info(nx[1]).type) : ""}</div>${b ? `<small>${c.inLv(nx[0] - lv)}</small>` : ""}</div>` : "";
     learn = `<section class="lsc"><h3>${c.learnShort}${b ? `<em>${c.nowLv(lv)}</em>` : ""}</h3>${next}<div>${rest.concat(behind).map(row).join("")}</div></section>`;
@@ -2799,7 +2815,7 @@ function updatePlayers() {
     const st = !p || !p.connected ? `<span class="state away">${t().offlineP}</span>` : w || f ? `<span class="state fight">${t().inBattle}</span>` : `<span class="state">${t().exploring}</span>`;
     const head = `<div class="pch"><i></i><b>${esc(seatName(i))}</b>${st}</div><p class="meta">${esc(meta)}</p>`;
     const bag = p && p.snapshot && p.snapshot.balls, owned = ballCounts(bag), pick = ballPick(i, owned);
-    const sig = [lang, head, dex ? 1 : 0, f ? JSON.stringify([f.pid, foes.map(x => x.battle && x.battle.hp), f.ailment]) : "", w ? [w.pid, w.species, w.battle && w.battle.hp, w.battle && w.battle.max_hp, w.ailment, (catchUi.list || []).length, caughtCount(), JSON.stringify(owned), pick].join() : "", local && local.art, !!sprites].join("|");
+    const sig = [lang, head, dex ? 1 : 0, f ? JSON.stringify([f.pid, foes.map(x => x.battle && [x.battle.hp, x.battle.level]), f.ailment]) : "", w ? [w.pid, w.species, w.battle && w.battle.hp, w.battle && w.battle.max_hp, w.ailment, (catchUi.list || []).length, caughtCount(), JSON.stringify(owned), pick].join() : "", local && local.art, !!sprites].join("|");
     if (el._sig === sig) return;
     const sameMon = el._pid && w && el._pid === w.pid, sameFoe = el._pid && f && el._pid === f.pid;
     el._sig = sig; el._pid = w ? w.pid : f ? f.pid : null;
@@ -2837,9 +2853,11 @@ function foeCard(el, i, head, f, foes, dex, same) {
   const x = t(), b = f.battle || { hp: 1, max_hp: 1, level: "?" }, r = b.max_hp ? b.hp / b.max_hp : 1;
   const left = foes.filter(o => !o.battle || o.battle.hp > 0).length;
   const info = id => dex && dex.moves && dex.moves[id];
-  const mv = (f.moves || []).map(m => {
-    const k = info(m.id), pow = k && k.power > 1 ? k.power : null;
-    return `<div class="fmv">${k && k.type ? tyChip(k.type) : "<span></span>"}<b title="${esc(k ? k.name : "")}">${esc(k ? k.name : x.mon.moveN(m.id))}</b><span class="pw">${pow || "–"}</span></div>`;
+  // Not its real moves: what its learnset allows up to its level, latest first.
+  const can = possibleMoves(f, dex);
+  const mv = can.slice(0, 4).map(([, id]) => {
+    const k = info(id), pow = k && k.power > 1 ? k.power : null;
+    return `<div class="fmv">${k && k.type ? tyChip(k.type) : "<span></span>"}<b title="${esc(k ? k.name : "")}">${esc(k ? k.name : x.mon.moveN(id))}</b><span class="pw">${pow || "–"}</span></div>`;
   }).join("");
   const dots = foes.map(o => `<i class="${o.pid === f.pid ? "on" : o.battle && o.battle.hp === 0 ? "out" : ""}"></i>`).join("");
   const html = head + `<div class="foe" data-mon="${f.pid}" data-seat="${i}" role="button" tabindex="0" title="${esc(x.foeTip)}">
@@ -2847,12 +2865,12 @@ function foeCard(el, i, head, f, foes, dex, same) {
       <div class="info"><div class="wnm"><b>${esc(species(f))}</b><span>${x.lv} ${b.level}  ·  ${x.foeTrainer}</span></div><div class="tys">${monTypes(f, dex).map(tyChip).join("")}</div>
       <div class="hpl"><span class="bar"><i style="--w:${(r * 100).toFixed(0)}%;--hc:var(--${r < .35 ? "danger" : r < .6 ? "warn" : "ok"})"></i></span>${Math.round(r * 100)} %${f.ailment ? `<span class="ail">${esc(x.ail[f.ailment])}</span>` : ""}</div></div>
       <div class="fteam"><small>${esc(x.foeTeam(left, foes.length))}</small><span>${dots}</span></div></div>
-    ${mv ? `<div class="fmvs">${mv}</div>` : ""}
-    <p class="fmore">${esc(x.foeOpen)} ›</p></div>`;
+    ${mv ? `<p class="fcap">${esc(x.foeMoves)}  ·  ${esc(x.foeUpTo(b.level))}</p><div class="fmvs">${mv}</div>` : ""}
+    <p class="fmore">${can.length > 4 ? esc(x.foeMore(can.length - 4)) + "  ·  " : ""}${esc(x.foeOpen)} ›</p></div>`;
   if (same) {
     // The same Pokémon: only the numbers change, the sprite keeps bobbing.
     const tmp = document.createElement("div"); tmp.innerHTML = html;
-    for (const sel of [".pch", ".meta", ".hpl", ".fteam", ".fmvs"]) { const a = $(sel, el), z = $(sel, tmp); if (a && z) a.replaceWith(z); }
+    for (const sel of [".pch", ".meta", ".hpl", ".fteam", ".fcap", ".fmvs", ".fmore"]) { const a = $(sel, el), z = $(sel, tmp); if (a && z) a.replaceWith(z); }
   } else el.innerHTML = html;
 }
 
