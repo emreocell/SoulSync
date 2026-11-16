@@ -442,12 +442,19 @@ button:active{transform:scale(.97)}
 /* feed */
 .feed{display:flex;flex-direction:column}
 .ev{display:grid;grid-template-rows:1fr;transition:grid-template-rows .45s var(--out)}
-.ev>div{overflow:hidden;display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:7px 6px;border-radius:10px;transition:opacity .4s var(--out) .1s,transform .45s var(--out) .1s,background .2s}
+.ev>div{overflow:hidden;display:grid;grid-template-columns:36px minmax(0,1fr);align-items:start;gap:10px;padding:7px 6px;border-radius:10px;transition:opacity .4s var(--out) .1s,transform .45s var(--out) .1s,background .2s}
 .ev>div:hover{background:var(--ov-1)}
 .ev.new{grid-template-rows:0fr}
 .ev.new>div{opacity:0;transform:translateY(-6px)}
 .evi{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c);font-size:13px;font-weight:700;font-style:normal}
 .ev p{font-size:13px;line-height:1.35}
+/* the Pokémon of an event, from the player's own ROM, with the event's mark in the corner */
+.evs{position:relative;z-index:1;flex:none;width:36px;height:36px;border-radius:10px;background:color-mix(in srgb,var(--c) 14%,var(--ov-1))}
+.evs>span{position:absolute;inset:0;border-radius:inherit;overflow:hidden}
+.evs img{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;max-width:none;image-rendering:pixelated}
+.evs.down img{filter:grayscale(1);opacity:.55}
+.evs>i{position:absolute;right:-4px;bottom:-4px;display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px var(--solid);color:var(--solid);font-size:10px;font-weight:800;font-style:normal;line-height:1}
+.evs:not(:has(img))>i{inset:0;width:auto;height:auto;border-radius:10px;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:none;color:var(--c);font-size:13px}
 .ev b{font-weight:600}
 .ev .bad{color:var(--danger)}
 .ev time{display:block;margin-top:2px;font-size:11.5px;color:var(--faint)}
@@ -513,9 +520,9 @@ button:active{transform:scale(.97)}
 /* timeline */
 .tl{position:relative;padding:8px 20px 20px 20px}
 .tday{margin:14px 0 6px 52px;font-size:11.5px;font-weight:600;color:var(--faint);letter-spacing:.04em;text-transform:uppercase}
-.trow{position:relative;display:grid;grid-template-columns:44px 28px minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 6px;border-radius:12px}
+.trow{position:relative;display:grid;grid-template-columns:44px 36px minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 6px;border-radius:12px}
 .trow:hover{background:var(--ov-1)}
-.trow::before{content:"";position:absolute;left:69px;top:-6px;bottom:-6px;width:2px;background:var(--edge)}
+.trow::before{content:"";position:absolute;left:79px;top:-6px;bottom:-6px;width:2px;background:var(--edge)}
 .trow time{font:400 17px var(--pix);color:var(--muted);text-align:right}
 .trow .evi{position:relative;z-index:1}
 .trow p b{font-weight:600}
@@ -911,9 +918,9 @@ details.adv .field{margin-top:12px}
   .thead,.erow{grid-template-columns:minmax(0,1fr) repeat(var(--n,2),minmax(0,1fr));padding-inline:12px;gap:8px}
   .thead>:last-child,.est,.ecell small{display:none}
   .ecell{flex-direction:column;align-items:flex-start;gap:4px}
-  .trow{grid-template-columns:40px 28px minmax(0,1fr)}
+  .trow{grid-template-columns:40px 36px minmax(0,1fr)}
   .hist{margin-left:0;grid-template-columns:minmax(0,1fr)}
-  .trow::before{left:62px}
+  .trow::before{left:75px}
   .trow .who{display:none}
   .search{min-width:0;flex:1}
   .wild2{grid-template-columns:64px minmax(0,1fr) 72px}
@@ -2003,6 +2010,15 @@ function evIcon(e) {
   const ty = e.event.type;
   return ({ caught: ["+", "var(--ok)"], fainted: ["×", "var(--danger)"], evolved: ["★", "var(--p4)"], level_up: ["↑", "var(--b)"], moved: ["⇄", "var(--muted)"], gone: ["–", "var(--faint)"], encountered: ["!", "var(--a)"], badges: ["◆", "var(--warn)"] })[ty] || ["·", "var(--muted)"];
 }
+// The mark of an event, on the Pokémon it is about. The picture comes by
+// species, so the events of the other players show up too: every ROM has
+// the same pictures, only the encounters differ.
+function evArt(e) {
+  const [g, c] = evIcon(e), p = e.event.pokemon, ty = e.event.type;
+  const img = p && p.species ? spriteImg(p) : "";
+  if (!img) return `<i class="evi" style="--c:${c}">${g}</i>`;
+  return `<span class="evs${ty === "fainted" || ty === "gone" ? " down" : ""}" style="--c:${c}"><span>${img}</span><i>${g}</i></span>`;
+}
 // An encounter the player removed as recorded by mistake leaves the
 // history too. Until a player's game has been seen, all of theirs stay.
 function shownLog() {
@@ -2018,7 +2034,7 @@ function updateTimeline() {
   const idx = Object.fromEntries(state.players.map((p, i) => [p.name, i]));
   const two = n => String(n).padStart(2, "0");
   const hist = (state.history || []).slice().reverse();
-  const sig = [lang, log.length, log.length && log[log.length - 1].at, state.players.map(p => p.name).join(), hist.length, hist.map(h => h.outcome).join()].join("|"), el = $("#tl");
+  const sig = [lang, log.length, log.length && log[log.length - 1].at, state.players.map(p => p.name).join(), hist.length, hist.map(h => h.outcome).join(), local && local.art, !!sprites].join("|"), el = $("#tl");
   if (el._sig === sig) return;
   el._sig = sig;
   let day = "";
@@ -2026,8 +2042,7 @@ function updateTimeline() {
     const d = new Date(e.at), dk = d.toLocaleDateString(lang, { weekday: "long", day: "numeric", month: "long" });
     const sep = dk !== day ? `<div class="tday">${esc(dk)}</div>` : "";
     day = dk;
-    const [g, c] = evIcon(e);
-    return `${sep}<div class="trow reveal" style="--i:${Math.min(k, 10)}"><time>${two(d.getHours())}:${two(d.getMinutes())}</time><i class="evi" style="--c:${c}">${g}</i><p>${eventHtml(e)}</p><span class="who" style="--c:${col(idx[e.player] || 0)}"><i></i>${esc(e.player)}</span></div>`;
+    return `${sep}<div class="trow reveal" style="--i:${Math.min(k, 10)}"><time>${two(d.getHours())}:${two(d.getMinutes())}</time>${evArt(e)}<p>${eventHtml(e)}</p><span class="who" style="--c:${col(idx[e.player] || 0)}"><i></i>${esc(e.player)}</span></div>`;
   }).join("") : `<p class="empty-list">${t().noEvents}</p>`;
   if (hist.length) el.innerHTML += `<div class="tday">${t().hist}</div><div class="hist">${hist.map(histCard).join("")}</div>`;
 }
@@ -2977,16 +2992,20 @@ function eventHtml(e) {
 
 function updateFeed() {
   const log = shownLog();
-  const box = $("#feed"), first = feed.size === 0;
+  const box = $("#feed");
+  // The pictures arrive once the app knows the ROM: draw the list anew then.
+  const art = [local && local.art, !!sprites].join();
+  if (box._art !== art) { box._art = art; feed.forEach(el => el.remove()); feed.clear(); }
+  const first = feed.size === 0;
   const keys = log.map(e => [e.at, e.player, e.event.type, e.event.pokemon ? e.event.pokemon.pid : e.event.count].join("|"));
   const want = new Set(keys);
   feed.forEach((el, k) => { if (!want.has(k)) { feed.delete(k); el.remove(); } });
   for (let i = log.length - 1; i >= 0; i--) {
     const k = keys[i];
     if (feed.has(k)) continue;
-    const el = document.createElement("div"), [g, c] = evIcon(log[i]);
+    const el = document.createElement("div");
     el.className = "ev" + (first ? "" : " new");
-    el.innerHTML = `<div><i class="evi" style="--c:${c}">${g}</i><p>${eventHtml(log[i])}<time data-at="${log[i].at}"></time></p></div>`;
+    el.innerHTML = `<div>${evArt(log[i])}<p>${eventHtml(log[i])}<time data-at="${log[i].at}"></time></p></div>`;
     box.prepend(el); feed.set(k, el);
     if (!first) nextFrame(() => el.classList.remove("new"));
   }
