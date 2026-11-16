@@ -266,6 +266,11 @@ impl Live {
             } else {
                 report.foes(&snap)
             };
+            // The dashboard shows what an opponent may know, as the game
+            // does not tell its moves either: they are not sent.
+            for foe in &mut snap.foes {
+                foe.moves.clear();
+            }
             if let Some(balls) = report.balls() {
                 snap.balls = Some(balls);
             }
