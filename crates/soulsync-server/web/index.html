@@ -2805,7 +2805,8 @@ function syncCmd() {
 }
 
 function updateSetup() {
-  const el = $("#setup"), need = state.players.length < seats() && !DEMO;
+  // A solo run has nobody to invite: its one seat is the player's own.
+  const el = $("#setup"), need = !solo() && state.players.length < seats() && !DEMO;
   if (!need) { el.innerHTML = ""; el._on = false; return; }
   const sig = lang + "|" + (local ? "a" + (local.server || "") : "w");
   if (el._on === sig) return;
