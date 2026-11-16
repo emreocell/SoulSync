@@ -290,6 +290,32 @@ impl Run {
             }
             self.active_at = Some(now);
         }
+        // A Pokémon that comes back right after it went is the same one seen
+        // through an older save: a client that resumes sends the last
+        // in-game save, which can lack what the live script already
+        // reported. Its "gone" is taken back and it is not caught twice.
+        let log = &mut self.log;
+        events.retain(|e| {
+            let Event::Caught { pokemon } = e else {
+                return true;
+            };
+            let last = log.iter().position(|l| {
+                l.player == name
+                    && match &l.event {
+                        Event::Caught { pokemon: p } | Event::Gone { pokemon: p } => {
+                            p.pid == pokemon.pid
+                        }
+                        _ => false,
+                    }
+            });
+            match last {
+                Some(i) if matches!(log[i].event, Event::Gone { .. }) => {
+                    log.remove(i);
+                    false
+                }
+                _ => true,
+            }
+        });
         let n = events.len();
         for event in events {
             self.log.push_front(LogEntry {
@@ -391,6 +417,36 @@ mod tests {
         assert!(r.dex("Alex").is_none());
         let s = r.state();
         assert!(s.players[0].dex && !s.players[1].dex);
+    }
+
+    #[test]
+    fn an_older_save_after_a_pause_does_not_lose_and_recatch_a_pokemon() {
+        let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
+        r.join("Alex").unwrap();
+        let mut before = snap(20);
+        before.boxes.clear();
+        r.update("Alex", before.clone(), 0);
+        r.update("Alex", snap(20), 1);
+        let caught = |r: &Run| {
+            r.state()
+                .log
+                .iter()
+                .filter(|l| matches!(&l.event, Event::Caught { pokemon } if pokemon.pid == 2))
+                .count()
+        };
+        assert_eq!(caught(&r), 1);
+        // Resuming sends the last in-game save, which lacks the boxed catch.
+        r.update("Alex", before, 2);
+        assert!(r
+            .state()
+            .log
+            .iter()
+            .any(|l| matches!(l.event, Event::Gone { .. })));
+        // The live view brings it back: no "gone" and no second "caught".
+        r.update("Alex", snap(20), 3);
+        let s = r.state();
+        assert!(!s.log.iter().any(|l| matches!(l.event, Event::Gone { .. })));
+        assert_eq!(caught(&r), 1);
     }
 
     #[test]
