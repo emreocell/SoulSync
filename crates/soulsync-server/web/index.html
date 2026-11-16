@@ -1723,7 +1723,6 @@ function renderSetup() {
         <div class="field"><label for="f-name">${t().fName}</label><input id="f-name" autocomplete="off" maxlength="24" placeholder="${t().fNamePh}" value="${esc(local.name)}"></div>
         <p class="lead" style="margin:0 0 12px;font-size:13px">${t().gRollHelp}</p>
         ${file("original", fr.original, t().fOriginal, fr.original && fr.original.ok ? t().romOk(esc(fr.original.label[lang]), fr.original.generation) : "")}
-        <div class="field"><label>${t().fRando}</label><small class="ok">✓ ${fr.own ? t().randoOwn : fr.randomizer ? esc(String(fr.randomizer).split(/[\\/]/).pop()) : t().randoBuiltin(fr.builtin ? esc(fr.builtin.name) : "")}</small></div>
         ${file("emulator", asFile(fr.emulator), t().fEmu, t().fEmuHelp)}
       </div>
     </div>
@@ -2806,7 +2805,8 @@ function syncCmd() {
 }
 
 function updateSetup() {
-  const el = $("#setup"), need = state.players.length < seats() && !DEMO;
+  // A solo run has nobody to invite: its one seat is the player's own.
+  const el = $("#setup"), need = !solo() && state.players.length < seats() && !DEMO;
   if (!need) { el.innerHTML = ""; el._on = false; return; }
   const sig = lang + "|" + (local ? "a" + (local.server || "") : "w");
   if (el._on === sig) return;
