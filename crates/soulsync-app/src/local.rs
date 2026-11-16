@@ -1483,8 +1483,10 @@ struct RunRef {
     server: String,
 }
 
-/// Goes back to a remembered run, leaving the current one paused. A run its
-/// server no longer has is forgotten.
+/// Goes back to a remembered run, leaving the current one paused. Switches
+/// at once: whether a run on a server still exists, the dashboard learns when
+/// it connects, and it takes a run that is gone off the list. A run kept in
+/// this app that is gone is forgotten here.
 async fn resume_run(State(local): State<Local>, Json(req): Json<RunRef>) -> Reply {
     let run = {
         let inner = local.inner.lock().unwrap();
@@ -1496,24 +1498,11 @@ async fn resume_run(State(local): State<Local>, Json(req): Json<RunRef>) -> Repl
             .cloned()
             .ok_or_else(|| bad("unknown run"))?
     };
-    let found = if run.server.trim().is_empty() {
-        Some(local.server.has_run(&run.code))
-    } else {
-        let url = format!("{}/api/runs/{}", run.server, run.code);
-        tokio::task::spawn_blocking(move || run_exists(&url))
-            .await
-            .unwrap_or(None)
-    };
-    match found {
-        Some(true) => {}
-        // Only a server that answers can say a run is gone.
-        None => return Err(bad("offline")),
-        Some(false) => {
-            let mut inner = local.inner.lock().unwrap();
-            inner.config.runs.retain(|r| r != &run);
-            write_config(&inner.config);
-            return Err(bad("missing"));
-        }
+    if run.server.trim().is_empty() && !local.server.has_run(&run.code) {
+        let mut inner = local.inner.lock().unwrap();
+        inner.config.runs.retain(|r| r != &run);
+        write_config(&inner.config);
+        return Err(bad("missing"));
     }
     local.stop();
     {
@@ -1522,7 +1511,11 @@ async fn resume_run(State(local): State<Local>, Json(req): Json<RunRef>) -> Repl
         inner.config.remember(now_ms());
         write_config(&inner.config);
     }
-    local.start();
+    // Reads the ROM, which must not hold up the answer.
+    let me = local.clone();
+    tokio::task::spawn_blocking(move || me.start())
+        .await
+        .map_err(|e| bad(e.to_string()))?;
     Ok(Json(local.view()))
 }
 
@@ -1539,22 +1532,6 @@ async fn drop_run(State(local): State<Local>, Json(req): Json<RunRef>) -> Json<s
         }
     }
     Json(local.view())
-}
-
-/// Whether the server has the run at `url`; `None` if it cannot be asked.
-fn run_exists(url: &str) -> Option<bool> {
-    // A server that does not answer soon counts as offline, so a click on
-    // another run never hangs.
-    let call = ureq::get(url)
-        .config()
-        .timeout_global(Some(Duration::from_secs(8)))
-        .build()
-        .call();
-    match call {
-        Ok(_) => Some(true),
-        Err(ureq::Error::StatusCode(404)) => Some(false),
-        Err(_) => None,
-    }
 }
 
 fn ureq_ok(url: &str) -> bool {
