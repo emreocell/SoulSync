@@ -170,6 +170,17 @@ pub fn parse_wild(raw: &[u8]) -> Option<Pokemon> {
     parse(raw, Place::Party { slot: 0 }).filter(|p| !trainer && !watched && !p.is_egg)
 }
 
+/// Reads a Pokémon that belongs to a trainer the player fights: all six IVs
+/// are the same, as the game gives trainers' Pokémon. `None` for wild ones
+/// and anything else.
+pub fn parse_foe(raw: &[u8]) -> Option<Pokemon> {
+    let d = crypto::decrypt(raw)?;
+    let iv = u32_at(&d, 0x38);
+    let first = iv & 31;
+    let trainer = (1..6).all(|i| (iv >> (5 * i)) & 31 == first);
+    parse(raw, Place::Party { slot: 0 }).filter(|p| trainer && !p.is_egg)
+}
+
 /// Decrypts and reads a record. Empty slots, corrupt data (bad checksum) and
 /// invalid species give `None`.
 pub fn parse(raw: &[u8], place: Place) -> Option<Pokemon> {

@@ -313,6 +313,19 @@ button:active{transform:scale(.97)}
 .balls button b{font:400 17px var(--pix);color:var(--text)}
 .balls button.best{background:color-mix(in srgb,var(--c) 18%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 45%,transparent);color:var(--text)}
 .balls button.none{opacity:.45}
+.foe{margin:2px -8px -6px;padding:0 8px 6px;border-radius:12px;transition:background .15s}
+.foe:hover{background:var(--ov-1)}
+.foe:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.fteam{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);text-align:center}
+.fteam span{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:60px}
+.fteam i{width:10px;height:10px;border-radius:50%;background:var(--muted);box-shadow:inset 0 -3px 0 color-mix(in srgb,#000 25%,transparent)}
+.fteam i.on{background:var(--danger)}
+.fteam i.out{background:var(--ov-2);box-shadow:none}
+.fmvs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:12px}
+.fmv{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:7px;padding:6px 9px;border-radius:var(--r-sm);background:var(--ov-1);font-size:12px}
+.fmv b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fmv .pw{font:400 15px var(--pix);color:var(--muted)}
+.fmore{margin:8px 0 0;font-size:11.5px;color:var(--faint);text-align:right}
 
 /* segmented choice */
 .seg3{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:3px;border-radius:11px;background:var(--ov-2)}
@@ -964,7 +977,7 @@ const T = {
     ballHave: (b, n) => `${b}: ${n} in the bag`,
     layEdit: "Customise", layDone: "Done", layReset: "Reset", layHint: "Fold a section with its arrow. Here you can also move and hide sections; this window remembers it.", layUp: "Move up", layDown: "Move down", layEye: "Show or hide", layFold: "Fold or unfold",
     tabs: { links: "Overview", encounters: "Encounters", team: "Team", timeline: "Timeline", types: "Types", rules: "Rules", settings: "Settings" },
-    live: "Right now", liveSrc: "live from DeSmuME", inBattle: "In battle", exploring: "Exploring", offlineP: "Offline", wild: "wild", idleWild: n => `When ${n} meets a wild Pokémon, it shows up here with its catch chance.`,
+    live: "Right now", liveSrc: "live from DeSmuME", inBattle: "In battle", exploring: "Exploring", offlineP: "Offline", wild: "wild", idleWild: n => `When ${n} meets a wild Pokémon, it shows up here with its catch chance.`, foeTrainer: "trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Show level-up moves and details", foeOf: n => `Opponent of ${n}`, foeMoves: "Its moves", foeOpen: "Level-up moves and details",
     badgesT: "Badges", play: "Continue", playSub: "opens DeSmuME with your save", playOk: "DeSmuME is starting…", playFail: "DeSmuME could not be started", playWine: "Install Wine Stable first (needed on a Mac)", newRun: "New run", newRunSure: "Click again: this run pauses", source: "Source on GitHub",
     soulLink: n => `Soul Link  ·  ${n} players`, seedOwn: "Seed per player", encAll: "All", encFind: "Search area or Pokémon", encNone: "Nothing matches.", teamLead: "Every pair shares its fate. Click a Pokémon for its moves and stats.", teamEmpty: "No linked pair is in the team yet.", look: "Appearance", fLang: "Language", fTheme: "Light or dark",
     area: "Area", status: "Status",
@@ -1010,7 +1023,7 @@ waitPlayer: n => `Waiting for player ${n}`, playerN: n => `Player ${n}`, fPlayer
     fPreset: "Randomizer settings", pNone: "None, everyone randomizes on their own", pOwn: "My own settings file (.rnqs)", pOwnMissing: "Choose your .rnqs in Settings › Start over first.", pJoin: "The randomizer settings come from the run.",
     eRoll: "Choose your original ROM first.", eEmu: "Choose DeSmuME first.", ePreset: "The randomizer settings cannot be read.",
     rollNow: n => `Attempt ${n} has begun`, rollNowSub: "Randomize your game anew", runRando: "Settings of the run", candiesDue: n => `${n} Rare Candies go into your game as soon as DeSmuME is closed.`, runCandiesHint: "For everyone in the run, from the next new game on.", runRandoHint: "Every player's game is made with the run's settings. Rare Candies come from the run as well.", eName: "Enter your name.", eSave: "Pick a save that can be read first.", eCode: "No run with this code on the server.",
-    sLive: "Live from DeSmuME", sLua: "Lua for DeSmuME", sLuaState: { present: "ready", installed: "set up, restart DeSmuME", missing: "DeSmuME not found" }, sLiveOn: "connected", sLiveForeign: "connected, but your party was not found yet", sLiveOff: "script not running", sAuto: "Starts with the game", sAutoState: { present: "yes", installed: "set up, restart DeSmuME", missing: "no, load the script by hand" }, sLiveHint: "Without the script the dashboard updates when you save in-game. With it, it follows your party and your encounters right away. DeSmuME starts it by itself when you open the game. If it does not: in DeSmuME open Tools › Lua Scripting › New Lua Script Window, choose this file and press Run.", sLiveScript: "Script", sGame: "Your game", sRun: "Run", sSync: "Sync", sServer: "Server", sLocal: "this computer", sBuild: "App build", sChannel: "Updates", sChannelHint: "Preview builds come with every change and may have bugs.", sStable: "Releases", sPreview: "Preview builds", sDex: "Moves from the ROM", sDexOk: n => `${n} moves read`, sDexBad: "could not be read", sRead: "What SoulSync reads", sReadLead: "Straight from your game. If something here does not match the game, report a problem below.", sReadAge: "Last message from the script", sReadAgeV: n => n < 2 ? "just now" : `${n} s ago`, sTeam: "Team", sTeamV: (n, f) => `${n} Pokémon` + (f ? `, ${f} fainted` : ""), sBattle: "Wild battle", sBattleNone: "none right now", sBalls: "Balls in the bag", sBallsNone: "not read", sBallsEmpty: "none", sEnc: "Encounters noted", rep: "Report a problem", repLead: "Puts your logs, your save and what the script last sent into one zip file and opens its folder. Nothing is uploaded: send the file along with your bug report.", repDump: "Add a copy of the game's memory (4 MB, helps most with wrong values in battle)", repDumpOff: "The memory copy needs the script running in DeSmuME.", repDo: "Make report", repBusy: "Making report…", repBusyDump: "Copying the game's memory… keep DeSmuME running", repDone: p => `Saved as ${p}`, repNoDump: "The script did not answer, so the report has no memory copy.", repFail: "The report could not be made:", startBusy: "Starting run…", startSlow: "Reading your ROM and save. This takes a few seconds.", uNew: n => `Update ${n} is ready`, uDo: "Install", uBusy: "Downloading update…", uLoad: n => `Downloading update… ${n} %`, uMb: (d, s) => s ? `Downloading update… ${d} of ${s} MB` : `Downloading update… ${d} MB`, uStart: "Installing…", uRestart: "Starting the new version…", uFail: "Update failed", uAgain: "Try again", fresh: "Start over", freshLead: "Run failed? One click randomizes your original ROM anew with your settings, puts your starting save in place, starts the next attempt and opens the game. Close DeSmuME first.", freshOriginal: "Original ROM", freshRando: "Randomizer", freshPreset: "Randomizer settings", freshSave: "Starting save", freshPick: "Choose", freshKeep: "Use current save", freshDrop: "Remove", freshKept: (n, k) => `${n}  ·  ${k} Pokémon`, freshSaveHint: "None yet? Then the first start begins a new game. Play the intro once, set text speed and battle style, save in-game: SoulSync keeps that save and every later start begins right there.", freshAwait: "Waiting for your first save in the new game…", freshNone: "none yet", freshDo: "Randomize and start", freshSure: "Click again: ROM and save are replaced, next attempt begins",
+    sLive: "Live from DeSmuME", sLua: "Lua for DeSmuME", sLuaState: { present: "ready", installed: "set up, restart DeSmuME", missing: "DeSmuME not found" }, sLiveOn: "connected", sLiveForeign: "connected, but your party was not found yet", sLiveOff: "script not running", sAuto: "Starts with the game", sAutoState: { present: "yes", installed: "set up, restart DeSmuME", missing: "no, load the script by hand" }, sLiveHint: "Without the script the dashboard updates when you save in-game. With it, it follows your party and your encounters right away. DeSmuME starts it by itself when you open the game. If it does not: in DeSmuME open Tools › Lua Scripting › New Lua Script Window, choose this file and press Run.", sLiveScript: "Script", sGame: "Your game", sRun: "Run", sSync: "Sync", sServer: "Server", sLocal: "this computer", sBuild: "App build", sChannel: "Updates", sChannelHint: "Preview builds come with every change and may have bugs.", sStable: "Releases", sPreview: "Preview builds", sDex: "Moves from the ROM", sDexOk: n => `${n} moves read`, sDexBad: "could not be read", sRead: "What SoulSync reads", sReadLead: "Straight from your game. If something here does not match the game, report a problem below.", sReadAge: "Last message from the script", sReadAgeV: n => n < 2 ? "just now" : `${n} s ago`, sTeam: "Team", sTeamV: (n, f) => `${n} Pokémon` + (f ? `, ${f} fainted` : ""), sBattle: "Battle", sBattleNone: "none right now", sBalls: "Balls in the bag", sBallsNone: "not read", sBallsEmpty: "none", sEnc: "Encounters noted", rep: "Report a problem", repLead: "Puts your logs, your save and what the script last sent into one zip file and opens its folder. Nothing is uploaded: send the file along with your bug report.", repDump: "Add a copy of the game's memory (4 MB, helps most with wrong values in battle)", repDumpOff: "The memory copy needs the script running in DeSmuME.", repDo: "Make report", repBusy: "Making report…", repBusyDump: "Copying the game's memory… keep DeSmuME running", repDone: p => `Saved as ${p}`, repNoDump: "The script did not answer, so the report has no memory copy.", repFail: "The report could not be made:", startBusy: "Starting run…", startSlow: "Reading your ROM and save. This takes a few seconds.", uNew: n => `Update ${n} is ready`, uDo: "Install", uBusy: "Downloading update…", uLoad: n => `Downloading update… ${n} %`, uMb: (d, s) => s ? `Downloading update… ${d} of ${s} MB` : `Downloading update… ${d} MB`, uStart: "Installing…", uRestart: "Starting the new version…", uFail: "Update failed", uAgain: "Try again", fresh: "Start over", freshLead: "Run failed? One click randomizes your original ROM anew with your settings, puts your starting save in place, starts the next attempt and opens the game. Close DeSmuME first.", freshOriginal: "Original ROM", freshRando: "Randomizer", freshPreset: "Randomizer settings", freshSave: "Starting save", freshPick: "Choose", freshKeep: "Use current save", freshDrop: "Remove", freshKept: (n, k) => `${n}  ·  ${k} Pokémon`, freshSaveHint: "None yet? Then the first start begins a new game. Play the intro once, set text speed and battle style, save in-game: SoulSync keeps that save and every later start begins right there.", freshAwait: "Waiting for your first save in the new game…", freshNone: "none yet", freshDo: "Randomize and start", freshSure: "Click again: ROM and save are replaced, next attempt begins",
     freshOptions: "Randomizer options", freshOptLead: "Changed here, on top of your settings file. The file itself stays as it is.", fTm: "TM compatibility", fTutor: "Tutor compatibility", fHm: "HMs for everyone", fCandies: "Rare Candies in the bag", fCandiesHint: "0 = as in the starting save",
 rando: { title: "What gets randomized", lead: "What the preset says, and what you change. It applies to everyone in the run.", std: v => `Preset (${v})`, changed: n => `${n} changed`, open: "Customise", asPreset: "Everything as in the preset", preset: "preset", back: "Back to the preset", search: "Search settings", none: "Nothing found.", reset: "Reset all", done: "Done", close: "Close",
       group: { traits: "Pokémon traits", starters: "Starters, static Pokémon and trades", moves: "Moves", trainers: "Trainers", wild: "Wild Pokémon", tms: "TMs, HMs and tutors", items: "Items", misc: "Other" },
@@ -1040,7 +1053,7 @@ rando: { title: "What gets randomized", lead: "What the preset says, and what yo
     ballHave: (b, n) => `${b}: ${n} im Beutel`,
     layEdit: "Anpassen", layDone: "Fertig", layReset: "Zurücksetzen", layHint: "Bereiche klappst du mit ihrem Pfeil ein. Hier kannst du sie auch verschieben und ausblenden; dieses Fenster merkt es sich.", layUp: "Nach vorn", layDown: "Nach hinten", layEye: "Ein- oder ausblenden", layFold: "Ein- oder ausklappen",
     tabs: { links: "Übersicht", encounters: "Begegnungen", team: "Team", timeline: "Verlauf", types: "Typen", rules: "Regeln", settings: "Einstellungen" },
-    live: "Gerade unterwegs", liveSrc: "live aus DeSmuME", inBattle: "Im Kampf", exploring: "Unterwegs", offlineP: "Offline", wild: "wild", idleWild: n => `Sobald ${n} auf ein wildes Pokémon trifft, erscheint es hier mit Fangchance.`,
+    live: "Gerade unterwegs", liveSrc: "live aus DeSmuME", inBattle: "Im Kampf", exploring: "Unterwegs", offlineP: "Offline", wild: "wild", idleWild: n => `Sobald ${n} auf ein wildes Pokémon trifft, erscheint es hier mit Fangchance.`, foeTrainer: "Trainer", foeTeam: (a, n) => `Team ${a}/${n}`, foeTip: "Lernset und Details zeigen", foeOf: n => `Gegner von ${n}`, foeMoves: "Seine Attacken", foeOpen: "Lernset und Details",
     badgesT: "Orden", play: "Weiterspielen", playSub: "öffnet DeSmuME mit deinem Spielstand", playOk: "DeSmuME startet…", playFail: "DeSmuME ließ sich nicht starten", playWine: "Installiere zuerst Wine Stable (nötig auf dem Mac)", newRun: "Neuer Run", newRunSure: "Nochmal klicken: dieser Run pausiert", source: "Quellcode auf GitHub",
     soulLink: n => `Soul Link  ·  ${n} Spieler`, seedOwn: "Seeds pro Spieler", encAll: "Alle", encFind: "Gebiet oder Pokémon suchen", encNone: "Nichts gefunden.", teamLead: "Jedes Paar teilt sein Schicksal. Klick auf ein Pokémon zeigt Attacken und Werte.", teamEmpty: "Noch kein verbundenes Paar im Team.", look: "Darstellung", fLang: "Sprache", fTheme: "Hell oder dunkel",
     area: "Gebiet", status: "Status",
@@ -1086,7 +1099,7 @@ waitPlayer: n => `Warte auf Spieler ${n}`, playerN: n => `Spieler ${n}`, fPlayer
     fPreset: "Randomizer-Einstellungen", pNone: "Keine, jeder würfelt selbst", pOwn: "Meine eigene Einstellungsdatei (.rnqs)", pOwnMissing: "Wähle zuerst deine .rnqs unter Einstellungen › Neu anfangen.", pJoin: "Die Randomizer-Einstellungen kommen aus dem Run.",
     eRoll: "Wähle zuerst deine Original-ROM.", eEmu: "Wähle zuerst DeSmuME.", ePreset: "Die Randomizer-Einstellungen sind nicht lesbar.",
     rollNow: n => `Versuch ${n} hat begonnen`, rollNowSub: "Dein Spiel neu würfeln", runRando: "Einstellungen des Runs", candiesDue: n => `${n} Sonderbonbons kommen in dein Spiel, sobald DeSmuME geschlossen ist.`, runCandiesHint: "Für alle im Run, ab dem nächsten neuen Spiel.", runRandoHint: "Alle Spiele des Runs werden mit diesen Einstellungen gewürfelt, auch die Sonderbonbons kommen aus dem Run.", eName: "Trag deinen Namen ein.", eSave: "Wähle zuerst einen lesbaren Spielstand.", eCode: "Auf dem Server gibt es keinen Run mit diesem Code.",
-    sLive: "Live aus DeSmuME", sLua: "Lua für DeSmuME", sLuaState: { present: "bereit", installed: "eingerichtet, DeSmuME neu starten", missing: "DeSmuME nicht gefunden" }, sLiveOn: "verbunden", sLiveForeign: "verbunden, aber dein Team wurde noch nicht gefunden", sLiveOff: "Skript läuft nicht", sAuto: "Startet mit dem Spiel", sAutoState: { present: "ja", installed: "eingerichtet, DeSmuME neu starten", missing: "nein, Skript von Hand laden" }, sLiveHint: "Ohne das Skript aktualisiert sich das Dashboard, wenn du im Spiel speicherst. Mit ihm folgt es deinem Team und deinen Begegnungen sofort. DeSmuME startet es von selbst, wenn du das Spiel öffnest. Falls nicht: in DeSmuME Tools › Lua Scripting › New Lua Script Window öffnen, diese Datei auswählen und Run drücken.", sLiveScript: "Skript", sGame: "Dein Spiel", sRun: "Run", sSync: "Sync", sServer: "Server", sLocal: "dieser Rechner", sBuild: "App-Build", sChannel: "Updates", sChannelHint: "Vorabversionen kommen mit jeder Änderung und können Fehler haben.", sStable: "Versionen", sPreview: "Vorabversionen", sDex: "Attacken aus der ROM", sDexOk: n => `${n} Attacken gelesen`, sDexBad: "nicht lesbar", sRead: "Was SoulSync liest", sReadLead: "Direkt aus deinem Spiel. Stimmt hier etwas nicht mit dem Spiel überein, melde unten ein Problem.", sReadAge: "Letzte Meldung des Skripts", sReadAgeV: n => n < 2 ? "gerade eben" : `vor ${n} s`, sTeam: "Team", sTeamV: (n, f) => `${n} Pokémon` + (f ? `, ${f} besiegt` : ""), sBattle: "Wildkampf", sBattleNone: "gerade keiner", sBalls: "Bälle im Beutel", sBallsNone: "nicht gelesen", sBallsEmpty: "keine", sEnc: "Erfasste Begegnungen", rep: "Problem melden", repLead: "Packt deine Logs, deinen Spielstand und die letzte Meldung des Skripts in eine ZIP-Datei und öffnet ihren Ordner. Hochgeladen wird nichts: Schick die Datei mit deiner Fehlermeldung mit.", repDump: "Kopie des Spielspeichers anhängen (4 MB, hilft am meisten bei falschen Werten im Kampf)", repDumpOff: "Die Speicherkopie braucht das laufende Skript in DeSmuME.", repDo: "Bericht erstellen", repBusy: "Bericht wird erstellt…", repBusyDump: "Spielspeicher wird kopiert… DeSmuME offen lassen", repDone: p => `Gespeichert als ${p}`, repNoDump: "Das Skript hat nicht geantwortet, der Bericht hat deshalb keine Speicherkopie.", repFail: "Der Bericht konnte nicht erstellt werden:", startBusy: "Run wird gestartet…", startSlow: "Deine ROM und dein Spielstand werden gelesen. Das dauert ein paar Sekunden.", uNew: n => `Update ${n} ist da`, uDo: "Installieren", uBusy: "Update wird geladen…", uLoad: n => `Update wird geladen… ${n} %`, uMb: (d, s) => s ? `Update wird geladen… ${d} von ${s} MB` : `Update wird geladen… ${d} MB`, uStart: "Wird installiert…", uRestart: "Neue Version startet…", uFail: "Update fehlgeschlagen", uAgain: "Nochmal", fresh: "Neu anfangen", freshLead: "Run verloren? Ein Klick würfelt deine Original-ROM mit deinen Einstellungen neu, legt deinen Start-Spielstand bereit, startet den nächsten Versuch und öffnet das Spiel. Schließe DeSmuME vorher.", freshOriginal: "Original-ROM", freshRando: "Randomizer", freshPreset: "Randomizer-Einstellungen", freshSave: "Start-Spielstand", freshPick: "Wählen", freshKeep: "Aktuellen Spielstand nehmen", freshDrop: "Entfernen", freshKept: (n, k) => `${n}  ·  ${k} Pokémon`, freshSaveHint: "Noch keiner? Dann beginnt der erste Start ein neues Spiel. Spiel das Intro einmal durch, stell Textgeschwindigkeit und Kampfstil ein und speichere im Spiel: SoulSync merkt sich diesen Spielstand, jeder spätere Start beginnt genau dort.", freshAwait: "Warte auf deinen ersten Spielstand im neuen Spiel…", freshNone: "noch keiner", freshDo: "Neu würfeln und starten", freshSure: "Nochmal klicken: ROM und Spielstand werden ersetzt, nächster Versuch beginnt",
+    sLive: "Live aus DeSmuME", sLua: "Lua für DeSmuME", sLuaState: { present: "bereit", installed: "eingerichtet, DeSmuME neu starten", missing: "DeSmuME nicht gefunden" }, sLiveOn: "verbunden", sLiveForeign: "verbunden, aber dein Team wurde noch nicht gefunden", sLiveOff: "Skript läuft nicht", sAuto: "Startet mit dem Spiel", sAutoState: { present: "ja", installed: "eingerichtet, DeSmuME neu starten", missing: "nein, Skript von Hand laden" }, sLiveHint: "Ohne das Skript aktualisiert sich das Dashboard, wenn du im Spiel speicherst. Mit ihm folgt es deinem Team und deinen Begegnungen sofort. DeSmuME startet es von selbst, wenn du das Spiel öffnest. Falls nicht: in DeSmuME Tools › Lua Scripting › New Lua Script Window öffnen, diese Datei auswählen und Run drücken.", sLiveScript: "Skript", sGame: "Dein Spiel", sRun: "Run", sSync: "Sync", sServer: "Server", sLocal: "dieser Rechner", sBuild: "App-Build", sChannel: "Updates", sChannelHint: "Vorabversionen kommen mit jeder Änderung und können Fehler haben.", sStable: "Versionen", sPreview: "Vorabversionen", sDex: "Attacken aus der ROM", sDexOk: n => `${n} Attacken gelesen`, sDexBad: "nicht lesbar", sRead: "Was SoulSync liest", sReadLead: "Direkt aus deinem Spiel. Stimmt hier etwas nicht mit dem Spiel überein, melde unten ein Problem.", sReadAge: "Letzte Meldung des Skripts", sReadAgeV: n => n < 2 ? "gerade eben" : `vor ${n} s`, sTeam: "Team", sTeamV: (n, f) => `${n} Pokémon` + (f ? `, ${f} besiegt` : ""), sBattle: "Kampf", sBattleNone: "gerade keiner", sBalls: "Bälle im Beutel", sBallsNone: "nicht gelesen", sBallsEmpty: "keine", sEnc: "Erfasste Begegnungen", rep: "Problem melden", repLead: "Packt deine Logs, deinen Spielstand und die letzte Meldung des Skripts in eine ZIP-Datei und öffnet ihren Ordner. Hochgeladen wird nichts: Schick die Datei mit deiner Fehlermeldung mit.", repDump: "Kopie des Spielspeichers anhängen (4 MB, hilft am meisten bei falschen Werten im Kampf)", repDumpOff: "Die Speicherkopie braucht das laufende Skript in DeSmuME.", repDo: "Bericht erstellen", repBusy: "Bericht wird erstellt…", repBusyDump: "Spielspeicher wird kopiert… DeSmuME offen lassen", repDone: p => `Gespeichert als ${p}`, repNoDump: "Das Skript hat nicht geantwortet, der Bericht hat deshalb keine Speicherkopie.", repFail: "Der Bericht konnte nicht erstellt werden:", startBusy: "Run wird gestartet…", startSlow: "Deine ROM und dein Spielstand werden gelesen. Das dauert ein paar Sekunden.", uNew: n => `Update ${n} ist da`, uDo: "Installieren", uBusy: "Update wird geladen…", uLoad: n => `Update wird geladen… ${n} %`, uMb: (d, s) => s ? `Update wird geladen… ${d} von ${s} MB` : `Update wird geladen… ${d} MB`, uStart: "Wird installiert…", uRestart: "Neue Version startet…", uFail: "Update fehlgeschlagen", uAgain: "Nochmal", fresh: "Neu anfangen", freshLead: "Run verloren? Ein Klick würfelt deine Original-ROM mit deinen Einstellungen neu, legt deinen Start-Spielstand bereit, startet den nächsten Versuch und öffnet das Spiel. Schließe DeSmuME vorher.", freshOriginal: "Original-ROM", freshRando: "Randomizer", freshPreset: "Randomizer-Einstellungen", freshSave: "Start-Spielstand", freshPick: "Wählen", freshKeep: "Aktuellen Spielstand nehmen", freshDrop: "Entfernen", freshKept: (n, k) => `${n}  ·  ${k} Pokémon`, freshSaveHint: "Noch keiner? Dann beginnt der erste Start ein neues Spiel. Spiel das Intro einmal durch, stell Textgeschwindigkeit und Kampfstil ein und speichere im Spiel: SoulSync merkt sich diesen Spielstand, jeder spätere Start beginnt genau dort.", freshAwait: "Warte auf deinen ersten Spielstand im neuen Spiel…", freshNone: "noch keiner", freshDo: "Neu würfeln und starten", freshSure: "Nochmal klicken: ROM und Spielstand werden ersetzt, nächster Versuch beginnt",
     freshOptions: "Randomizer-Optionen", freshOptLead: "Hier geändert, zusätzlich zu deiner Einstellungsdatei. Die Datei selbst bleibt, wie sie ist.", fTm: "TM-Kompatibilität", fTutor: "Tutor-Kompatibilität", fHm: "VMs für alle", fCandies: "Sonderbonbons im Beutel", fCandiesHint: "0 = wie im Start-Spielstand",
 rando: { title: "Was gewürfelt wird", lead: "Was die Vorauswahl sagt und was du daran änderst. Das gilt für alle im Run.", std: v => `Vorauswahl (${v})`, changed: n => `${n} geändert`, open: "Anpassen", asPreset: "Alles wie in der Vorauswahl", preset: "Vorauswahl", back: "Zurück zur Vorauswahl", search: "Einstellung suchen", none: "Nichts gefunden.", reset: "Alles zurücksetzen", done: "Fertig", close: "Schließen",
       group: { traits: "Eigenschaften der Pokémon", starters: "Starter, feste Pokémon und Tausche", moves: "Attacken", trainers: "Trainer", wild: "Wilde Pokémon", tms: "TMs, VMs und Attackenlehrer", items: "Items", misc: "Sonstiges" },
@@ -2075,7 +2088,8 @@ function readRows(snap) {
   const fainted = snap.party.filter(p => p.battle && p.battle.hp === 0).length;
   const ballName = item => { const k = BALL_ITEMS.indexOf(item); return k >= 0 ? x.balls[k][0] : `#${item}`; };
   const balls = !Array.isArray(snap.balls) ? x.sBallsNone : snap.balls.length ? snap.balls.map(([it, n]) => `${esc(ballName(it))} ×${n}`).join(", ") : x.sBallsEmpty;
-  const battle = !w ? x.sBattleNone : `${esc(species(w))}  ·  ${x.lv} ${w.battle ? w.battle.level : "?"}${w.battle && w.battle.max_hp ? `  ·  ${w.battle.hp}/${w.battle.max_hp} ${x.mon.hp}` : ""}${w.ailment ? `  ·  ${esc(x.ail[w.ailment])}` : ""}`;
+  const f = !w && activeFoe(snap), o = w || f;
+  const battle = !o ? x.sBattleNone : `${esc(species(o))}  ·  ${x.lv} ${o.battle ? o.battle.level : "?"}${o.battle && o.battle.max_hp ? `  ·  ${o.battle.hp}/${o.battle.max_hp} ${x.mon.hp}` : ""}${o.ailment ? `  ·  ${esc(x.ail[o.ailment])}` : ""}  ·  ${w ? x.wild : x.foeTrainer}`;
   return [
     [x.sReadAge, age == null ? "–" : x.sReadAgeV(age)],
     [x.sTeam, x.sTeamV(snap.party.length, fainted)],
@@ -2089,7 +2103,7 @@ function updateSettings() {
   const el = $("#settings");
   const runCandies = state.settings && state.settings.randomizer ? state.settings.randomizer.candies : null;
   const mine = local && state.players.find(p => p.name === local.name), snap = mine && mine.snapshot;
-  const seen = snap ? JSON.stringify([snap.party.map(p => p.battle && p.battle.hp), snap.wild && [snap.wild.pid, snap.wild.battle && snap.wild.battle.hp, snap.wild.ailment], snap.balls, (snap.encounters || []).length]) : "";
+  const seen = snap ? JSON.stringify([snap.party.map(p => p.battle && p.battle.hp), snap.wild && [snap.wild.pid, snap.wild.battle && snap.wild.battle.hp, snap.wild.ailment], (snap.foes || []).map(f => [f.pid, f.battle && f.battle.hp, f.ailment]), snap.balls, (snap.encounters || []).length]) : "";
   const sig = [lang, state.code, state.attempt, state.finished, runCandies, JSON.stringify(local), seen, JSON.stringify(reportUi)].join("|");
   if (el._sig === sig) return;
   el._sig = sig;
@@ -2352,9 +2366,28 @@ const dexes = new Map();
 let cardSel = null;
 const STATS = ["attack", "defense", "speed", "sp_attack", "sp_defense"];
 
+// The species' types as this player's ROM has them, since a randomizer may
+// change them; the original ones until the ROM's are known.
+function monTypes(p, dex) {
+  const r = dex && dex.types && dex.types[p.species - 1];
+  return r && r.length ? r : p.types || [];
+}
+
+// The trainer's Pokémon that is out: the first that can still fight, as the
+// game sends them in order. The last one once all have fainted.
+function activeFoe(snap) {
+  const foes = snap && snap.foes || [];
+  return foes.find(f => !f.battle || f.battle.hp > 0) || foes[foes.length - 1] || null;
+}
+
+function isFoe(seat, p) {
+  const pl = state && state.players[seat], snap = pl && pl.snapshot;
+  return !!(snap && (snap.foes || []).some(f => f.pid === p.pid));
+}
+
 function findMon(seat, pid) {
   const pl = state && state.players[seat], snap = pl && pl.snapshot;
-  const own = snap && [...snap.party, ...snap.boxes].find(p => p.pid === pid);
+  const own = snap && [...snap.party, ...snap.boxes, ...(snap.foes || [])].find(p => p.pid === pid);
   if (own) return own;
   for (const l of state ? state.links : []) { const s = l.sides[seat]; if (s && s.pokemon.pid === pid) return s.pokemon; }
   return null;
@@ -2372,7 +2405,7 @@ function dexFor(seat) {
     dexes.set(key, d);
     fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/dex?player=${encodeURIComponent(pl.name)}`)
       .then(r => r.ok ? r.json() : null).catch(() => null)
-      .then(x => { d.data = x; updateCard(); });
+      .then(x => { d.data = x; updateCard(); updatePlayers(); });
   }
   return d.data;
 }
@@ -2401,6 +2434,7 @@ function moveCard(mv, info, pp, max) {
 // partners, then facts | moves and stats | level-up moves.
 function cardHtml(seat, p, dex) {
   const c = t().mon, b = p.battle, pl = state.players[seat];
+  const foe = isFoe(seat, p);
   const info = id => dex && dex.moves[id];
   const ail = p.ailment && t().ail[p.ailment] ? `<span class="ail">${esc(t().ail[p.ailment])}</span>` : "";
   const entry = (list, id) => dex && list && list[id] ? list[id] : null;
@@ -2413,10 +2447,10 @@ function cardHtml(seat, p, dex) {
   const partner = partners.map(([s, j]) => `<button type="button" class="partner" style="--pc:${col(j)}" data-mon="${s.pokemon.pid}" data-seat="${j}"><span class="slot">${spriteImg(s.pokemon)}</span><span><small><i></i>${c.linked}${esc(seatName(j))}</small><b>${esc(label(s.pokemon))}${s.pokemon.battle ? `<em>${t().lv} ${s.pokemon.battle.level}</em>` : ""}</b></span></button>`).join("");
   const head = `<header class="dh">
     <div class="dstage">${spriteImg(p)}</div>
-    <div class="did"><p class="who"><i></i>${esc(pl ? pl.name : seatName(seat))}  ·  ${esc(c.met(p.met_location_name ? nameOf(p.met_location_name) : "#" + p.met_location, p.met_level))}</p>
+    <div class="did"><p class="who"><i></i>${foe ? esc(t().foeOf(pl ? pl.name : seatName(seat))) : `${esc(pl ? pl.name : seatName(seat))}  ·  ${esc(c.met(p.met_location_name ? nameOf(p.met_location_name) : "#" + p.met_location, p.met_level))}`}</p>
       <h2>${esc(label(p))}${b ? `<small>${t().lv} ${b.level}</small>` : ""}</h2>
       ${p.is_nicknamed ? `<div class="spc">${esc(species(p))}</div>` : ""}
-      <div class="tys">${(p.types || []).map(tyChip).join("")}${ail}</div>
+      <div class="tys">${monTypes(p, dex).map(tyChip).join("")}${ail}</div>
       ${b ? hpLine(b) : ""}</div>
     ${partner ? `<div class="dparts">${partner}</div>` : ""}
     <button type="button" class="x" data-close aria-label="${c.close}"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2 2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></header>`;
@@ -2435,7 +2469,8 @@ function cardHtml(seat, p, dex) {
   const known = new Set(p.moves.map(m => m.id));
   const cards = p.moves.map(m => {
     const i = info(m.id), max = i ? Math.floor(i.pp * (5 + m.pp_ups) / 5) : null;
-    return moveCard(m.id, i, m.pp, max);
+    // An opponent's PP as the game started the battle, not as it stands: the most.
+    return foe ? moveCard(m.id, i, max, null) : moveCard(m.id, i, m.pp, max);
   });
   while (cards.length < 4) cards.push(`<div class="mvc free">${c.free}</div>`);
 
@@ -2446,7 +2481,7 @@ function cardHtml(seat, p, dex) {
     const rows = [row(c.hp, b.max_hp, ""), ...STATS.map((k, i) => row(c.st[k], p.stats[k], up === down ? "" : i === up ? "up" : i === down ? "dn" : ""))];
     stats = `<h3 class="gap">${c.stats}<em>${c.total} ${all.reduce((a, x) => a + x, 0)}</em></h3><div class="sts2"><div class="sts">${rows.slice(0, 3).join("")}</div><div class="sts">${rows.slice(3).join("")}</div></div>`;
   } else stats = `<h3 class="gap">${c.stats}</h3><p class="mon-note" style="margin:0;padding:0">${c.noStats}</p>`;
-  const moves = `<section><h3>${c.moves}<em>${c.of(p.moves.length)}</em></h3><div class="mvg">${cards.join("")}</div>${stats}</section>`;
+  const moves = `<section><h3>${foe ? t().foeMoves : c.moves}<em>${c.of(p.moves.length)}</em></h3><div class="mvg">${cards.join("")}</div>${stats}</section>`;
 
   let learn = "";
   const ls = dex && dex.learnsets && dex.learnsets[p.species - 1];
@@ -2757,17 +2792,20 @@ function updatePlayers() {
   $("#livesrc").textContent = local && local.live ? t().liveSrc : "";
   box.querySelectorAll(".pcard").forEach((el, i) => {
     const p = state.players[i], w = p && p.snapshot && p.snapshot.wild;
+    const foes = !w && p && p.snapshot && p.snapshot.foes || [], f = foes.length ? activeFoe(p.snapshot) : null;
+    const dex = (w || f) && p ? dexFor(i) : null;
     const secs = p && p.updated_at ? Math.max(0, (Date.now() - p.updated_at) / 1000) : null;
     const meta = !p ? t().notJoined : [gameOf(p), p.connected ? null : t().away, secs == null ? t().never : `${t().saved} ${t().ago(secs)}`].filter(Boolean).join("  ·  ");
-    const st = !p || !p.connected ? `<span class="state away">${t().offlineP}</span>` : w ? `<span class="state fight">${t().inBattle}</span>` : `<span class="state">${t().exploring}</span>`;
+    const st = !p || !p.connected ? `<span class="state away">${t().offlineP}</span>` : w || f ? `<span class="state fight">${t().inBattle}</span>` : `<span class="state">${t().exploring}</span>`;
     const head = `<div class="pch"><i></i><b>${esc(seatName(i))}</b>${st}</div><p class="meta">${esc(meta)}</p>`;
     const bag = p && p.snapshot && p.snapshot.balls, owned = ballCounts(bag), pick = ballPick(i, owned);
-    const sig = [lang, head, w ? [w.pid, w.species, w.battle && w.battle.hp, w.battle && w.battle.max_hp, w.ailment, (catchUi.list || []).length, caughtCount(), JSON.stringify(owned), pick].join() : "", local && local.art, !!sprites].join("|");
+    const sig = [lang, head, dex ? 1 : 0, f ? JSON.stringify([f.pid, foes.map(x => x.battle && x.battle.hp), f.ailment]) : "", w ? [w.pid, w.species, w.battle && w.battle.hp, w.battle && w.battle.max_hp, w.ailment, (catchUi.list || []).length, caughtCount(), JSON.stringify(owned), pick].join() : "", local && local.art, !!sprites].join("|");
     if (el._sig === sig) return;
-    const sameMon = el._pid && w && el._pid === w.pid;
-    el._sig = sig; el._pid = w ? w.pid : null;
-    el.classList.toggle("fight", !!w);
+    const sameMon = el._pid && w && el._pid === w.pid, sameFoe = el._pid && f && el._pid === f.pid;
+    el._sig = sig; el._pid = w ? w.pid : f ? f.pid : null;
+    el.classList.toggle("fight", !!(w || f));
     el.classList.toggle("off", !p || !p.connected);
+    if (f) { foeCard(el, i, head, f, foes, dex, sameFoe); return; }
     if (!w) { el.innerHTML = head + `<p class="idle">${p ? t().idleWild(esc(seatName(i))) : esc(t().waitPlayer(i + 1))}</p>`; return; }
     const b = w.battle || { hp: 1, max_hp: 1, level: "?" }, r = b.max_hp ? b.hp / b.max_hp : 1;
     const sp = (catchUi.list || []).find(x => x[0] === (w.species_name && w.species_name.en));
@@ -2777,7 +2815,7 @@ function updatePlayers() {
     const three = [0, 1, 2].map(k => [t().balls[k][0], chance(BALLS[k])]);
     const ring = three[pick][1] == null ? null : three[pick];
     const html = head + `<div class="wild2"><span class="stage">${spriteImg(w)}</span>
-      <div class="info"><div class="wnm"><b>${esc(species(w))}</b><span>${t().lv} ${b.level}  ·  ${t().wild}</span></div><div class="tys">${(w.types || []).map(tyChip).join("")}</div>
+      <div class="info"><div class="wnm"><b>${esc(species(w))}</b><span>${t().lv} ${b.level}  ·  ${t().wild}</span></div><div class="tys">${monTypes(w, dex).map(tyChip).join("")}</div>
       <div class="hpl"><span class="bar"><i style="--w:${(r * 100).toFixed(0)}%;--hc:var(--${r < .35 ? "danger" : r < .6 ? "warn" : "ok"})"></i></span>${Math.round(r * 100)} %${w.ailment ? `<span class="ail">${esc(t().ail[w.ailment])}</span>` : ""}</div></div>
       <div class="ring" style="--p:${ring ? Math.min(100, ring[1]).toFixed(0) : 0}" title="${esc(t().wildTip)}"><div><b>${ring ? fmt(ring[1]) : "–"}</b><small>${ring ? esc(ring[0]) : ""}</small></div></div></div>
       <div class="balls">${three.map(([nm, x], k) => {
@@ -2790,6 +2828,32 @@ function updatePlayers() {
       for (const sel of [".pch", ".meta", ".hpl", ".ring", ".balls"]) { const a = $(sel, el), z = $(sel, tmp); if (a && z) a.replaceWith(z); }
     } else el.innerHTML = html;
   });
+}
+
+// A trainer battle: the Pokémon the trainer has out, its types and moves as
+// the player's ROM has them, and how many the trainer has left. A click
+// opens it with its level-up moves.
+function foeCard(el, i, head, f, foes, dex, same) {
+  const x = t(), b = f.battle || { hp: 1, max_hp: 1, level: "?" }, r = b.max_hp ? b.hp / b.max_hp : 1;
+  const left = foes.filter(o => !o.battle || o.battle.hp > 0).length;
+  const info = id => dex && dex.moves && dex.moves[id];
+  const mv = (f.moves || []).map(m => {
+    const k = info(m.id), pow = k && k.power > 1 ? k.power : null;
+    return `<div class="fmv">${k && k.type ? tyChip(k.type) : "<span></span>"}<b title="${esc(k ? k.name : "")}">${esc(k ? k.name : x.mon.moveN(m.id))}</b><span class="pw">${pow || "–"}</span></div>`;
+  }).join("");
+  const dots = foes.map(o => `<i class="${o.pid === f.pid ? "on" : o.battle && o.battle.hp === 0 ? "out" : ""}"></i>`).join("");
+  const html = head + `<div class="foe" data-mon="${f.pid}" data-seat="${i}" role="button" tabindex="0" title="${esc(x.foeTip)}">
+    <div class="wild2 foe2"><span class="stage">${spriteImg(f)}</span>
+      <div class="info"><div class="wnm"><b>${esc(species(f))}</b><span>${x.lv} ${b.level}  ·  ${x.foeTrainer}</span></div><div class="tys">${monTypes(f, dex).map(tyChip).join("")}</div>
+      <div class="hpl"><span class="bar"><i style="--w:${(r * 100).toFixed(0)}%;--hc:var(--${r < .35 ? "danger" : r < .6 ? "warn" : "ok"})"></i></span>${Math.round(r * 100)} %${f.ailment ? `<span class="ail">${esc(x.ail[f.ailment])}</span>` : ""}</div></div>
+      <div class="fteam"><small>${esc(x.foeTeam(left, foes.length))}</small><span>${dots}</span></div></div>
+    ${mv ? `<div class="fmvs">${mv}</div>` : ""}
+    <p class="fmore">${esc(x.foeOpen)} ›</p></div>`;
+  if (same) {
+    // The same Pokémon: only the numbers change, the sprite keeps bobbing.
+    const tmp = document.createElement("div"); tmp.innerHTML = html;
+    for (const sel of [".pch", ".meta", ".hpl", ".fteam", ".fmvs"]) { const a = $(sel, el), z = $(sel, tmp); if (a && z) a.replaceWith(z); }
+  } else el.innerHTML = html;
 }
 
 function updateStatus() {

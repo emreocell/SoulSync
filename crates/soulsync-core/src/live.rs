@@ -4,9 +4,10 @@
 //! without the bag), then [`WINDOW`] bytes of the
 //! game's memory starting at the party block, then any number of Pokémon that
 //! turned up in memory while it ran and are not in the party. Those are
-//! mostly the opponents of battles, wild and trainers'. Each is one byte, 1
-//! while the Pokémon is still where it was found, and its 220 bytes as they
-//! are now, or were last.
+//! mostly the opponents of battles, wild and trainers'. Each is one byte of
+//! flags, bit 0 while the Pokémon is still where it was found and bit 1
+//! while the game has a battle copy of it (it is in a battle now), and its
+//! 220 bytes as they are now, or were last.
 //!
 //! The memory after the party block holds the trainer and the player's
 //! position, as in the save file. Where exactly is checked against the save,
@@ -74,6 +75,9 @@ pub struct LiveReport<'a> {
     pub seen: Vec<&'a [u8]>,
     /// For each of them, whether it is still in memory.
     present: Vec<bool>,
+    /// For each of them, whether it is in a battle right now. Scripts before
+    /// this flag never say so.
+    battling: Vec<bool>,
 }
 
 impl<'a> LiveReport<'a> {
@@ -92,7 +96,8 @@ impl<'a> LiveReport<'a> {
             window,
             items: (bag > 0).then_some(items),
             seen: seen.chunks(ENTRY).map(|e| &e[1..]).collect(),
-            present: seen.chunks(ENTRY).map(|e| e[0] == 1).collect(),
+            present: seen.chunks(ENTRY).map(|e| e[0] & 1 == 1).collect(),
+            battling: seen.chunks(ENTRY).map(|e| e[0] & 3 == 3).collect(),
         })
     }
 
@@ -104,6 +109,19 @@ impl<'a> LiveReport<'a> {
             .filter(|(_, present)| **present)
             .find_map(|(raw, _)| pk5::parse_wild(raw))
             .filter(|w| !snapshot.owns(w.pid) && !w.is_fainted())
+    }
+
+    /// The team of the trainer the player is fighting, in the order the game
+    /// keeps it: their Pokémon in memory that are in a battle now. Empty
+    /// outside of trainer battles.
+    pub fn foes(&self, snapshot: &SaveSnapshot) -> Vec<Pokemon> {
+        self.seen
+            .iter()
+            .zip(&self.battling)
+            .filter(|(_, battling)| **battling)
+            .filter_map(|(raw, _)| pk5::parse_foe(raw))
+            .filter(|f| !snapshot.owns(f.pid))
+            .collect()
     }
 
     /// The Poké Balls in the bag right now. `None` if the script sent no bag
@@ -335,6 +353,7 @@ mod tests {
             encounters: vec![],
             fallen: vec![],
             wild: None,
+            foes: vec![],
             balls: None,
         }
     }
@@ -416,6 +435,36 @@ mod tests {
         assert_eq!(r.map(&other), None);
         assert_eq!(LiveReport::parse(&data[..data.len() - 1]), None);
         assert_eq!(LiveReport::parse(&data[4..]), None);
+    }
+
+    #[test]
+    fn reads_the_team_of_the_trainer_fought() {
+        let wild = build_raw_ivs(9, 504, "", 0, 0, Some(&STATS), WILD);
+        let foe = |pid, species| build_raw_ivs(pid, species, "", 0, 0, Some(&STATS), 0x3FFF_FFFF);
+        let (a, b, old) = (foe(20, 610), foe(21, 509), foe(22, 519));
+        let mut data = report(0x600, 427, &[wild, old, a, b]);
+        // Flags: the wild one is gone, the old foe is in memory but out of
+        // battle, the trainer's two are in it.
+        let flag = |i: usize| 4 + WINDOW + i * ENTRY;
+        data[flag(0)] = 0;
+        data[flag(1)] = 1;
+        data[flag(2)] = 3;
+        data[flag(3)] = 3;
+        let r = LiveReport::parse(&data).unwrap();
+        let team: Vec<u16> = r
+            .foes(&snapshot(vec![]))
+            .iter()
+            .map(|p| p.species)
+            .collect();
+        assert_eq!(team, [610, 509]);
+        assert!(r.wild(&snapshot(vec![])).is_none());
+        // Older scripts send 1 alone: no trainer battle shows.
+        data[flag(2)] = 1;
+        data[flag(3)] = 1;
+        assert!(LiveReport::parse(&data)
+            .unwrap()
+            .foes(&snapshot(vec![]))
+            .is_empty());
     }
 
     #[test]

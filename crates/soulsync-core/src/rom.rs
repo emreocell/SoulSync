@@ -18,6 +18,8 @@ const MAP_HEADER: usize = 48;
 const MAP_LOCATION: usize = 26;
 /// Offset of the catch rate in a species entry.
 const CATCH_RATE: usize = 8;
+/// Offset of the two types in a species entry; the same twice for one type.
+const TYPES: usize = 6;
 const SPECIES: usize = 649;
 /// Larger than any file this module reads: the text archive of Black 2 and
 /// White 2, with every name and description of the game, has some megabytes.
@@ -345,6 +347,10 @@ pub struct RomDex {
     pub items: Vec<Entry>,
     /// By National Dex number minus one: (level, move) pairs in game order.
     pub learnsets: Vec<Vec<(u8, u16)>>,
+    /// By National Dex number minus one: the species' types as the ROM has
+    /// them, which a randomizer may have changed. Empty if not read.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub types: Vec<Vec<Type>>,
 }
 
 /// Names with their texts; the texts only if the file has one per name.
@@ -363,7 +369,28 @@ fn entries(names: Vec<String>, texts: Option<Vec<String>>) -> Vec<Entry> {
         .collect()
 }
 
-/// Reads moves, abilities, items and learnsets out of the ROM.
+/// The species' types as the ROM has them, by National Dex number minus one.
+fn read_types<R: Read + Seek>(rom: &mut R) -> Result<Vec<Vec<Type>>, RomError> {
+    let narc = read_file(rom, PERSONAL)?;
+    let entries = narc_entries(&narc).ok_or(RomError::Layout("species archive"))?;
+    let types: Vec<Vec<Type>> = entries
+        .iter()
+        .skip(1)
+        .take(SPECIES)
+        .filter_map(|e| {
+            let one = Type::from_index(i64::from(*e.get(TYPES)?))?;
+            let two = Type::from_index(i64::from(*e.get(TYPES + 1)?)).filter(|&t| t != one);
+            Some([Some(one), two].into_iter().flatten().collect())
+        })
+        .collect();
+    if types.len() == SPECIES {
+        Ok(types)
+    } else {
+        Err(RomError::Layout("species archive"))
+    }
+}
+
+/// Reads moves, abilities, items, learnsets and types out of the ROM.
 pub fn read_dex<R: Read + Seek>(rom: &mut R, game: Game) -> Result<RomDex, RomError> {
     let files = match game {
         Game::Black | Game::White => &TEXTS_BW,
@@ -428,11 +455,14 @@ pub fn read_dex<R: Read + Seek>(rom: &mut R, game: Game) -> Result<RomDex, RomEr
                 .collect()
         })
         .collect();
+    // Older dexes had no types; a ROM without readable ones keeps the rest.
+    let types = read_types(rom).unwrap_or_default();
     Ok(RomDex {
         moves,
         abilities,
         items,
         learnsets,
+        types,
     })
 }
 
@@ -626,5 +656,29 @@ mod tests {
         assert_eq!(dex.items[1].text, "");
         assert_eq!(dex.learnsets[487], [(1, 2), (38, 2)]);
         assert!(dex.learnsets[0].is_empty());
+        // No species archive: no types, the rest is there.
+        assert!(dex.types.is_empty());
+    }
+
+    #[test]
+    fn reads_types_as_the_rom_has_them() {
+        let entries: Vec<Vec<u8>> = (0..=700u32)
+            .map(|i| {
+                let mut e = vec![0u8; 0x4C];
+                // Bulbasaur Grass/Poison, Charmander turned Dragon only.
+                (e[TYPES], e[TYPES + 1]) = match i {
+                    1 => (11, 3),
+                    4 => (15, 15),
+                    _ => (0, 0),
+                };
+                e
+            })
+            .collect();
+        let image = rom(&[("a/0/1/6", narc(&entries))]);
+        let types = read_types(&mut Cursor::new(image)).unwrap();
+        assert_eq!(types.len(), 649);
+        assert_eq!(types[0], [Type::Grass, Type::Poison]);
+        assert_eq!(types[3], [Type::Dragon]);
+        assert_eq!(types[648], [Type::Normal]);
     }
 }
