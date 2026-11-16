@@ -228,6 +228,9 @@ struct Inner {
     dex: Option<Result<usize, String>>,
     /// Sprites and item icons of the ROM they were read from.
     art: Option<(PathBuf, Option<Arc<soulsync_core::art::Art>>)>,
+    /// Whether the DeSmuME of the game being played is open, looked up
+    /// every few seconds by [`watch_emulator`].
+    running: bool,
 }
 
 #[derive(Clone)]
@@ -721,6 +724,7 @@ impl Local {
             "art": c.rom.is_some() || c.original.is_some(),
             "play": c.rom.as_deref().is_some_and(Path::exists)
                 && c.save.as_deref().and_then(desmume_exe).is_some(),
+            "running": inner.running,
             "dex": inner.dex.as_ref().map(|d| match d {
                 Ok(moves) => serde_json::json!({ "moves": moves }),
                 Err(why) => serde_json::json!({ "error": why }),
@@ -1680,7 +1684,7 @@ async fn forget(State(local): State<Local>, Json(req): Json<Forget>) -> Reply {
 }
 
 /// How often a running app looks for a newer build.
-const UPDATE_EVERY: Duration = Duration::from_secs(10 * 60);
+const UPDATE_EVERY: Duration = Duration::from_secs(2 * 60);
 
 /// Looks for a newer build in the background, at start and then every few
 /// minutes, so an app left open hears of updates too. Only the Windows
@@ -1789,6 +1793,17 @@ async fn leave(State(local): State<Local>) -> Json<serde_json::Value> {
         write_config(&inner.config);
     }
     Json(local.view())
+}
+
+/// Notes whether the DeSmuME of the game being played is open, so the
+/// dashboard can show that instead of offering to open it a second time.
+fn watch_emulator(local: &Local) {
+    let save = local.inner.lock().unwrap().config.save.clone();
+    let running = save
+        .as_deref()
+        .and_then(desmume_exe)
+        .is_some_and(|exe| crate::fresh::running(&exe));
+    local.inner.lock().unwrap().running = running;
 }
 
 /// Opens the game being played in DeSmuME.
@@ -1948,6 +1963,11 @@ pub fn routes(server: soulsync_server::AppState, own: String) -> Router {
     std::thread::spawn(move || loop {
         give_due_candies(&giver);
         std::thread::sleep(Duration::from_secs(5));
+    });
+    let watcher = local.clone();
+    std::thread::spawn(move || loop {
+        watch_emulator(&watcher);
+        std::thread::sleep(Duration::from_secs(2));
     });
     Router::new()
         .route("/api/local/state", get(state))
