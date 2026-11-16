@@ -2226,6 +2226,15 @@ mod tests {
         // Poisoned in the battle; B itself says asleep.
         battle = [battle, vec![0u8; 0x20]].concat();
         battle[0x30] = 1;
+        // The trainer's Pokémon C has a working copy too: 12 HP, level 7.
+        let mut theirs = vec![0u8; 0x40];
+        theirs[..4].copy_from_slice(&0x0200_D000u32.to_le_bytes());
+        theirs[0x0C..0x0E].copy_from_slice(&509u16.to_le_bytes());
+        theirs[0x0E..0x10].copy_from_slice(&60u16.to_le_bytes());
+        theirs[0x10..0x12].copy_from_slice(&12u16.to_le_bytes());
+        theirs[0x18] = 7;
+        battle.extend(vec![0u8; 0x100 - battle.len()]);
+        battle.extend(theirs);
         globals
             .set("BATTLE", lua.create_string(&battle).unwrap())
             .unwrap();
@@ -2306,6 +2315,11 @@ mod tests {
         assert_eq!(facing.battle.as_ref().unwrap().hp, 3);
         assert_eq!(facing.battle.as_ref().unwrap().max_hp, 60);
         assert_eq!(facing.ailment, Some(soulsync_core::Ailment::Poison));
+        // The trainer's Pokémon in the battle, with its HP there.
+        let foes = report.foes(&live);
+        assert_eq!(foes.len(), 1);
+        assert_eq!(foes[0].species, 509);
+        assert_eq!(foes[0].battle.as_ref().unwrap().hp, 12);
         let mut encounters = Encounters::default();
         assert!(encounters.observe(&live, &report.seen, Some(20)));
         let list = encounters.of(&save.trainer);

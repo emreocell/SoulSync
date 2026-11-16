@@ -25,6 +25,9 @@ window.SoulSyncDemoDex = (() => {
   mv(232, "Metal Claw", "steel", "physical", 50, 95, 35, "The target is raked with steel claws. It may also raise the user's Attack stat.");
   mv(93, "Confusion", "psychic", "special", 50, 100, 25, "The target is hit by a weak telekinetic force. It may also leave the target confused.");
   mv(36, "Take Down", "normal", "physical", 90, 85, 20, "A reckless, full-body charge attack. It also damages the user a little.");
+  mv(82, "Dragon Rage", "dragon", "special", 1, 100, 10, "This attack hits the target with a shock wave of pure rage. This attack always inflicts 40 HP damage.");
+  mv(43, "Leer", "normal", "status", 0, 100, 30, "The user gives opponents an intimidating leer that lowers the Defense stat.");
+  mv(10, "Scratch", "normal", "physical", 40, 100, 35, "Hard, pointed, sharp claws rake the target to inflict damage.");
   mv(334, "Iron Defense", "steel", "status", 0, 101, 15, "The user hardens its body's surface like iron, sharply raising its Defense stat.");
   abilities[29] = { name: "Clear Body", text: "Prevents other Pokémon from lowering its stats." };
   abilities[149] = { name: "Illusion", text: "Enters battle disguised as the last Pokémon in the party." };
@@ -74,7 +77,7 @@ window.SoulSyncDemo = function (apply) {
       code: "DEMO-0000", seed: 4821, attempt, settings: { players: players.length, caps: [13, 18, 24, 30, 33, 39, 48, 51] },
       players: joined.map(p => ({
         name: p.name, connected: true, updated_at: p.at,
-        snapshot: { trainer: { name: p.name, badges: p.badges, game: p.game }, party: p.mons.filter(m => m.battle), boxes: p.mons.filter(m => !m.battle), wild: p.wild || null },
+        snapshot: { trainer: { name: p.name, badges: p.badges, game: p.game }, party: p.mons.filter(m => m.battle), boxes: p.mons.filter(m => !m.battle), wild: p.wild || null, foes: p.foes || [] },
       })),
       links: links(), log: log.slice(0, 30),
       started_at: began, played_ms: played(), finished, history,
@@ -127,6 +130,17 @@ window.SoulSyncDemo = function (apply) {
     p.wild = { pid: 9000 + species, species, species_name: names(DEX[species]), types: DEX[species][2], nickname: "", is_nicknamed: false, is_egg: false, met_location: 0, met_level: level, place: { kind: "party", slot: 0 }, battle: { level, hp: Math.round(max * ratio), max_hp: max }, ailment: ailment || null };
     emit(p);
   }
+  // A trainer battle: the trainer's team as [species, level, HP ratio], and its moves.
+  function fight(p, team) {
+    if (!team) { p.foes = []; emit(p); return; }
+    p.foes = team.map(([species, level, ratio], k) => {
+      const max = 12 + level * 2;
+      return { pid: 9500 + k, species, species_name: names(DEX[species]), types: DEX[species][2], nickname: "", is_nicknamed: false, is_egg: false, met_location: 0, met_level: level, place: { kind: "party", slot: 0 }, battle: { level, hp: Math.round(max * ratio), max_hp: max }, ailment: null,
+        moves: (species === 610 ? [10, 43, 82] : [33, 98, 44]).map(id => ({ id, pp: window.SoulSyncDemoDex.moves[id].pp, pp_ups: 0 })), item: 155, ability: 145, nature: 3,
+        stats: { attack: 8 + level * 2, defense: 7 + level * 2, speed: 9 + level * 2, sp_attack: 6 + level * 2, sp_defense: 7 + level * 2 } };
+    });
+    emit(p);
+  }
   function badge(p) { if (!p) return; p.badges++; say(p, { type: "badges", count: p.badges }); emit(p); }
 
   const [H, M] = players;
@@ -146,6 +160,8 @@ window.SoulSyncDemo = function (apply) {
     [500, () => level(M, 123, 3)], [700, () => hurt(H, 519, .6)], [600, () => level(H, 375, 3)], [500, () => level(M, 570, 3)],
     [1500, () => badge(H)], [900, () => badge(M)],
     [1200, () => battle(B, 246, 11, 1)], [1400, () => battle(B, 246, 11, .45)], [1400, () => battle(B, 246, 11, .45, "paralysis")], [1600, () => battle(B, null)],
+    [1200, () => fight(H, [[610, 9, 1], [519, 8, 1]])], [1600, () => fight(H, [[610, 9, .4], [519, 8, 1]])],
+    [1600, () => fight(H, [[610, 9, 0], [519, 8, 1]])], [1800, () => fight(H, null)],
     [1500, () => caught(H, 479, 5, "", 11)],
     [1100, () => caught(M, 246, 5, "Pebble", 11)],
     [1300, () => caught(H, 215, 6, "", 12)],

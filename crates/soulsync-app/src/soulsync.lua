@@ -354,7 +354,11 @@ end
 local function report()
   local parts = { "SSL4", window(), bag() }
   for i = 1, #reported do
-    parts[#parts + 1] = string.char(reported[i].present and 1 or 0) .. reported[i].data
+    -- Bit 0: still in memory; bit 1: in a battle now, which tells the
+    -- team of a trainer being fought from what is left of earlier battles.
+    local r = reported[i]
+    local flags = not r.present and 0 or #r.battle > 0 and 3 or 1
+    parts[#parts + 1] = string.char(flags) .. r.data
   end
   return table.concat(parts)
 end

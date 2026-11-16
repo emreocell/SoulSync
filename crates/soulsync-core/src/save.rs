@@ -77,6 +77,10 @@ pub struct SaveSnapshot {
     /// has it in memory right now.
     #[serde(default)]
     pub wild: Option<Box<Pokemon>>,
+    /// The team of the trainer the player is fighting right now, as the
+    /// emulator has it in memory. Empty outside of trainer battles.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub foes: Vec<Pokemon>,
     /// Poké Balls in the bag, as (item, count). `None` where not known, as
     /// from clients before this field.
     #[serde(default)]
@@ -139,6 +143,7 @@ impl SaveSnapshot {
             encounters: self.encounters.clone(),
             fallen: self.fallen.clone(),
             wild: None,
+            foes: vec![],
             balls: self.balls.clone(),
         };
         for old in &self.party {
@@ -221,6 +226,7 @@ pub fn parse_b2w2(data: &[u8]) -> Result<SaveSnapshot, SaveError> {
         encounters: Vec::new(),
         fallen: Vec::new(),
         wild: None,
+        foes: vec![],
         balls: crate::bag::items_pocket(b).and_then(crate::bag::balls),
     })
 }

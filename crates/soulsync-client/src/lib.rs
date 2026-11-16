@@ -260,6 +260,12 @@ impl Live {
                 self.note(&snap, raw, place);
             }
             snap.wild = report.wild(&snap).map(Box::new);
+            // A trainer battle: who the trainer has, unless a wild one is out.
+            snap.foes = if snap.wild.is_some() {
+                Vec::new()
+            } else {
+                report.foes(&snap)
+            };
             if let Some(balls) = report.balls() {
                 snap.balls = Some(balls);
             }
