@@ -49,6 +49,8 @@ html,body{height:100%}
 body{margin:0;background:var(--night);color:var(--text);font:14px/1.45 var(--sans);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;overflow:hidden}
 h1,h2,h3,h4,p,ol,ul{margin:0;padding:0}
 button,input,select{font:inherit;color:inherit}
+/* A native list opens in the page's colours, not white on white. */
+select option,select optgroup{background:var(--solid);color:var(--text)}
 button{cursor:pointer;background:none;border:0;padding:0}
 button:active{transform:scale(.97)}
 ::selection{background:var(--b);color:var(--night)}
@@ -1305,7 +1307,7 @@ function renderStart() {
   const fill = () => {
     pane.innerHTML = tab === 0
       ? `<div class="field"><label for="f-code">${t().code}</label><input id="f-code" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="HYPNO-6811" required><small>${t().codeHelp}</small></div><button class="btn" type="submit">${t().openRun}</button>`
-      : `${playersField(newPlayers)}<div class="field"><label for="f-caps">${t().caps}</label><input id="f-caps" autocomplete="off" placeholder="${t().capsPh}"><small>${t().capsHelp}</small></div>${rulePicker(RULES_DEFAULT)}<p class="err" id="err" hidden></p><button class="btn" type="submit">${t().create}</button>`;
+      : `${playersField(newPlayers)}<div class="field"><label for="f-caps">${t().caps}</label><input id="f-caps" autocomplete="off" placeholder="${t().capsPh}"><small>${t().capsHelp}</small></div>${rulePicker(RULES_NEW)}<p class="err" id="err" hidden></p><button class="btn" type="submit">${t().create}</button>`;
     pane.style.animation = "none"; void pane.offsetWidth; pane.style.animation = "";
   };
   fill();
@@ -1613,12 +1615,12 @@ function openRules(u, rom, done) {
 }
 
 function renderSetup() {
-  const u = setupUi, rom = local.rom, save = local.save, fr = local.fresh || {};
-  if (!u.rules) u.rules = RULES_DEFAULT.slice();
-  if (!u.mode) u.mode = save && save.ok ? "own" : "roll";
+  const u = setupUi, fr = local.fresh || {}, rom = fr.original && fr.original.ok ? fr.original : local.rom;
+  if (!u.rules) u.rules = RULES_NEW.slice();
+  // The setup always makes a new game from the original ROM.
+  u.mode = "roll";
   if (!PRESETS) { loadPresets().then(() => renderSetup()); }
-  const nRuns = (local.runs || []).length;
-  if (u.tab === 2 && !nRuns) u.tab = 1;
+  if (u.tab !== 0) u.tab = 1;
   const asFile = p => p ? { path: p, ok: true } : null;
   const file = (kind, f, label, okText) => `<div class="field"><label for="f-${kind}">${label}</label>
     <div class="filerow"><input id="f-${kind}" autocomplete="off" spellcheck="false" placeholder="${t().fPathPh}" value="${f ? esc(f.path) : ""}">${local.dialogs ? `<button type="button" data-pick="${kind}">${t().browse}</button>` : ""}</div>
@@ -1633,28 +1635,24 @@ function renderSetup() {
         <h3>${t().sGame}</h3>
         ${cart}
         <div class="field"><label for="f-name">${t().fName}</label><input id="f-name" autocomplete="off" maxlength="24" placeholder="${t().fNamePh}" value="${esc(local.name)}"></div>
-        <div class="field"><div class="seg3" id="f-mode" style="grid-template-columns:1fr 1fr"><button type="button" data-m="roll" aria-pressed="${u.mode === "roll"}">${t().gRoll}</button><button type="button" data-m="own" aria-pressed="${u.mode === "own"}">${t().gOwn}</button></div></div>
-        ${u.mode === "roll" ? `<p class="lead" style="margin:0 0 12px;font-size:13px">${t().gRollHelp}</p>
+        <p class="lead" style="margin:0 0 12px;font-size:13px">${t().gRollHelp}</p>
         ${file("original", fr.original, t().fOriginal, fr.original && fr.original.ok ? t().romOk(esc(fr.original.label[lang]), fr.original.generation) : "")}
         <div class="field"><label>${t().fRando}</label><small class="ok">✓ ${fr.own ? t().randoOwn : fr.randomizer ? esc(String(fr.randomizer).split(/[\\/]/).pop()) : t().randoBuiltin(fr.builtin ? esc(fr.builtin.name) : "")}</small></div>
-        ${file("emulator", asFile(fr.emulator), t().fEmu, t().fEmuHelp)}`
-        : `${file("rom", rom, t().fRom, rom && rom.ok ? t().romOk(esc(rom.label[lang]), rom.generation) : "")}
-        ${file("save", save, t().fSave, save && save.ok ? t().saveOk(esc(save.trainer), save.badges, save.pokemon) : "")}`}
+        ${file("emulator", asFile(fr.emulator), t().fEmu, t().fEmuHelp)}
       </div>
     </div>
     <div class="fcol">
-      <div class="ptabs glass${nRuns ? " three" : ""}" role="tablist" data-i="${u.tab}"><button type="button" role="tab" aria-selected="${u.tab === 0}" data-i="0">${t().tabJoin}</button><button type="button" role="tab" aria-selected="${u.tab === 1}" data-i="1">${t().tabNew}</button>${nRuns ? `<button type="button" role="tab" aria-selected="${u.tab === 2}" data-i="2">${t().myRuns}<i>${nRuns}</i></button>` : ""}</div>
-      ${u.tab === 2 ? `<div class="pane glass runs-pane reveal" id="myruns" style="--i:1">${runsHtml(true)}</div>` : `<div class="pane glass reveal" style="--i:1">${u.tab === 0
+      <div class="ptabs glass" role="tablist" data-i="${u.tab}"><button type="button" role="tab" aria-selected="${u.tab === 0}" data-i="0">${t().tabJoin}</button><button type="button" role="tab" aria-selected="${u.tab === 1}" data-i="1">${t().tabNew}</button></div>
+      <div class="pane glass reveal" style="--i:1">${u.tab === 0
         ? `<div class="field"><label for="f-code">${t().code}</label><input id="f-code" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="HYPNO-6811" value="${esc(u.code)}"><small>${t().codeHelp}${u.mode === "roll" ? " " + t().pJoin : ""}</small></div>`
         : playersField(u.players) + presetField(u, fr) + rulesField(u)}
         <details class="adv" ${u.adv ? "open" : ""}><summary>${t().advanced}${local.server ? `<span>${esc(local.server.replace(/^https?:\/\//, "").replace(/\/.*$/, ""))}</span>` : ""}</summary><div class="field"><label for="f-server">${t().fServer}</label><input id="f-server" autocomplete="off" spellcheck="false" placeholder="https://" value="${esc(local.server)}"><small>${t().fServerHelp}</small></div>${u.tab === 1 ? `<div class="field"><div class="checks"><label><input type="checkbox" id="f-seed" ${u.sharedSeed ? "checked" : ""}><span>${t().fSeed}</span><small>${t().fSeedHelp}</small></label></div></div>` : ""}</details>
         <p class="err" id="err" ${u.error ? "" : "hidden"}>${esc(u.error)}</p>
         <button class="btn" type="submit">${ICON.play.replace("<svg", '<svg width="20" height="20"')}${u.tab === 0 ? t().startJoin : t().startNew}</button>
-      </div>`}
+      </div>
     </div>
   </form></main>`);
   bindChrome();
-  if ($("#myruns")) bindRuns($("#myruns"), renderSetup);
   const form = $("#setupf");
   const keep = () => {
     const code = $("#f-code"), adv = $("details.adv", form);
@@ -1663,11 +1661,11 @@ function renderSetup() {
     if (code) u.code = code.value;
   };
   const save_ = async patch => { keep(); const r = await localPost("set", patch); if (r.ok) { local = await r.json(); SRV = local.server || ""; } };
-  const FILES = u.mode === "roll" ? ["original", "emulator"] : ["rom", "save"];
+  const FILES = ["original", "emulator"];
   const fields = () => { const o = { name: $("#f-name").value }; if ($("#f-server")) o.server = $("#f-server").value; for (const k of FILES) o[k] = $("#f-" + k).value; return o; };
   for (const id of ["name", "server", ...FILES]) if ($("#f-" + id)) $("#f-" + id).onchange = async () => { await save_(fields()); if (id !== "name") renderSetup(); };
   const rules = $("[data-rules-open]", form);
-  if (rules) rules.onclick = () => { keep(); openRules(u, u.mode === "roll" ? (local.fresh || {}).original : local.rom, renderSetup); };
+  if (rules) rules.onclick = () => { keep(); openRules(u, (local.fresh || {}).original, renderSetup); };
   form.onchange = async e => {
     if (e.target.id === "f-preset") { keep(); u.preset = e.target.value; renderSetup(); }
     else if (e.target.id === "f-candies") {
@@ -1678,8 +1676,7 @@ function renderSetup() {
   const open = $("[data-rando-open]", form);
   if (open) open.onclick = () => openRando(() => { const f = local.fresh || {}; return { base: presetBase(setupUi, f), r: f.rando || {}, save: async r => { await save_({ rando: r }); renderSetup(); } }; });
   form.onclick = async e => {
-    const pick = e.target.closest("[data-pick]"), tabBtn = e.target.closest(".ptabs button"), modeBtn = e.target.closest("#f-mode button");
-    if (modeBtn) { keep(); u.mode = modeBtn.dataset.m; u.error = ""; return renderSetup(); }
+    const pick = e.target.closest("[data-pick]"), tabBtn = e.target.closest(".ptabs button");
     const n = pickPlayers(e);
     if (n && n !== u.players) { keep(); u.players = n; return renderSetup(); }
     if (pick) {
@@ -1943,6 +1940,9 @@ const armed = () => Date.now() < armUntil;
 
 const RULES = ["first", "linked", "fate", "together", "failed", "cap", "items", "dupes", "nick", "set"];
 const RULES_FIXED = ["linked", "fate"], RULES_DEFAULT = ["first", "linked", "fate", "together", "failed", "cap"];
+// What a new run starts with: every rule but nicknames. RULES_DEFAULT stays
+// what runs from before rules could be chosen are shown with.
+const RULES_NEW = RULES.filter(id => id !== "nick");
 
 function updateRules() {
   const caps = state.settings && state.settings.caps || [];
@@ -2910,15 +2910,19 @@ function render() {
 
 function apply(next) { state = next; conn = "live"; render(); }
 
+// The one connection to the run on screen. A run left behind is closed: the
+// server lets one address hold only so many, and kept ones would block the next.
+let socket = null;
 function connect() {
   const code = codeFromPath;
   const path = `${SRV || location.origin}/api/runs/${encodeURIComponent(code.toUpperCase())}`;
-  const ws = new WebSocket(path.replace(/^http/, "ws") + "/ws");
+  if (socket) { const old = socket; socket = null; old.onclose = null; old.onmessage = null; try { old.close(); } catch {} }
+  const ws = socket = new WebSocket(path.replace(/^http/, "ws") + "/ws");
   let opened = false;
   ws.onopen = () => { opened = true; conn = "live"; updateStatus(); };
   ws.onmessage = m => { const msg = JSON.parse(m.data); if (msg.type === "state" && code === codeFromPath) apply(msg.state); };
   ws.onclose = async () => {
-    if (code !== codeFromPath) return;
+    if (code !== codeFromPath || socket !== ws) return;
     if (!opened) {
       const r = await fetch(path).catch(() => null);
       if (r && r.status === 404) {
@@ -2927,7 +2931,7 @@ function connect() {
         conn = "missing"; render(); return;
       }
     }
-    conn = "offline"; updateStatus(); setTimeout(connect, 2000);
+    conn = "offline"; updateStatus(); setTimeout(() => { if (socket === ws) connect(); }, 2000);
   };
 }
 

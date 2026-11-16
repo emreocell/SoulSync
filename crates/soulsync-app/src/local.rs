@@ -1543,7 +1543,14 @@ async fn drop_run(State(local): State<Local>, Json(req): Json<RunRef>) -> Json<s
 
 /// Whether the server has the run at `url`; `None` if it cannot be asked.
 fn run_exists(url: &str) -> Option<bool> {
-    match ureq::get(url).call() {
+    // A server that does not answer soon counts as offline, so a click on
+    // another run never hangs.
+    let call = ureq::get(url)
+        .config()
+        .timeout_global(Some(Duration::from_secs(8)))
+        .build()
+        .call();
+    match call {
         Ok(_) => Some(true),
         Err(ureq::Error::StatusCode(404)) => Some(false),
         Err(_) => None,
