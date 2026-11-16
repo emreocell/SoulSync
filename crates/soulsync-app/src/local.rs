@@ -99,6 +99,9 @@ struct Saved {
     at: u64,
     randomizer: Option<RunRandomizer>,
     rolled: u32,
+    /// Seats in the run, once known, to tell runs apart in the list.
+    #[serde(default)]
+    players: Option<u8>,
 }
 
 /// Runs remembered at most.
@@ -111,7 +114,8 @@ fn now_ms() -> u64 {
 }
 
 impl Config {
-    /// Puts the current run at the top of [`Config::runs`].
+    /// Notes the current run in [`Config::runs`]: a new one at the top, one
+    /// already there where it is, so the list keeps its order.
     fn remember(&mut self, at: u64) {
         let Some(code) = self.code.clone() else {
             return;
@@ -121,23 +125,30 @@ impl Config {
             .as_deref()
             .map(rom_info)
             .and_then(|i| i.get("label").filter(|l| !l.is_null()).cloned());
-        self.runs
-            .retain(|r| !(r.code == code && r.server == self.server));
-        self.runs.insert(
-            0,
-            Saved {
-                code,
-                server: self.server.clone(),
-                name: self.name.clone(),
-                rom: self.rom.clone(),
-                save: self.save.clone(),
-                game,
-                at,
-                randomizer: self.run_rando.clone(),
-                rolled: self.rolled,
-            },
-        );
-        self.runs.truncate(SAVED_RUNS);
+        let at_index = self
+            .runs
+            .iter()
+            .position(|r| r.code == code && r.server == self.server);
+        let players = at_index.and_then(|i| self.runs[i].players);
+        let run = Saved {
+            code,
+            server: self.server.clone(),
+            name: self.name.clone(),
+            rom: self.rom.clone(),
+            save: self.save.clone(),
+            game,
+            at,
+            randomizer: self.run_rando.clone(),
+            rolled: self.rolled,
+            players,
+        };
+        match at_index {
+            Some(i) => self.runs[i] = run,
+            None => {
+                self.runs.insert(0, run);
+                self.runs.truncate(SAVED_RUNS);
+            }
+        }
     }
 
     /// Makes a remembered run the current one again.
@@ -702,6 +713,7 @@ impl Local {
                 "name": r.name,
                 "game": r.game,
                 "at": r.at,
+                "players": r.players,
                 "current": c.code.as_deref() == Some(r.code.as_str()) && c.server == r.server,
             })).collect::<Vec<_>>(),
             "phase": inner.phase,
@@ -1519,6 +1531,34 @@ async fn resume_run(State(local): State<Local>, Json(req): Json<RunRef>) -> Repl
     Ok(Json(local.view()))
 }
 
+#[derive(Deserialize)]
+struct RunPlayers {
+    code: String,
+    #[serde(default)]
+    server: String,
+    players: u8,
+}
+
+/// Notes how many seats a run has, as its dashboard learned.
+async fn run_players(
+    State(local): State<Local>,
+    Json(req): Json<RunPlayers>,
+) -> Json<serde_json::Value> {
+    {
+        let mut inner = local.inner.lock().unwrap();
+        let c = &mut inner.config;
+        let run = c
+            .runs
+            .iter_mut()
+            .find(|r| r.code == req.code && r.server == req.server);
+        if let Some(run) = run.filter(|r| r.players != Some(req.players)) {
+            run.players = Some(req.players.clamp(1, 4));
+            write_config(c);
+        }
+    }
+    Json(local.view())
+}
+
 /// Takes a run off the list. The run itself stays on its server.
 async fn drop_run(State(local): State<Local>, Json(req): Json<RunRef>) -> Json<serde_json::Value> {
     {
@@ -1917,6 +1957,7 @@ pub fn routes(server: soulsync_server::AppState, own: String) -> Router {
         .route("/api/local/leave", post(leave))
         .route("/api/local/resume", post(resume_run))
         .route("/api/local/drop", post(drop_run))
+        .route("/api/local/players", post(run_players))
         .route("/api/local/update", post(update))
         .route("/api/local/handoff", post(handoff))
         .route("/api/local/forget", post(forget))
@@ -2301,7 +2342,8 @@ mod tests {
                 .iter()
                 .map(|r| (r.code.as_str(), r.at))
                 .collect::<Vec<_>>(),
-            [("ZORUA-0001", 3), ("HYPNO-0002", 2)]
+            [("HYPNO-0002", 2), ("ZORUA-0001", 3)],
+            "a run keeps its place when played again"
         );
     }
 }
