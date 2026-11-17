@@ -1,26 +1,29 @@
 # Roadmap
 
-SoulSync reads game state **from the outside** (save files, then DeSmuME Lua) instead of reimplementing or forking an emulator. Each stage is useful on its own.
+SoulSync reads game state **from the outside**, through save files and the DeSmuME Lua script, instead of reimplementing or forking an emulator. Each step below is useful on its own. Ideas and help are welcome in the [issues](https://github.com/hildlabs/SoulSync/issues).
 
-| Stage | Scope | Outcome |
-| --- | --- | --- |
-| 1. Foundation | Rust workspace, generation 5 save parser, CLI | `soulsync inspect` reads a real save ✅ |
-| 2. Sync on save | Run server with run codes and WebSocket, save watcher, web dashboard | Saving in-game updates both players' dashboards ✅ (runs are kept in memory for now) |
-| 3. Live | DeSmuME Lua script (party, boxes, map, battle state, bag), rule engine | Encounters and deaths show up within seconds |
-| 4. Run setup | Randomizer with a shared seed, ROM check, starter-kit save editor, DeSmuME launcher | One click from run code to playing |
-| 5. Installer | Desktop app (Tauri) for Windows, then macOS/Linux, public default server | One file to send to your partner |
-| 6. Extras | Leaderboard, OBS overlay, more games (Black/White, Platinum, HGSS), optional embedded emulator | |
+## Done
 
-## Starting a run (target flow)
+- Generation 5 save parser and CLI (`soulsync inspect`, `watch`, `sync`)
+- Run server with run codes, WebSocket sync, persistent runs and limits for a public instance
+- Live tracking from DeSmuME: party, wild encounters, battles with catch chance, bag
+- Rule engine: links, shared fate, level caps from the ROM, failed catches
+- Desktop app for Windows with one-click updates; solo and two to four players
+- Built-in randomizer: a Rust port of Universal Pokémon Randomizer ZX 4.6.1 for Black 2 and White 2, byte-identical to the original
+- One-click new attempts with a fresh save and Rare Candies
+- Run end, archive and real time played
 
-1. Player A creates a run: game, randomizer settings (`.rnqs`), rules. The server hands out a code like `ZORUA-4821` and a seed.
-2. Player B enters the code and picks only their own ROM.
-3. SoulSync checks the ROM header, randomizes with the shared settings and seed, and compares a fingerprint of the randomizer log so both play the same world.
-4. After the first in-game save, SoulSync adds the starter kit (for example 999 Rare Candies) to the save.
-5. SoulSync launches DeSmuME with the Lua script. From here everything updates automatically.
+## Next
 
-## Open questions
+- A code-signed Windows build
+- OBS overlay and a read-only viewer link for streamers
+- Testing other game languages, then turning the native randomizer on for them (until then the original randomizer is downloaded as a fallback)
+- Black and White tested end to end
+- A tested macOS build (see [mac.md](mac.md))
 
-- Does Universal Pokémon Randomizer ZX 4.6.1 accept a seed on the command line? (UPR FVX does, with `-z`.)
-- RAM addresses for the Lua script across game languages.
-- Hosting for the public server, and persisting runs across restarts.
+## Later
+
+- More games: Platinum, HeartGold and SoulSilver
+- More emulators: melonDS, BizHawk
+- Chat bot for streams
+- Opt-in leaderboards (last, since randomized runs are hard to compare)

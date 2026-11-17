@@ -23,7 +23,7 @@
 <p align="center"><sub>The dashboard in its demo mode. The figures are placeholder art, see <a href="#legal">Legal</a>.</sub></p>
 
 > [!NOTE]
-> **SoulSync is in early development.** So far it has only been tested in the early game of Pokémon Black 2, by two players on Windows with DeSmuME. Black, White and White 2 should work the same way but have not been tested, nor has playing alone. Expect rough edges, and please [report what breaks](https://github.com/hildlabs/SoulSync/issues).
+> **SoulSync is young.** It has been played on Windows with DeSmuME, solo and with friends, mostly with German copies of Black 2 and White 2. Other languages and Black/White should work but have seen little or no testing. Expect rough edges, and please [report what breaks](https://github.com/hildlabs/SoulSync/issues).
 
 ## What it does
 
@@ -34,7 +34,8 @@ In a Soul Link, two or more players play the same game side by side. The first P
 - **Solo or with up to three friends.** Play a classic Nuzlocke on your own, or a Soul Link with two to four players. Everyone sees all teams, the shared activity feed and who is in battle right now.
 - **Rules that watch themselves.** Level caps read from the gym leaders in your ROM, shared fate, "together or not at all", failed catches. SoulSync points out when a team breaks one; it never stops you from playing.
 - **Catch odds in battle.** The wild Pokémon's HP, status and the Poké Balls in your bag give the chance to catch it, before you throw.
-- **Made for randomizers.** Moves, abilities and learnsets come from each player's own ROM, so a randomized game shows what is really in it. A new attempt rerolls the ROM and restarts the save in one click.
+- **A randomizer built in.** SoulSync randomizes your original ROM itself, with every option of Universal Pokémon Randomizer ZX for Black 2 and White 2, preset for Soul Link. Nothing else to download, no Java. A new attempt rerolls the game and starts a fresh save in one click, with Rare Candies in the bag if you like.
+- **Made for randomized games.** Moves, abilities and learnsets come from each player's own ROM, so the dashboard shows what is really in it.
 - **Runs that last.** Pause a run, switch to another and come back later. Every attempt keeps its real time played, and once it ends, won or lost, it goes to an archive with its badges and final teams.
 - **English and German**, light and dark.
 
@@ -56,9 +57,12 @@ In a Soul Link, two or more players play the same game side by side. The first P
 You need Windows (or a Mac, see [SoulSync on a Mac](docs/mac.md)), [DeSmuME](https://desmume.org) and your own copy of a generation 5 game (Black, White, Black 2 or White 2). SoulSync does not include or download games.
 
 1. **Download** `SoulSync.exe` from the [latest release](https://github.com/hildlabs/SoulSync/releases/latest) and start it. It opens in its own window; new versions are offered in the top bar and install with one click.
-2. **Set up once:** enter your name and pick your ROM and your save. For DeSmuME the save is the `.dsv` in its `Battery` folder; SoulSync finds it next to the ROM if it can.
-3. **Start a run:** choose how many players it has and your rules, then send the run code to your friends. They choose *Join* and enter it.
-4. **Play.** When SoulSync finds DeSmuME next to your save, it sets up the Lua script to start with your game by itself (restart DeSmuME once afterwards). *Settings › Live from DeSmuME* shows whether that worked.
+2. **Start or join a run.** Enter your name, then choose *Start run* (pick the number of players and your rules) or *Join run* with the code a friend sent you.
+3. **Pick your game.** With *Make a new game*, choose your original ROM and your DeSmuME `.exe`: SoulSync randomizes the ROM with the run's settings and opens it in DeSmuME with a new save. With *Game I already have*, choose the ROM and its `.dsv` from DeSmuME's `Battery` folder.
+4. **Play.** SoulSync sets up its Lua script to start with your game by itself. *Settings › Live from DeSmuME* shows whether that worked.
+
+> [!TIP]
+> **Windows may warn you on the first start.** The app is not code-signed yet, so SmartScreen shows *"Windows protected your PC"*. Choose *More info › Run anyway*. The exe is built from this repository by [GitHub Actions](https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml) for every release.
 
 The app plays on the public SoulSync server out of the box, so sharing the code is all it takes. Your ROM and your save never leave your computer; the server only receives what the dashboard shows.
 
@@ -90,10 +94,12 @@ SoulSync reads the game **from the outside**, through the save file and the emul
 
 Next up, roughly in this order:
 
-- [ ] Starting a randomized run without bringing your own randomizer
-- [ ] A smoother first start and a signed Windows build
-- [ ] An OBS overlay for streamers
-- [ ] More games and emulators
+- [x] Live tracking from DeSmuME, solo or with up to four players
+- [x] A built-in randomizer and one-click new attempts
+- [ ] A signed Windows build
+- [ ] An OBS overlay and a viewer link for streamers
+- [ ] More languages tested, Black and White checked end to end
+- [ ] More games (Platinum, HeartGold/SoulSilver) and emulators (melonDS, BizHawk)
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the bigger picture. Ideas and bug reports are welcome in the [issues](https://github.com/hildlabs/SoulSync/issues).
 
@@ -185,7 +191,7 @@ cargo test
 cargo run -p soulsync-server   # then open http://localhost:3000/demo
 ```
 
-The demo plays a scripted run, so you can work on the dashboard without a game. Please keep game assets out of the repository: no ROMs, saves, RAM dumps or sprites.
+The demo plays a scripted run, so you can work on the dashboard without a game. Please keep game assets out of the repository: no ROMs, saves, RAM dumps or sprites. [CONTRIBUTING.md](CONTRIBUTING.md) has the details and good places to start.
 
 | Crate | Purpose |
 | --- | --- |
@@ -196,6 +202,12 @@ The demo plays a scripted run, so you can work on the dashboard without a game. 
 | [`soulsync-cli`](crates/soulsync-cli) | The `soulsync` command-line tool |
 
 **Releasing:** every push to `main` publishes a preview build (a GitHub pre-release `build-<n>`). To release a version, open *Actions › CI › Run workflow* on `main` and enter the version, such as `0.1.0`: it builds `main`, publishes it as *SoulSync 0.1.0* and tags the commit `v0.1.0`. Apps on the default channel only update to such releases.
+
+## Credits
+
+- The built-in randomizer is a Rust port of [Universal Pokémon Randomizer ZX](https://github.com/Ajarmar/universal-pokemon-randomizer-zx) 4.6.1 by Ajarmar, based on the Universal Pokémon Randomizer by Dabomstew and its contributors (GPL-3.0). It follows the original step by step, so the same settings and seed give a byte-identical ROM, and every option was checked against it. Its ROM offsets, tables and name lists come from that project too. Where SoulSync cannot randomize a game itself, it downloads and runs the original.
+- DeSmuME on Windows gets [Lua 5.1](https://www.lua.org) (MIT) next to it, see [crates/soulsync-app/lua51](crates/soulsync-app/lua51).
+- Sprites in the dashboard are loaded at runtime from [PokeAPI/sprites](https://github.com/PokeAPI/sprites).
 
 ## Legal
 
