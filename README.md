@@ -6,9 +6,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hildlabs/SoulSync/releases/latest"><img src="docs/readme/btn-download.svg" height="44" alt="Download for Windows"></a>&nbsp;
-  <a href="#getting-started"><img src="docs/readme/btn-start.svg" height="44" alt="Getting started"></a>&nbsp;
-  <a href="https://github.com/hildlabs/SoulSync/issues"><img src="docs/readme/btn-bug.svg" height="44" alt="Report a problem"></a>
+  <a href="https://github.com/hildlabs/SoulSync/releases/latest"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/btn-download-dark.svg"><img src="docs/readme/btn-download-light.svg" height="44" alt="Download for Windows"></picture></a>&nbsp;
+  <a href="#getting-started"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/btn-start-dark.svg"><img src="docs/readme/btn-start-light.svg" height="44" alt="Getting started"></picture></a>&nbsp;
+  <a href="https://github.com/hildlabs/SoulSync/issues"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/btn-bug-dark.svg"><img src="docs/readme/btn-bug-light.svg" height="44" alt="Report a problem"></picture></a>
 </p>
 
 <p align="center">
