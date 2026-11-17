@@ -35,8 +35,8 @@ const ident = () => {
 };
 
 
-async function open(browser, colorScheme) {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, colorScheme });
+async function open(browser, colorScheme, height = 900) {
+  const page = await browser.newPage({ viewport: { width: 1440, height }, deviceScaleFactor: 2, colorScheme });
   await page.addInitScript(ident);
   await page.goto(URL);
   return page;
@@ -51,13 +51,18 @@ function save(png, name) {
   const tmp = name => path.join(require("os").tmpdir(), `soulsync-${name}.png`);
   const shot = async (page, name) => { await page.screenshot({ path: tmp(name) }); save(tmp(name), name); };
 
+  // The demo's scripted battle, both players at once: a taller window so
+  // both cards with their catch chance fit.
+  const fight = await open(browser, "light", 1180);
+  await fight.locator(".wild2").first().waitFor({ timeout: 60000 });
+  await fight.waitForTimeout(2900);
+  await shot(fight, "battle");
+  await fight.close();
+
   const page = await open(browser, "light");
-  // The demo's scripted battle: wait for the wild Pokémon to show.
-  await page.locator(".wild2").waitFor({ timeout: 60000 });
-  await page.waitForTimeout(3000);
-  await shot(page, "battle");
+  await page.locator(".wild2").first().waitFor({ timeout: 60000 });
   // The end of the script: every link made, one lost.
-  await page.waitForTimeout(40000);
+  await page.waitForTimeout(43000);
   await shot(page, "overview");
   for (const [tab, name] of [["Team", "team"], ["Encounters", "encounters"]]) {
     await page.getByRole("button", { name: tab }).first().click();
