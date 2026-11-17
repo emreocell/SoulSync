@@ -1,10 +1,11 @@
-// Takes the README screenshots from the dashboard's demo, with original
-// placeholder figures in place of game sprites.
+// Takes the README screenshots from the dashboard's demo. Sprites come from
+// the server's sprite source, as in the app.
 //
 //   cargo run -p soulsync-server &
 //   node docs/screenshots/take.js        # needs Playwright and ImageMagick
 //
-// Set SOULSYNC_URL if the server is not on http://localhost:3000.
+// Set SOULSYNC_URL if the server is not on http://localhost:3000, and
+// SOULSYNC_PLACEHOLDERS=1 to draw original placeholder figures instead.
 const { chromium } = require("playwright");
 const { execFileSync } = require("child_process");
 const path = require("path");
@@ -37,7 +38,7 @@ const ident = () => {
 
 async function open(browser, colorScheme, height = 900) {
   const page = await browser.newPage({ viewport: { width: 1440, height }, deviceScaleFactor: 2, colorScheme });
-  await page.addInitScript(ident);
+  if (process.env.SOULSYNC_PLACEHOLDERS) await page.addInitScript(ident);
   await page.goto(URL);
   return page;
 }
