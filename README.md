@@ -1,35 +1,101 @@
-<p align="center"><img src="assets/soulsync-icon.svg" width="88" height="88" alt=""></p>
-
-<h1 align="center">SoulSync</h1>
-
 <p align="center">
-  <b>A live tracker for Pokémon Soul Link and Nuzlocke runs, fed straight from your emulator.</b><br>
-  No spreadsheets, no manual bookkeeping. Play, and everyone sees the run as it happens.
+  <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/header.svg">
+  <img src="docs/readme/header-light.svg" width="100%" alt="SoulSync: a live tracker for Pokémon Soul Link and Nuzlocke runs. Play your run, everyone sees it live. Reads Pokémon Black 2 and White 2 straight from DeSmuME, solo or with up to four players.">
+</picture>
 </p>
 
 <p align="center">
-  <a href="https://github.com/hildlabs/SoulSync/releases/latest"><img src="https://img.shields.io/github/v/release/hildlabs/SoulSync?label=download&color=e8590c" alt="Latest release"></a>
+  <a href="https://github.com/hildlabs/SoulSync/releases/latest"><img src="docs/readme/btn-download.svg" height="44" alt="Download for Windows"></a>&nbsp;
+  <a href="#getting-started"><img src="docs/readme/btn-start.svg" height="44" alt="Getting started"></a>&nbsp;
+  <a href="https://github.com/hildlabs/SoulSync/issues"><img src="docs/readme/btn-bug.svg" height="44" alt="Report a problem"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/hildlabs/SoulSync/releases/latest"><img src="https://img.shields.io/github/v/release/hildlabs/SoulSync?label=version&color=ff8d4d" alt="Latest release"></a>
   <a href="https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hildlabs/SoulSync/ci.yml?branch=main&label=build" alt="Build status"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-1c7ed6" alt="License: GPL-3.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-56c2f0" alt="License: GPL-3.0"></a>
+</p>
+
+**SoulSync keeps track of your Nuzlocke or Soul Link run for you, live from the emulator.** You play Pokémon Black 2 or White 2 in DeSmuME as usual. SoulSync reads the game while you play and keeps the run up to date for everyone in it: catches, faints, links, badges and the rules. No spreadsheets, no bookkeeping in Discord.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/soulsync.gif">
+    <img src="docs/screenshots/soulsync-light.gif" width="100%" alt="SoulSync in 20 seconds: a catch in DeSmuME shows up for the partner, both players' catch chance in a wild battle, a lost link, and a new randomized attempt in one click">
+  </picture>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/soulsync.gif" alt="SoulSync in 20 seconds: a catch in DeSmuME shows up for the partner, both players' catch chance in a wild battle, a lost link, and a new randomized attempt in one click" width="900">
+  <a href="#what-you-need"><b>What you need</b></a> ·
+  <a href="#getting-started"><b>Getting started</b></a> ·
+  <a href="#features"><b>Features</b></a> ·
+  <a href="#how-it-works"><b>How it works</b></a> ·
+  <a href="#faq"><b>FAQ</b></a>
 </p>
+
+### New to Soul Links?
+
+A **Nuzlocke** is a challenge run with two core rules: you may only catch the first Pokémon you meet on each route, and a Pokémon that faints is gone for good. In a **Soul Link**, two or more friends play a Nuzlocke side by side. The catches they make on the same route are linked, and if one of them faints, its partners are lost too. Keeping all of that straight by hand gets tedious fast. SoulSync does it for you, solo or with up to four players.
 
 > [!NOTE]
 > **SoulSync is young.** It has been played on Windows with DeSmuME, solo and with friends, mostly with German copies of Black 2 and White 2. Other languages and Black/White should work but have seen little or no testing. Expect rough edges, and please [report what breaks](https://github.com/hildlabs/SoulSync/issues).
 
-## What it does
+## What you need
 
-In a Soul Link, two or more players play the same game side by side. The first Pokémon each of them catches on a route is linked to the others', and if one faints, its partners are lost too. Keeping track of that by hand gets tedious fast. SoulSync does it for you:
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/needs.svg">
+  <img src="docs/readme/needs-light.svg" width="100%" alt="What you need: a Windows PC, DeSmuME, and your own copy of Pokémon Black 2 or White 2">
+</picture>
+
+- **A PC with Windows 10 or 11.** On a Mac, SoulSync runs DeSmuME through Wine, see [SoulSync on a Mac](docs/mac.md).
+- **[DeSmuME](https://desmume.org)**, the free Nintendo DS emulator (Windows build). Its Lua scripting is what lets SoulSync follow the game live.
+- **Your own copy of Pokémon Black 2 or White 2** as a ROM file. Black and White work too, with less testing so far. SoulSync does not include or download games.
+
+That's all: no account, and for Black 2 and White 2 no Java or separate randomizer either. Everyone in a Soul Link needs the same three things on their own PC.
+
+## Getting started
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/steps.svg">
+  <img src="docs/readme/steps-light.svg" width="100%" alt="Four steps: download SoulSync, start or join a run, pick your game, play">
+</picture>
+
+1. **Download** `SoulSync.exe` from the [latest release](https://github.com/hildlabs/SoulSync/releases/latest) and start it. It opens in its own window; new versions are offered in the top bar and install with one click.
+2. **Start or join a run.** Enter your name, then choose *Start run* (pick the number of players and your rules) or *Join run* with the code a friend sent you.
+3. **Pick your game.**
+   - *Make a new game*: choose your original ROM and your DeSmuME `.exe`. SoulSync randomizes the ROM with the run's settings and opens it in DeSmuME with a new save.
+   - *Game I already have*: choose the ROM and its `.dsv` save from DeSmuME's `Battery` folder.
+4. **Play.** SoulSync sets up its Lua script to start with your game. *Settings › Live from DeSmuME* shows whether it is connected.
+
+> [!TIP]
+> **Windows may warn you on the first start.** The app is not code-signed yet, so SmartScreen shows *"Windows protected your PC"*. Choose *More info › Run anyway*. The exe is built from this repository by [GitHub Actions](https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml) for every release.
+
+The app plays on the public SoulSync server out of the box, so sharing the run code is all it takes. Your ROM and your save never leave your computer; the server only receives what the dashboard shows.
+
+<details>
+<summary><b>Tips and troubleshooting</b></summary>
+<br>
+
+- **The Lua script does not start by itself?** Load it by hand in DeSmuME: *Tools › Lua Scripting › New Lua Script Window*, choose the file shown under *Settings › Live from DeSmuME* and press *Run*.
+- **A catch that went straight to a PC box** shows as not caught until you save in-game, because the boxes arrive with your next save.
+- **An encounter recorded by mistake** can be removed under *Encounters* with *Remove* next to your entry.
+- **Your starter fainted in the first rival fight?** The run begins with your first catch, so that link is not lost.
+- **Windows 10:** the window uses Microsoft's WebView2 runtime, which most computers already have. Without it, SoulSync opens in your browser instead.
+- **Found a bug?** *Settings › Report a problem* puts the logs that help into one zip file. Nothing is sent anywhere; attach it to an [issue](https://github.com/hildlabs/SoulSync/issues).
+- The script only trusts a party that has your own trainer behind it in memory, so an opponent's team is never mistaken for yours.
+- Under *Server* you can enter your own server, or leave it empty to keep the run on your computer. Under *Settings › Run › Updates* you can get preview builds, made from every change.
+
+</details>
+
+## Features
 
 - **Live from the emulator.** A small Lua script inside DeSmuME reads your party, the wild Pokémon you face and your bag while you play. Catches, faints and level-ups show up within a second or two, for everyone in the run.
 - **Links and encounters, automatic.** The first encounter of every location is recorded for each player and paired up. A Pokémon you fail to catch closes the location for the whole group.
 - **Solo or with up to three friends.** Play a classic Nuzlocke on your own, or a Soul Link with two to four players. Everyone sees all teams, the shared activity feed and who is in battle right now.
 - **Rules that watch themselves.** Level caps read from the gym leaders in your ROM, shared fate, "together or not at all", failed catches. SoulSync points out when a team breaks one; it never stops you from playing.
 - **Catch odds in battle.** The wild Pokémon's HP, status and the Poké Balls in your bag give the chance to catch it, before you throw.
-- **A randomizer built in.** SoulSync randomizes your original ROM itself, with every option of Universal Pokémon Randomizer ZX for Black 2 and White 2, preset for Soul Link. Nothing else to download, no Java. A new attempt rerolls the game and starts a fresh save in one click, with Rare Candies in the bag if you like.
+- **A randomizer built in.** SoulSync randomizes your original ROM itself, with every option of Universal Pokémon Randomizer ZX for Black 2 and White 2, preset for Soul Link. A new attempt rerolls the game and starts a fresh save in one click, with Rare Candies in the bag if you like.
 - **Made for randomized games.** Moves, abilities and learnsets come from each player's own ROM, so the dashboard shows what is really in it.
 - **Runs that last.** Pause a run, switch to another and come back later. Every attempt keeps its real time played, and once it ends, won or lost, it goes to an archive with its badges and final teams.
 - **English and German**, light and dark.
@@ -37,17 +103,15 @@ In a Soul Link, two or more players play the same game side by side. The first P
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/overview-dark.webp">
-    <img src="docs/screenshots/overview.webp" alt="The SoulSync dashboard: two players' linked Pokémon side by side, with badges, level cap and a rule warning" width="900">
+    <img src="docs/screenshots/overview.webp" width="100%" alt="The SoulSync dashboard: two players' linked Pokémon side by side, with badges, level cap and a rule warning">
   </picture>
 </p>
 
-<p align="center"><sub>The dashboard in its demo mode.</sub></p>
-
 <table>
   <tr>
-    <td width="33%"><img src="docs/screenshots/battle.webp" alt="Both players in a wild battle, each with the wild Pokémon's HP, status and catch chance"></td>
-    <td width="33%"><img src="docs/screenshots/team.webp" alt="The team view: every linked pair side by side"></td>
-    <td width="33%"><img src="docs/screenshots/encounters.webp" alt="The encounter list: one row per location, with each player's catch and its status"></td>
+    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/battle-dark.webp"><img src="docs/screenshots/battle.webp" alt="Both players in a wild battle, each with the wild Pokémon's HP, status and catch chance"></picture></td>
+    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/team-dark.webp"><img src="docs/screenshots/team.webp" alt="The team view: every linked pair side by side"></picture></td>
+    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/encounters-dark.webp"><img src="docs/screenshots/encounters.webp" alt="The encounter list: one row per location, with each player's catch and its status"></picture></td>
   </tr>
   <tr>
     <td align="center"><sub>Everyone's catch chance, live in battle</sub></td>
@@ -56,43 +120,52 @@ In a Soul Link, two or more players play the same game side by side. The first P
   </tr>
 </table>
 
-## Getting started
-
-You need Windows (or a Mac, see [SoulSync on a Mac](docs/mac.md)), [DeSmuME](https://desmume.org) and your own copy of a generation 5 game (Black, White, Black 2 or White 2). SoulSync does not include or download games.
-
-1. **Download** `SoulSync.exe` from the [latest release](https://github.com/hildlabs/SoulSync/releases/latest) and start it. It opens in its own window; new versions are offered in the top bar and install with one click.
-2. **Start or join a run.** Enter your name, then choose *Start run* (pick the number of players and your rules) or *Join run* with the code a friend sent you.
-3. **Pick your game.** With *Make a new game*, choose your original ROM and your DeSmuME `.exe`: SoulSync randomizes the ROM with the run's settings and opens it in DeSmuME with a new save. With *Game I already have*, choose the ROM and its `.dsv` from DeSmuME's `Battery` folder.
-4. **Play.** SoulSync sets up its Lua script to start with your game by itself. *Settings › Live from DeSmuME* shows whether that worked.
-
-> [!TIP]
-> **Windows may warn you on the first start.** The app is not code-signed yet, so SmartScreen shows *"Windows protected your PC"*. Choose *More info › Run anyway*. The exe is built from this repository by [GitHub Actions](https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml) for every release.
-
-The app plays on the public SoulSync server out of the box, so sharing the code is all it takes. Your ROM and your save never leave your computer; the server only receives what the dashboard shows.
-
-<details>
-<summary><b>More about the app</b></summary>
-
-- If the Lua script does not start by itself, load it by hand in DeSmuME: *Tools › Lua Scripting › New Lua Script Window*, choose the file shown under *Settings › Live from DeSmuME* and press *Run*.
-- The script only trusts a party that has your own trainer behind it in memory, so an opponent's team is never mistaken for yours.
-- What happens in the PC boxes arrives with your next in-game save, so a catch that went straight to a box shows as not caught until you save.
-- An encounter recorded by mistake can be removed under *Encounters* with *Remove* next to your entry.
-- The run begins with your first catch: if your starter faints before it, as in the first fight against your rival, the link is not lost.
-- Under *Server* you can enter your own server instead, or leave it empty to keep the run on your computer.
-- Under *Settings › Run › Updates* you can also get preview builds, made from every change and not yet released.
-- The window uses the web view that comes with Windows 11. On Windows 10 it needs Microsoft's WebView2 runtime, which most computers already have; without it SoulSync opens in your browser instead.
-- *Settings › Report a problem* puts the logs that help find a bug into one zip file. Nothing is sent anywhere.
-
-</details>
-
 ## How it works
 
-```
-DeSmuME + Lua script ──▶ SoulSync app ──▶ run server ──▶ every player's dashboard
-   (party, battle, bag)     (save file, ROM data)   (WebSocket)
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/flow.svg">
+  <img src="docs/readme/flow-light.svg" width="100%" alt="How it works: DeSmuME with a Lua script, the SoulSync app on your PC, the run server, and every player's dashboard">
+</picture>
 
-SoulSync reads the game **from the outside**, through the save file and the emulator's memory, instead of modifying or bundling an emulator. The app turns what it reads into a snapshot and sends it to the run server, which pairs up encounters, applies the rules and pushes the new state to everyone in the run. The dashboard is a web page served by the run server, so anyone with the link can watch along in a browser.
+SoulSync reads the game **from the outside**, through the save file and the emulator's memory, instead of modifying or bundling an emulator. The app turns what it reads into a snapshot and sends it to the run server, which pairs up encounters, applies the rules and pushes the new state to everyone in the run over WebSocket. The dashboard is a web page served by the run server, so anyone with the link can watch along in a browser.
+
+## FAQ
+
+<details>
+<summary><b>Does SoulSync come with the game?</b></summary>
+<br>
+No. SoulSync does not include, download or link to games. Every player uses a ROM of their own copy of the game.
+</details>
+
+<details>
+<summary><b>Which games and languages work?</b></summary>
+<br>
+The generation 5 games: Pokémon Black 2 and White 2, and Black and White. Black 2 and White 2 in German have been played the most; other languages and Black/White should work but have seen less testing. More games are on the <a href="#roadmap">roadmap</a>.
+</details>
+
+<details>
+<summary><b>Do I have to play randomized?</b></summary>
+<br>
+No. With <i>Game I already have</i> you play whichever ROM and save you choose, randomized or not. The built-in randomizer is there for when you want it.
+</details>
+
+<details>
+<summary><b>Can friends watch without playing?</b></summary>
+<br>
+Yes. The dashboard is a web page on the run server, so anyone with the link can follow the run in a browser.
+</details>
+
+<details>
+<summary><b>Does it work with melonDS, mGBA or a real DS?</b></summary>
+<br>
+Not yet. Live tracking needs DeSmuME's Lua scripting. Other emulators are on the <a href="#roadmap">roadmap</a>. On a Mac without Wine you can play in any emulator and pick its save; the dashboard then only updates when you save in-game.
+</details>
+
+<details>
+<summary><b>Is it safe to run?</b></summary>
+<br>
+SoulSync is open source, and every release is built from this repository by GitHub Actions. It is not code-signed yet, which is why Windows warns on the first start. Your ROM and save stay on your PC.
+</details>
 
 ## Roadmap
 
@@ -197,6 +270,10 @@ cargo run -p soulsync-server   # then open http://localhost:3000/demo
 
 The demo plays a scripted run, so you can work on the dashboard without a game. Please keep game assets out of the repository: no ROMs, saves, RAM dumps or sprites. [CONTRIBUTING.md](CONTRIBUTING.md) has the details and good places to start.
 
+<details>
+<summary><b>Crates and releasing</b></summary>
+<br>
+
 | Crate | Purpose |
 | --- | --- |
 | [`soulsync-core`](crates/soulsync-core) | Generation 5 data model: PK5 encryption, save parsing, ROM data, species, types and locations, events, Soul Link pairs, sync protocol |
@@ -206,6 +283,8 @@ The demo plays a scripted run, so you can work on the dashboard without a game. 
 | [`soulsync-cli`](crates/soulsync-cli) | The `soulsync` command-line tool |
 
 **Releasing:** every push to `main` publishes a preview build (a GitHub pre-release `build-<n>`). To release a version, open *Actions › CI › Run workflow* on `main` and enter the version, such as `0.1.0`: it builds `main`, publishes it as *SoulSync 0.1.0* and tags the commit `v0.1.0`. Apps on the default channel only update to such releases.
+
+</details>
 
 ## Credits
 
