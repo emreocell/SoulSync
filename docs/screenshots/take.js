@@ -71,6 +71,23 @@ function save(png, name) {
     await shot(page, name);
   }
 
+  // The same moments in the dark theme.
+  const darkFight = await open(browser, "dark", 1180);
+  await darkFight.locator(".wild2").first().waitFor({ timeout: 60000 });
+  await darkFight.waitForTimeout(2900);
+  await shot(darkFight, "battle-dark");
+  await darkFight.close();
+
+  const darkTabs = await open(browser, "dark");
+  await darkTabs.locator(".wild2").first().waitFor({ timeout: 60000 });
+  await darkTabs.waitForTimeout(43000);
+  for (const [tab, name] of [["Team", "team-dark"], ["Encounters", "encounters-dark"]]) {
+    await darkTabs.getByRole("button", { name: tab }).first().click();
+    await darkTabs.waitForTimeout(3000);
+    await shot(darkTabs, name);
+  }
+  await darkTabs.close();
+
   const dark = await open(browser, "dark");
   await dark.waitForTimeout(64000);
   await shot(dark, "overview-dark");
