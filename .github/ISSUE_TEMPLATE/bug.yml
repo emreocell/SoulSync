@@ -1,0 +1,39 @@
+name: Bug report
+description: Something does not work or shows the wrong thing
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting! Please never attach or link a ROM.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SoulSync version
+      description: Shown in the top bar of the app.
+      placeholder: 0.3.5
+  - type: dropdown
+    id: game
+    attributes:
+      label: Game
+      options: [Black 2, White 2, Black, White]
+  - type: input
+    id: language
+    attributes:
+      label: Game language
+      placeholder: English, German, French…
+  - type: dropdown
+    id: players
+    attributes:
+      label: Players in the run
+      options: [Solo, "2", "3", "4"]
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "Settings › Report a problem makes a zip with the logs. Drag it here."
