@@ -68,14 +68,14 @@ jobs:
           if-no-files-found: error
       # Offered only to players who chose preview builds in the app.
       # Checksum for the release notes, so anyone can check the download.
-      # With a VT_API_KEY secret (a free VirusTotal key), releases also send
+      # With a VIRUSTOTAL secret (a free VirusTotal API key), releases also send
       # the exe to VirusTotal and link the scan; without it this is skipped.
       - name: Checksum and virus scan
         id: sum
         if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         shell: bash
         env:
-          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+          VT_API_KEY: ${{ secrets.VIRUSTOTAL || secrets.VT_API_KEY }}
         run: |
           sha=$(sha256sum target/release/SoulSync.exe | cut -d' ' -f1)
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
