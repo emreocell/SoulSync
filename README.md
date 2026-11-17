@@ -15,7 +15,7 @@
 
 <p align="center"><img src="docs/screenshots/demo.gif" alt="A demo run filling up live: catches on both sides are linked by route, levels and badges update as they happen" width="900"></p>
 
-<p align="center"><sub>The dashboard's demo mode, sped up. The figures are placeholder art, see <a href="#legal">Legal</a>.</sub></p>
+<p align="center"><sub>The dashboard's demo mode. The figures are placeholder art, see <a href="#legal">Legal</a>.</sub></p>
 
 > [!NOTE]
 > **SoulSync is young.** It has been played on Windows with DeSmuME, solo and with friends, mostly with German copies of Black 2 and White 2. Other languages and Black/White should work but have seen little or no testing. Expect rough edges, and please [report what breaks](https://github.com/hildlabs/SoulSync/issues).
