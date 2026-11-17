@@ -14,13 +14,8 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/overview-dark.webp">
-    <img src="docs/screenshots/overview.webp" alt="The SoulSync dashboard: two players' linked Pokémon side by side, with badges, level cap and a rule warning" width="900">
-  </picture>
+  <img src="docs/screenshots/soulsync.gif" alt="SoulSync in 20 seconds: a catch in DeSmuME shows up for the partner, both players' catch chance in a wild battle, a lost link, and a new randomized attempt in one click" width="900">
 </p>
-
-<p align="center"><sub>The dashboard in its demo mode. The figures are placeholder art, see <a href="#legal">Legal</a>.</sub></p>
 
 > [!NOTE]
 > **SoulSync is young.** It has been played on Windows with DeSmuME, solo and with friends, mostly with German copies of Black 2 and White 2. Other languages and Black/White should work but have seen little or no testing. Expect rough edges, and please [report what breaks](https://github.com/hildlabs/SoulSync/issues).
@@ -38,6 +33,15 @@ In a Soul Link, two or more players play the same game side by side. The first P
 - **Made for randomized games.** Moves, abilities and learnsets come from each player's own ROM, so the dashboard shows what is really in it.
 - **Runs that last.** Pause a run, switch to another and come back later. Every attempt keeps its real time played, and once it ends, won or lost, it goes to an archive with its badges and final teams.
 - **English and German**, light and dark.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/overview-dark.webp">
+    <img src="docs/screenshots/overview.webp" alt="The SoulSync dashboard: two players' linked Pokémon side by side, with badges, level cap and a rule warning" width="900">
+  </picture>
+</p>
+
+<p align="center"><sub>The dashboard in its demo mode.</sub></p>
 
 <table>
   <tr>
@@ -215,4 +219,4 @@ SoulSync is licensed under [GPL-3.0-or-later](LICENSE).
 
 SoulSync is an unofficial fan project and is not affiliated with or endorsed by Nintendo, Creatures or GAME FREAK. Pokémon and its names are trademarks of Nintendo, Creatures and GAME FREAK.
 
-The repository contains no game data or graphics. SoulSync does not include or distribute ROMs; every player uses their own. Sprites are loaded at runtime from a public source while you play and can be turned off with `SOULSYNC_SPRITES=off` on the server. The screenshots in this README use original placeholder figures in their place.
+The repository contains no game data and no sprite files. SoulSync does not include or distribute ROMs; every player uses their own. Sprites are loaded at runtime from a public source while you play and can be turned off with `SOULSYNC_SPRITES=off` on the server. The screenshots and the animation in this README show those sprites as they appear in the app.
