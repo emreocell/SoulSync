@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hildlabs/SoulSync/releases/latest"><img src="https://img.shields.io/github/v/release/hildlabs/SoulSync?label=version&color=ff8d4d" alt="Latest release"></a>
+  <a href="https://github.com/hildlabs/SoulSync/releases/latest"><img src="https://img.shields.io/github/v/tag/hildlabs/SoulSync?filter=v*&label=version&color=ff8d4d" alt="Latest release"></a>
   <a href="https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hildlabs/SoulSync/ci.yml?branch=main&label=build" alt="Build status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-56c2f0" alt="License: GPL-3.0"></a>
 </p>
