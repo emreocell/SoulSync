@@ -69,7 +69,7 @@ That's all: no account, and for Black 2 and White 2 no Java or separate randomiz
 4. **Play.** SoulSync sets up its Lua script to start with your game. *Settings › Live from DeSmuME* shows whether it is connected.
 
 > [!TIP]
-> **Windows may warn you on the first start.** The app is not code-signed yet, so SmartScreen shows *"Windows protected your PC"*. Choose *More info › Run anyway*. The exe is built from this repository by [GitHub Actions](https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml) for every release.
+> **Windows may warn you on the first start.** The app is not code-signed yet, so SmartScreen shows *"Windows protected your PC"*. Choose *More info › Run anyway*. SoulSync is open source, and the exe is built from this repository by [GitHub Actions](https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml), not on someone's PC. Every release lists the exe's SHA-256 checksum so you can check your download.
 
 The app plays on the public SoulSync server out of the box, so sharing the run code is all it takes. Your ROM and your save never leave your computer; the server only receives what the dashboard shows.
 
@@ -164,7 +164,7 @@ Not yet. Live tracking needs DeSmuME's Lua scripting. Other emulators are on the
 <details>
 <summary><b>Is it safe to run?</b></summary>
 <br>
-SoulSync is open source, and every release is built from this repository by GitHub Actions. It is not code-signed yet, which is why Windows warns on the first start. Your ROM and save stay on your PC.
+SoulSync is open source, and every release is built from this repository by GitHub Actions; the release notes link the build and list the exe's SHA-256 checksum. It is not code-signed yet, which is why Windows SmartScreen warns on the first start: choose *More info › Run anyway*. A signed build is on the roadmap. Your ROM and save stay on your PC, and nothing is sent anywhere except what the dashboard shows to the run server.
 </details>
 
 ## Roadmap
@@ -222,6 +222,12 @@ A build of the app made with `SOULSYNC_SERVER=https://…` starts out with that 
 
 <details>
 <summary><b>Tracking a run and reading saves without the app</b></summary>
+
+The command-line tools are not in the releases; build them with [Rust](https://rustup.rs):
+
+```sh
+cargo install --git https://github.com/hildlabs/SoulSync soulsync-cli soulsync-server
+```
 
 ```sh
 # 1. Start a server (or use one someone else runs)

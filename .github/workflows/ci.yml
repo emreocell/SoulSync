@@ -67,6 +67,27 @@ jobs:
           path: target/release/SoulSync.exe
           if-no-files-found: error
       # Offered only to players who chose preview builds in the app.
+      # Checksum for the release notes, so anyone can check the download.
+      # With a VT_API_KEY secret (a free VirusTotal key), releases also send
+      # the exe to VirusTotal and link the scan; without it this is skipped.
+      - name: Checksum and virus scan
+        id: sum
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+        shell: bash
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        run: |
+          sha=$(sha256sum target/release/SoulSync.exe | cut -d' ' -f1)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          vt=""
+          if [ -n "$VT_API_KEY" ] && [ "${{ github.event_name }}" = workflow_dispatch ]; then
+            if curl -sSf --max-time 300 -H "x-apikey: $VT_API_KEY" -F "file=@target/release/SoulSync.exe" https://www.virustotal.com/api/v3/files > /dev/null; then
+              vt="https://www.virustotal.com/gui/file/$sha"
+            else
+              echo "::warning::Upload to VirusTotal failed; the release goes out without the link."
+            fi
+          fi
+          echo "vt=$vt" >> "$GITHUB_OUTPUT"
       - name: Publish the build as a pre-release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
@@ -75,7 +96,7 @@ jobs:
         run: >
           gh release create "build-${{ github.run_number }}" target/release/SoulSync.exe
           --target "${{ github.sha }}" --title "Build ${{ github.run_number }}"
-          --notes "Preview build of SoulSync for Windows, built from ${{ github.sha }}. Apps set to preview builds install this by itself."
+          --notes "Preview build of SoulSync for Windows, built from ${{ github.sha }}. Apps set to preview builds install this by itself. SHA-256 of SoulSync.exe: ${{ steps.sum.outputs.sha }}"
           --prerelease
       # The app reads the version from the title, so keep "SoulSync <version>".
       - name: Publish the version
@@ -84,9 +105,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          {
+            echo "SoulSync $SOULSYNC_VERSION for Windows. Download **SoulSync.exe** and start it; later versions install from inside the app. New here? See [Getting started](https://github.com/${{ github.repository }}#getting-started)."
+            echo
+            echo "> [!NOTE]"
+            echo "> The app is not code-signed yet, so Windows SmartScreen warns on the first start (*Windows protected your PC*). Choose **More info › Run anyway**. This exe was built from commit ${{ github.sha }} by [GitHub Actions](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}), from the open source code in this repository."
+            echo
+            echo "**SHA-256** of SoulSync.exe: \`${{ steps.sum.outputs.sha }}\`"
+            if [ -n "${{ steps.sum.outputs.vt }}" ]; then
+              echo
+              echo "**VirusTotal:** ${{ steps.sum.outputs.vt }}"
+            fi
+          } > notes.md
           gh release create "build-${{ github.run_number }}" target/release/SoulSync.exe \
             --target "${{ github.sha }}" --title "SoulSync $SOULSYNC_VERSION" \
-            --notes "SoulSync $SOULSYNC_VERSION for Windows (build ${{ github.run_number }}, ${{ github.sha }}). Download SoulSync.exe and start it; later versions install from inside the app." \
+            --notes-file notes.md \
             --latest
           gh api "repos/${{ github.repository }}/git/refs" -f ref="refs/tags/v$SOULSYNC_VERSION" -f sha="${{ github.sha }}"
 
