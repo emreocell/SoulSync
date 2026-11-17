@@ -13,9 +13,14 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-1c7ed6" alt="License: GPL-3.0"></a>
 </p>
 
-<p align="center"><img src="docs/screenshots/demo.gif" alt="A demo run filling up live: catches on both sides are linked by route, levels and badges update as they happen" width="900"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/overview-dark.webp">
+    <img src="docs/screenshots/overview.webp" alt="The SoulSync dashboard: two players' linked Pokémon side by side, with badges, level cap and a rule warning" width="900">
+  </picture>
+</p>
 
-<p align="center"><sub>The dashboard's demo mode. The figures are placeholder art, see <a href="#legal">Legal</a>.</sub></p>
+<p align="center"><sub>The dashboard in its demo mode. The figures are placeholder art, see <a href="#legal">Legal</a>.</sub></p>
 
 > [!NOTE]
 > **SoulSync is young.** It has been played on Windows with DeSmuME, solo and with friends, mostly with German copies of Black 2 and White 2. Other languages and Black/White should work but have seen little or no testing. Expect rough edges, and please [report what breaks](https://github.com/hildlabs/SoulSync/issues).
@@ -36,12 +41,12 @@ In a Soul Link, two or more players play the same game side by side. The first P
 
 <table>
   <tr>
-    <td width="33%"><img src="docs/screenshots/battle.webp" alt="A player in battle, with the wild Pokémon's HP, status and catch chance"></td>
+    <td width="33%"><img src="docs/screenshots/battle.webp" alt="Both players in a wild battle, each with the wild Pokémon's HP, status and catch chance"></td>
     <td width="33%"><img src="docs/screenshots/team.webp" alt="The team view: every linked pair side by side"></td>
     <td width="33%"><img src="docs/screenshots/encounters.webp" alt="The encounter list: one row per location, with each player's catch and its status"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Catch chance, live in battle</sub></td>
+    <td align="center"><sub>Everyone's catch chance, live in battle</sub></td>
     <td align="center"><sub>Every pair shares its fate</sub></td>
     <td align="center"><sub>One row per location</sub></td>
   </tr>

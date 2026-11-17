@@ -159,7 +159,11 @@ window.SoulSyncDemo = function (apply) {
     [500, () => level(M, 207, 3)], [500, () => hurt(M, 207, .55)], [600, () => level(H, 176, 2)],
     [500, () => level(M, 123, 3)], [700, () => hurt(H, 519, .6)], [600, () => level(H, 375, 3)], [500, () => level(M, 570, 3)],
     [1500, () => badge(H)], [900, () => badge(M)],
-    [1200, () => battle(B, 246, 11, 1)], [1400, () => battle(B, 246, 11, .45)], [1400, () => battle(B, 246, 11, .45, "paralysis")], [1600, () => battle(B, null)],
+    // With a partner, both are in a wild battle at once, each with a catch chance.
+    [1200, () => { battle(B, 246, 11, 1); if (M) battle(H, 479, 10, 1); }],
+    [1400, () => { battle(B, 246, 11, .45); if (M) battle(H, 479, 10, .3); }],
+    [1400, () => { battle(B, 246, 11, .45, "paralysis"); if (M) battle(H, 479, 10, .3, "sleep"); }],
+    [2400, () => { battle(B, null); if (M) battle(H, null); }],
     [1200, () => fight(H, [[610, 9, 1], [519, 8, 1]])], [1600, () => fight(H, [[610, 9, .4], [519, 8, 1]])],
     [1600, () => fight(H, [[610, 9, 0], [519, 8, 1]])], [1800, () => fight(H, null)],
     [1500, () => caught(H, 479, 5, "", 11)],
