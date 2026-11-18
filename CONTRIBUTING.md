@@ -28,12 +28,36 @@ The demo plays a scripted run, so most dashboard work needs no game at all. `/de
 | `crates/soulsync-cli` | The `soulsync` command-line tool |
 | `docs/design.md` | Design rules for the dashboard: tokens, components, motion |
 
+## How it fits together
+
+```
+DeSmuME + soulsync.lua  ──file──▶  desktop app  ──WebSocket──▶  run server  ──▶  dashboard (browser or app window)
+   (reads game memory)            (also reads save + ROM)        (one run, all players)
+```
+
+- `crates/soulsync-app/src/soulsync.lua` runs inside DeSmuME. It copies the party, the player's position and the Pokémon met in battle to a file. The format is described at the top of `crates/soulsync-core/src/live.rs`.
+- The app reads that file, the save and the player's own ROM (names, catch rates, level caps), turns them into a snapshot and sends it to the run server.
+- The server keeps the run, works out links and rule breaks, and pushes the state to every dashboard. Without a server address the app runs the same server locally.
+- The dashboard is one HTML file, `crates/soulsync-server/web/index.html`. `web/demo.js` feeds it a scripted run at `/demo`.
+
 ## Good places to start
 
-- Translations: the dashboard text is in `web/index.html` (English and German so far).
-- Testing other game languages (French, Spanish, Italian, Japanese…) and reporting what does not match.
-- Dashboard polish, following `docs/design.md`.
-- Anything on the [roadmap](docs/ROADMAP.md).
+Look for issues labelled [**good first issue**](https://github.com/hildlabs/SoulSync/labels/good%20first%20issue) or [**help wanted**](https://github.com/hildlabs/SoulSync/labels/help%20wanted). Each one says which files to look at and how to check your change. Many need no copy of the game at all: the demo and the tests are enough.
+
+- **Translations:** dashboard text is in the `T` object in `web/index.html`, command-line text in `crates/soulsync-cli/src/i18n.rs` (English and German so far).
+- **Testing:** play a game or language that has not been tested yet and report what works and what does not. No code needed.
+- **Dashboard polish**, following `docs/design.md`.
+- Anything on the [roadmap](docs/ROADMAP.md). For bigger features, open an issue first so we can agree on the approach before you spend time on it.
+
+## Sending a pull request
+
+1. Fork the repository and create a branch from `main`.
+2. Make your change. Keep a pull request to one topic; small is easier to review.
+3. Run `cargo fmt --all`, `cargo clippy --all-targets -- -D warnings` and `cargo test --all`. CI runs the same three on every pull request.
+4. For dashboard changes, check `/demo` and `/demo?players=1` in light and dark mode, and add a screenshot to the pull request.
+5. Open the pull request and say what you changed and how you checked it. If it fixes an issue, write `Fixes #123`.
+
+Not sure about something? Ask in the issue, open a draft pull request early, or come to the [Discord](https://discord.gg/DKhuhJS8tJ).
 
 ## Rules
 
