@@ -8,7 +8,9 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
-use soulsync_client::{create_run, load, load_played, session, ws_url, End, Live, Update};
+use soulsync_client::{
+    create_run, load, load_played, session, with_key, ws_url, End, Live, Update,
+};
 use soulsync_core::protocol::{RunRandomizer, RunSettings};
 use soulsync_core::{
     read_catch_rates, read_dex, read_level_caps, read_map_locations, read_rom_header, Lang,
@@ -63,6 +65,9 @@ struct Config {
     /// Whether builds of main are offered as updates too, not only
     /// released versions.
     preview: bool,
+    /// This app's secret: the servers it plays on let only this app take
+    /// its seats again and change its runs. Made on first use.
+    key: String,
 }
 
 /// A count of Rare Candies, [`MAX_COUNT`](soulsync_core::bag::MAX_COUNT)
@@ -730,6 +735,9 @@ impl Local {
             "save": c.save.as_deref().map(save_info),
             "server": c.server,
             "code": c.code,
+            // For the dashboard's changes to the run; only this app's own
+            // pages can read it (see `guard`).
+            "key": c.key,
             "runs": c.runs.iter().map(|r| serde_json::json!({
                 "code": r.code,
                 "server": r.server,
@@ -831,12 +839,19 @@ impl Local {
     /// Starts syncing the configured save with the configured run.
     fn start(&self) {
         self.stop();
-        let config = self.inner.lock().unwrap().config.clone();
+        let config = {
+            let mut inner = self.inner.lock().unwrap();
+            if inner.config.key.is_empty() {
+                inner.config.key = soulsync_client::new_key();
+                write_config(&inner.config);
+            }
+            inner.config.clone()
+        };
         let server = self.server_url();
         let (Some(code), Some(save)) = (config.code, config.save) else {
             return;
         };
-        let url = ws_url(&server, &code, &config.name);
+        let url = with_key(ws_url(&server, &code, &config.name), &config.key);
         let mut rom = config
             .rom
             .as_ref()
@@ -1703,7 +1718,11 @@ const DUMP_WAIT: Duration = Duration::from_secs(20);
 async fn report(State(local): State<Local>, Json(req): Json<ReportReq>) -> Reply {
     let dir = data_dir().ok_or_else(|| bad("no settings folder"))?;
     let (info, save, code, out) = {
-        let view = local.view();
+        let mut view = local.view();
+        // Reports get shared; the app's secret stays out of them.
+        if let Some(v) = view.as_object_mut() {
+            v.remove("key");
+        }
         let inner = local.inner.lock().unwrap();
         let info = format!(
             "SoulSync report\nbuild {}\nsystem {} {}\n\n{}\n",

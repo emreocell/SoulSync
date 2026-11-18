@@ -33,6 +33,11 @@ struct Player {
     /// Moves, abilities, items and learnsets of this player's ROM.
     #[serde(default)]
     dex: Option<Box<RomDex>>,
+    /// The secret this player's app sent when it took the seat. Only that
+    /// app can take the seat again, and only the players' apps can change
+    /// the run; the code alone is enough to watch. Never sent to anyone.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    key: Option<String>,
 }
 
 /// One run. Stored as JSON by the server, so fields added later need a
@@ -71,6 +76,8 @@ pub struct Run {
 pub enum JoinError {
     Full,
     BadName,
+    /// The name belongs to another player's app.
+    Taken,
 }
 
 impl std::fmt::Display for JoinError {
@@ -78,8 +85,19 @@ impl std::fmt::Display for JoinError {
         match self {
             JoinError::Full => write!(f, "this run already has all its players"),
             JoinError::BadName => write!(f, "player names must be 1 to 24 characters"),
+            JoinError::Taken => write!(
+                f,
+                "another player already plays under this name in this run; choose another name"
+            ),
         }
     }
+}
+
+/// A key as apps make them: 16 to 128 letters, digits, `-` or `_`.
+fn valid_key(k: &str) -> bool {
+    (16..=128).contains(&k.len())
+        && k.bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
 }
 
 impl Run {
@@ -220,6 +238,18 @@ impl Run {
         from_rom.or_else(|| soulsync_core::dex::species(species).map(|s| s.catch_rate))
     }
 
+    /// Whether `key` may change the run: it belongs to one of its players.
+    /// A run whose players all joined without a key, from apps before keys,
+    /// stays open to anyone with the code.
+    pub fn may_change(&self, key: Option<&str>) -> bool {
+        let mut keys = self
+            .players
+            .iter()
+            .filter_map(|p| p.key.as_deref())
+            .peekable();
+        keys.peek().is_none() || key.is_some_and(|k| keys.any(|own| own == k))
+    }
+
     /// Whether nobody ever sent a save to this run.
     pub fn unplayed(&self) -> bool {
         self.history.is_empty() && self.players.iter().all(|p| p.snapshot.is_none())
@@ -233,13 +263,21 @@ impl Run {
         self.players.iter_mut().find(|p| p.name == name)
     }
 
-    /// Registers a connection for `name`. A known name reconnects to its seat.
-    pub fn join(&mut self, name: &str) -> Result<(), JoinError> {
+    /// Registers a connection for `name`. A known name reconnects to its
+    /// seat if `key` is the one it was taken with. A seat taken without a
+    /// key, by an app from before keys, goes to the first app with one.
+    pub fn join(&mut self, name: &str, key: Option<&str>) -> Result<(), JoinError> {
         let name = name.trim();
         if name.is_empty() || name.chars().count() > 24 || name.chars().any(char::is_control) {
             return Err(JoinError::BadName);
         }
+        let key = key.filter(|k| valid_key(k));
         if let Some(p) = self.player_mut(name) {
+            match (&p.key, key) {
+                (Some(own), Some(k)) if own == k => {}
+                (Some(_), _) => return Err(JoinError::Taken),
+                (None, k) => p.key = k.map(str::to_owned),
+            }
             p.connections += 1;
             return Ok(());
         }
@@ -253,6 +291,7 @@ impl Run {
             updated_at: None,
             met: HashSet::new(),
             dex: None,
+            key: key.map(str::to_owned),
         });
         Ok(())
     }
@@ -415,8 +454,8 @@ mod tests {
     #[test]
     fn each_player_keeps_the_dex_of_their_own_rom() {
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        r.join("Hannes").unwrap();
-        r.join("Alex").unwrap();
+        r.join("Hannes", None).unwrap();
+        r.join("Alex", None).unwrap();
         let dex = RomDex {
             learnsets: vec![vec![(1, 33)]],
             ..RomDex::default()
@@ -433,7 +472,7 @@ mod tests {
     #[test]
     fn an_older_save_after_a_pause_does_not_lose_and_recatch_a_pokemon() {
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        r.join("Alex").unwrap();
+        r.join("Alex", None).unwrap();
         let mut before = snap(20);
         before.boxes.clear();
         r.update("Alex", before.clone(), 0);
@@ -463,7 +502,7 @@ mod tests {
     #[test]
     fn a_blackout_ends_the_attempt() {
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        r.join("Hannes").unwrap();
+        r.join("Hannes", None).unwrap();
         let alone = |hp, stake| {
             let mut s = snap(hp);
             s.boxes.clear();
@@ -489,7 +528,7 @@ mod tests {
     #[test]
     fn restart_counts_attempts() {
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        r.join("Hannes").unwrap();
+        r.join("Hannes", None).unwrap();
         r.update("Hannes", snap(20), 1);
         r.restart(2);
         let s = r.state();
@@ -502,8 +541,8 @@ mod tests {
     fn play_time_leaves_out_breaks_and_attempts_go_into_history() {
         const MIN: u64 = 60 * 1000;
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        r.join("Hannes").unwrap();
-        r.join("Mika").unwrap();
+        r.join("Hannes", None).unwrap();
+        r.join("Mika", None).unwrap();
         r.update("Hannes", snap(20), 1000);
         r.update("Mika", snap(20), 1000 + 2 * MIN);
         r.update("Hannes", snap(19), 1000 + 5 * MIN);
@@ -577,9 +616,9 @@ mod tests {
         };
         let mut r = Run::new("ZORUA-1234".into(), 7, settings);
         for name in ["Hannes", "Buddy", "Third"] {
-            r.join(name).unwrap();
+            r.join(name, None).unwrap();
         }
-        assert_eq!(r.join("Fourth"), Err(JoinError::Full));
+        assert_eq!(r.join("Fourth", None), Err(JoinError::Full));
         let s = r.state();
         assert_eq!(s.seeds.len(), 3);
         assert!(s.seeds[0] != s.seeds[1] && s.seeds[1] != s.seeds[2]);
@@ -593,8 +632,8 @@ mod tests {
         };
         assert!(settings.validate().is_ok());
         let mut r = Run::new("ZORUA-1234".into(), 7, settings);
-        r.join("Hannes").unwrap();
-        assert_eq!(r.join("Buddy"), Err(JoinError::Full));
+        r.join("Hannes", None).unwrap();
+        assert_eq!(r.join("Buddy", None), Err(JoinError::Full));
         r.update("Hannes", snap(20), 1);
         let s = r.state();
         assert_eq!(s.seeds.len(), 1);
@@ -605,13 +644,40 @@ mod tests {
     }
 
     #[test]
+    fn a_seat_and_the_run_belong_to_the_players_apps() {
+        let mut r = Run::new("A-1".into(), 1, RunSettings::default());
+        let (mine, theirs) = ("k-hannes-0123456789", "k-buddy-0123456789ab");
+        assert!(r.may_change(None), "nobody joined yet");
+        r.join("Hannes", Some(mine)).unwrap();
+        assert!(!r.may_change(None));
+        assert!(!r.may_change(Some("guessed-guessed-guessed")));
+        assert!(r.may_change(Some(mine)));
+        // Someone with the code cannot take Hannes' seat.
+        assert_eq!(r.join("Hannes", None), Err(JoinError::Taken));
+        assert_eq!(r.join("Hannes", Some(theirs)), Err(JoinError::Taken));
+        r.join("Hannes", Some(mine)).unwrap();
+        // A seat taken by an app from before keys goes to the first key.
+        r.join("Buddy", None).unwrap();
+        r.join("Buddy", None).unwrap();
+        r.join("Buddy", Some(theirs)).unwrap();
+        assert_eq!(r.join("Buddy", None), Err(JoinError::Taken));
+        assert!(r.may_change(Some(theirs)));
+        // A key that is too short counts as none.
+        let mut old = Run::new("B-2".into(), 1, RunSettings::default());
+        old.join("X", Some("short")).unwrap();
+        assert!(old.may_change(None));
+        // The key never leaves the server.
+        assert!(!serde_json::to_string(&r.state()).unwrap().contains(mine));
+    }
+
+    #[test]
     fn seats_and_reconnects() {
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        assert_eq!(r.join(" "), Err(JoinError::BadName));
-        r.join("Hannes").unwrap();
-        r.join("Buddy").unwrap();
-        assert_eq!(r.join("Third"), Err(JoinError::Full));
-        r.join("Hannes").unwrap();
+        assert_eq!(r.join(" ", None), Err(JoinError::BadName));
+        r.join("Hannes", None).unwrap();
+        r.join("Buddy", None).unwrap();
+        assert_eq!(r.join("Third", None), Err(JoinError::Full));
+        r.join("Hannes", None).unwrap();
         r.leave("Hannes");
         assert!(r.state().players[0].connected);
         r.leave("Hannes");
@@ -621,8 +687,8 @@ mod tests {
     #[test]
     fn updates_log_events_and_links() {
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        r.join("Hannes").unwrap();
-        r.join("Buddy").unwrap();
+        r.join("Hannes", None).unwrap();
+        r.join("Buddy", None).unwrap();
         assert_eq!(r.update("Hannes", snap(20), 1), 0);
         assert_eq!(r.update("Hannes", snap(0), 2), 1);
         assert_eq!(r.update("Nobody", snap(0), 3), 0);
@@ -650,7 +716,7 @@ mod tests {
             s
         };
         let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
-        r.join("Hannes").unwrap();
+        r.join("Hannes", None).unwrap();
         r.update("Hannes", snap(20), 1);
         assert_eq!(r.update("Hannes", with(&[100]), 2), 1);
         // The app restarts: first the save alone, then the encounters it kept.

@@ -10,6 +10,7 @@ Write entries for players, not for developers: what they notice in the app.
 ## Unreleased
 
 ### New
+- Only the players of a run can change it now. Someone who knows the code, for example from a stream, can still watch the dashboard, but can no longer start a new attempt, end the run or play under your name. Your app keeps its secret in its settings, so play each run from the same computer.
 - The command-line tool now speaks Spanish: use `--lang es`, or set `SOULSYNC_LANG=es`.
 
 ### Fixed

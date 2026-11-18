@@ -1156,6 +1156,8 @@ const DEMO = location.pathname === "/demo" || window.SOULSYNC_DEMO === true;
 let codeFromPath = DEMO ? "DEMO-0000" : (location.pathname.match(/^\/run\/([^/]+)/) || [])[1];
 // Inside the desktop app: its local state (ROM, save, run, sync). `SRV` is the run server, empty for this origin.
 let local = null, SRV = "";
+// This app's secret, which the server asks for before it changes a run.
+const keyQ = sep => local && local.key ? `${sep}key=${encodeURIComponent(local.key)}` : "";
 const localPost = (path, body) => fetch("/api/local/" + path, { method: "POST", headers: { "content-type": "application/json", "x-soulsync": "1" }, body: JSON.stringify(body || {}) });
 
 const VIEWS = ["links", "encounters", "team", "timeline", "types", "rules", "settings"];
@@ -2208,12 +2210,12 @@ function updateSettings() {
   for (const [id, outcome] of [["endWon", "won"], ["endLost", "lost"]]) if ($("#" + id)) confirmButton($("#" + id), id === "endWon" ? t().endWon : t().endLost, t().endSure, btn => {
     btn.disabled = true;
     if (window.SoulSyncDemoFinish) { window.SoulSyncDemoFinish(outcome); el._sig = ""; updateSettings(); }
-    else fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/finish?outcome=${outcome}`, { method: "POST" }).catch(() => {}).finally(() => { el._sig = ""; updateSettings(); });
+    else fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/finish?outcome=${outcome}${keyQ("&")}`, { method: "POST" }).catch(() => {}).finally(() => { el._sig = ""; updateSettings(); });
   });
   if ($("#retry")) confirmButton($("#retry"), t().retry, t().retrySure, btn => {
     btn.disabled = true;
     if (window.SoulSyncDemoRestart) { window.SoulSyncDemoRestart(); btn.disabled = false; btn.classList.remove("arm"); btn.textContent = t().retry; }
-    else fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt`, { method: "POST" }).catch(() => {}).finally(() => { el._sig = ""; updateSettings(); });
+    else fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt${keyQ("?")}`, { method: "POST" }).catch(() => {}).finally(() => { el._sig = ""; updateSettings(); });
   });
   const takeLocal = async r => { if (r && r.ok) local = await r.json(); el._sig = ""; updateSettings(); };
   for (const b of el.querySelectorAll("[data-fresh]")) b.onclick = async () => {
@@ -2231,14 +2233,14 @@ function updateSettings() {
   const runC = $("#runCandies", el);
   if (runC) runC.onchange = async () => {
     const n = Math.max(0, Math.min(999, Math.round(+runC.value) || 0));
-    await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/candies?n=${n}`, { method: "POST" }).catch(() => {});
+    await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/candies?n=${n}${keyQ("&")}`, { method: "POST" }).catch(() => {});
   };
   const next = $("#next");
   if (next && !next.disabled) confirmButton(next, t().nextDo(state.attempt || 1), rolls ? t().freshSure : t().retrySure, async btn => {
     btn.disabled = true;
     const from = state.attempt || 1;
     if (!rolls) {
-      await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt`, { method: "POST" }).catch(() => {});
+      await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt${keyQ("?")}`, { method: "POST" }).catch(() => {});
       el._sig = ""; return updateSettings();
     }
     // A new game is a new attempt; one player starting over starts it for
@@ -2246,7 +2248,7 @@ function updateSettings() {
     // already started it, this game is for that one.
     let attempt = from;
     if (!(f.rolled > 0 && from > f.rolled) && state.code) {
-      const a = await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt?from=${from}`, { method: "POST" }).then(x => x.json()).catch(() => null);
+      const a = await fetch(`${SRV}/api/runs/${encodeURIComponent(state.code)}/attempt?from=${from}${keyQ("&")}`, { method: "POST" }).then(x => x.json()).catch(() => null);
       attempt = a && a.attempt || from + 1;
     }
     await takeLocal(await localPost("fresh", { attempt }).catch(() => null));

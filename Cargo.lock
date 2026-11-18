@@ -2908,6 +2908,7 @@ name = "soulsync-client"
 version = "0.1.0"
 dependencies = [
  "futures-util",
+ "rand 0.9.5",
  "serde_json",
  "soulsync-core",
  "tokio",
