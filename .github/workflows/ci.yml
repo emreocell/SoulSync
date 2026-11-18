@@ -140,8 +140,8 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_ROLE: ${{ vars.DISCORD_ROLE }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK || secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD }}
+          DISCORD_ROLE: ${{ vars.DISCORD_ROLE || secrets.DISCORD_ROLE }}
           PYTHONUTF8: "1"
         run: python .github/scripts/release_notes.py discord "$SOULSYNC_VERSION" "https://github.com/${{ github.repository }}/releases/tag/build-${{ github.run_number }}"
 
