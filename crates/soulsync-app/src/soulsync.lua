@@ -192,6 +192,10 @@ local BATTLE_STATUS = {
 local COPIES = 4
 -- Checks for which a Pokémon's battle copy is looked for, about a minute.
 local HUNT = 120
+-- Checks in a row without a battle copy after which a Pokémon that had one
+-- counts as done with: fled from, or the battle is over. Its bytes stay in
+-- memory until the next battle.
+local OVER = 4
 -- Reported Pokémon still in memory, by personality value.
 local facing, hunting = {}, false
 
@@ -330,10 +334,13 @@ local function refresh()
       -- Looked for only for a while: what is left over from a battle that
       -- is over has no copy any more.
       if #r.battle > 0 then
-        r.hunted = 0
-      elseif (r.hunted or 0) < HUNT then
-        r.hunted = (r.hunted or 0) + 1
-        hunting = true
+        r.hunted, r.fought, r.without = 0, true, 0
+      else
+        if r.fought then r.without = (r.without or 0) + 1 end
+        if (r.hunted or 0) < HUNT then
+          r.hunted = (r.hunted or 0) + 1
+          hunting = true
+        end
       end
     else
       r.battle, r.hunted = {}, 0
@@ -355,9 +362,11 @@ local function report()
   local parts = { "SSL4", window(), bag() }
   for i = 1, #reported do
     -- Bit 0: still in memory; bit 1: in a battle now, which tells the
-    -- team of a trainer being fought from what is left of earlier battles.
+    -- team of a trainer being fought from what is left of earlier battles;
+    -- bit 2: its battle is over, though it is still in memory.
     local r = reported[i]
-    local flags = not r.present and 0 or #r.battle > 0 and 3 or 1
+    local flags = not r.present and 0 or #r.battle > 0 and 3
+      or r.fought and r.without >= OVER and 5 or 1
     parts[#parts + 1] = string.char(flags) .. r.data
   end
   return table.concat(parts)
@@ -395,6 +404,102 @@ local function dump_if_asked()
   print("SoulSync: memory copied for your problem report.")
 end
 
+-- Rare Candies for a game begun from nothing. The app asks for them in a
+-- file until a save has them. Long before there is a save or a party the game
+-- keeps the trainer in memory the way a save lays it out, with the bag in
+-- front of it; once the player walks around, a position record names the
+-- trainer, so nothing is written during the intro or into anything else.
+local CANDY_REQUEST = (OUT:gsub("[^\\/]+$", "live-candies.txt"))
+local RARE_CANDY, MEDICINE_IN_BAG, MEDICINE_SLOTS = 50, 0x7D8, 48
+local BAG_BEFORE_TRAINER, PARTY_BEFORE_TRAINER = 0x1000, 0x600
+-- The game clears the bag once more while the intro ends, so the bag is looked
+-- at again every so often for as long as the app asks.
+local CANDY_PAUSE = 300
+local candies, candy_cursor, candy_rest = nil, RAM_START, 0
+local walking, save_trainers = {}, {}
+-- The player's trainer record in a game that has no party yet.
+local own_trainer = nil
+
+local function own_game(addr)
+  local version = memory.readbyte(addr + 0x1F)
+  return version == 22 or version == 23
+end
+
+local function pocket_fits(addr, slots)
+  for i = 0, slots - 1 do
+    local item, count = memory.readword(addr + i * 4), memory.readword(addr + i * 4 + 2)
+    if item > 700 or count > 999 or (item == 0) ~= (count == 0) then return false end
+  end
+  return true
+end
+
+local function is_walking(addr)
+  local map = memory.readdword(addr)
+  return map > 0 and map < 0x1000
+    and memory.readword(addr + 4) == 0x8000 and memory.readword(addr + 12) == 0x8000
+    and memory.readdword(addr + PLACE_TRAINER + 0x14) ~= 0 and own_game(addr + PLACE_TRAINER)
+end
+
+local function is_save_trainer(addr)
+  if addr - BAG_BEFORE_TRAINER < RAM_START or not own_game(addr) then return false end
+  if memory.readdword(addr - PARTY_BEFORE_TRAINER + 4) > SLOTS then return false end
+  local bag = addr - BAG_BEFORE_TRAINER
+  return pocket_fits(bag, ITEMS_LEN / 4) and pocket_fits(bag + MEDICINE_IN_BAG, MEDICINE_SLOTS)
+end
+
+local function put_candies(trainer)
+  local pocket = trainer - BAG_BEFORE_TRAINER + MEDICINE_IN_BAG
+  for i = 0, MEDICINE_SLOTS - 1 do
+    local item = memory.readword(pocket + i * 4)
+    if item == RARE_CANDY then return true end
+    if item == 0 then
+      memory.writeword(pocket + i * 4, RARE_CANDY)
+      memory.writeword(pocket + i * 4 + 2, candies)
+      print("SoulSync: your Rare Candies are in the bag.")
+      return true
+    end
+  end
+  return false
+end
+
+-- Searches the next piece of memory. Other memory can look like one of the
+-- two records by chance, so it takes both, with the same trainer ID, in one
+-- pass over the memory.
+local function give_candies()
+  if candy_rest > 0 then
+    candy_rest = candy_rest - 1
+    return
+  end
+  local last = RAM_END - 0x100
+  local stop = math.min(candy_cursor + CHUNK, last)
+  for addr = candy_cursor, stop - 4, 4 do
+    if is_walking(addr) then
+      walking[memory.readdword(addr + PLACE_TRAINER + 0x14)] = true
+      if not place and trainer_id and is_place(addr) then place = addr end
+    end
+    local id = memory.readdword(addr + 0x14)
+    if id ~= 0 and is_save_trainer(addr) then save_trainers[id] = addr end
+  end
+  candy_cursor = stop >= last and RAM_START or stop
+  if candy_cursor == RAM_START then
+    for id, addr in pairs(save_trainers) do
+      if walking[id] then
+        own_trainer = addr
+        if candies then put_candies(addr) end
+        candy_rest = CANDY_PAUSE
+      end
+    end
+    walking, save_trainers = {}, {}
+  end
+end
+
+local function read_candies()
+  local file = io.open(CANDY_REQUEST, "r")
+  local count = file and tonumber(file:read("*l") or "") or nil
+  if file then file:close() end
+  candies = count and count > 0 and count <= 999 and count or nil
+end
+
 print("SoulSync: looking for your party ...")
 
 -- Checks in a row at which the party did not read as one. While the game
@@ -403,9 +508,29 @@ local MISSES = 20
 
 local sent, sent_at, frame, changed, misses = nil, 0, 0, false, 0
 read_trainer()
+
+-- A new game before the starter: the same report, with an empty party, so
+-- that the player is in the run from the first steps on.
+local function report_new_game()
+  if not is_save_trainer(own_trainer) then
+    own_trainer = nil
+    return
+  end
+  party = own_trainer - PARTY_BEFORE_TRAINER
+  local data, now = report(), os.time()
+  party = nil
+  if data ~= sent or now - sent_at >= 5 then
+    if write(data) then sent, sent_at = data, now end
+  end
+end
+
 while true do
   frame = frame + 1
-  if frame % 60 == 0 then dump_if_asked() end
+  if frame % 60 == 0 then
+    dump_if_asked()
+    read_candies()
+  end
+  if candies or not party then give_candies() end
   if frame % 300 == 0 then
     if read_trainer() then
       party, party_cursor = nil, RAM_START
@@ -416,6 +541,8 @@ while true do
     if party then
       know_party()
       print("SoulSync: party found, taking stock of the memory ...")
+    elseif own_trainer and frame % 30 == 0 then
+      report_new_game()
     end
   else
     if sweep() then changed = true end

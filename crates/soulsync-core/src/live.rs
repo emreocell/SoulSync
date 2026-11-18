@@ -5,9 +5,9 @@
 //! game's memory starting at the party block, then any number of Pokémon that
 //! turned up in memory while it ran and are not in the party. Those are
 //! mostly the opponents of battles, wild and trainers'. Each is one byte of
-//! flags, bit 0 while the Pokémon is still where it was found and bit 1
-//! while the game has a battle copy of it (it is in a battle now), and its
-//! 220 bytes as they are now, or were last.
+//! flags, bit 0 while the Pokémon is still where it was found, bit 1 while
+//! the game has a battle copy of it (it is in a battle now) and bit 2 once
+//! that battle is over, and its 220 bytes as they are now, or were last.
 //!
 //! The memory after the party block holds the trainer and the player's
 //! position, as in the save file. Where exactly is checked against the save,
@@ -15,6 +15,7 @@
 
 use crate::crypto::PARTY_SIZE;
 use crate::dex;
+use crate::game::Game;
 use crate::pk5::{self, Pokemon};
 use crate::save::{SaveSnapshot, Trainer, PARTY_BLOCK_LEN};
 use serde::{Deserialize, Serialize};
@@ -78,6 +79,10 @@ pub struct LiveReport<'a> {
     /// For each of them, whether it is in a battle right now. Scripts before
     /// this flag never say so.
     battling: Vec<bool>,
+    /// For each of them, whether the battle it was in is over, by flight for
+    /// example, while its bytes are still in memory. Scripts before this
+    /// flag never say so.
+    over: Vec<bool>,
 }
 
 impl<'a> LiveReport<'a> {
@@ -98,16 +103,17 @@ impl<'a> LiveReport<'a> {
             seen: seen.chunks(ENTRY).map(|e| &e[1..]).collect(),
             present: seen.chunks(ENTRY).map(|e| e[0] & 1 == 1).collect(),
             battling: seen.chunks(ENTRY).map(|e| e[0] & 3 == 3).collect(),
+            over: seen.chunks(ENTRY).map(|e| e[0] & 4 != 0).collect(),
         })
     }
 
     /// The wild Pokémon the player is facing: the newest one still in memory
-    /// that is not theirs and has HP left.
+    /// whose battle is not over, that is not theirs and has HP left.
     pub fn wild(&self, snapshot: &SaveSnapshot) -> Option<Pokemon> {
-        let newest = self.seen.iter().zip(&self.present).rev();
+        let newest = (0..self.seen.len()).rev();
         newest
-            .filter(|(_, present)| **present)
-            .find_map(|(raw, _)| pk5::parse_wild(raw))
+            .filter(|&i| self.present[i] && !self.over[i])
+            .find_map(|i| pk5::parse_wild(self.seen[i]))
             .filter(|w| !snapshot.owns(w.pid) && !w.is_fainted())
     }
 
@@ -130,6 +136,49 @@ impl<'a> LiveReport<'a> {
     pub fn balls(&self) -> Option<Vec<(u16, u16)>> {
         let items = self.items.filter(|i| crate::bag::any_items(i))?;
         crate::bag::balls(items)
+    }
+
+    /// The player as the game has them in memory, for a new game that was
+    /// not saved yet. `None` unless the party is followed by the trainer of a
+    /// Black 2 or White 2, which an opponent's party is not.
+    pub fn trainer(&self) -> Option<Trainer> {
+        let t = self
+            .window
+            .get(TRAINER_IN_SAVE..TRAINER_IN_SAVE + TRAINER_LEN)?;
+        let game = Game::from_save_version(t[0x1F])
+            .filter(|g| matches!(g, Game::Black2 | Game::White2))?;
+        let id = u32::from_le_bytes([t[0x14], t[0x15], t[0x16], t[0x17]]);
+        let name = pk5::read_string(&t[4..], 8);
+        (id != 0 && !name.is_empty()).then_some(Trainer {
+            name,
+            id,
+            badges: 0,
+            game: Some(game),
+        })
+    }
+
+    /// Whether the player has no Pokémon yet: a new game before the starter.
+    pub fn no_party(&self) -> bool {
+        self.window[4..8] == [0; 4]
+    }
+
+    /// The game as far as memory tells, with no save behind it.
+    pub fn snapshot(&self) -> Option<SaveSnapshot> {
+        let empty = SaveSnapshot {
+            trainer: self.trainer()?,
+            party: vec![],
+            boxes: vec![],
+            encounters: vec![],
+            fallen: vec![],
+            wild: None,
+            foes: vec![],
+            balls: None,
+        };
+        if self.no_party() {
+            Some(empty)
+        } else {
+            empty.with_live_party(self.party())
+        }
     }
 
     /// The party block, for [`SaveSnapshot::with_live_party`].
@@ -424,6 +473,12 @@ mod tests {
             LiveReport::parse(&over).unwrap().wild(&snapshot(vec![])),
             None
         );
+        // Fled from: still in memory, but the battle is over.
+        over[4 + WINDOW] = 5;
+        assert_eq!(
+            LiveReport::parse(&over).unwrap().wild(&snapshot(vec![])),
+            None
+        );
         // Blocks packed without the gaps of the save file.
         let packed = report(0x534, 12, &[]);
         assert_eq!(
@@ -435,6 +490,24 @@ mod tests {
         assert_eq!(r.map(&other), None);
         assert_eq!(LiveReport::parse(&data[..data.len() - 1]), None);
         assert_eq!(LiveReport::parse(&data[4..]), None);
+    }
+
+    #[test]
+    fn a_game_not_saved_yet_is_read_from_memory() {
+        let mut data = report(0x600, 427, &[]);
+        // Before a save nothing says which game it is: no trainer yet.
+        assert_eq!(LiveReport::parse(&data).unwrap().snapshot(), None);
+        data[4 + 0x600 + 0x1F] = 22;
+        let snap = LiveReport::parse(&data).unwrap().snapshot().unwrap();
+        assert_eq!(snap.trainer.name, "Hannes");
+        assert_eq!(snap.trainer.id, 0xCAFE_1234);
+        assert_eq!(snap.trainer.game, Some(Game::White2));
+        assert_eq!(snap.party.len(), 1);
+        // Before the starter: the player, without a team.
+        data[4 + 4] = 0;
+        let snap = LiveReport::parse(&data).unwrap().snapshot().unwrap();
+        assert_eq!(snap.trainer.name, "Hannes");
+        assert!(snap.party.is_empty());
     }
 
     #[test]

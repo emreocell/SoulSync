@@ -40,7 +40,7 @@
 A **Nuzlocke** is a challenge run with two core rules: you may only catch the first Pokémon you meet on each route, and a Pokémon that faints is gone for good. In a **Soul Link**, two or more friends play a Nuzlocke side by side. The catches they make on the same route are linked, and if one of them faints, its partners are lost too. Keeping all of that straight by hand gets tedious fast. SoulSync does it for you, solo or with up to four players.
 
 > [!NOTE]
-> **SoulSync is an early hobby project.** So far it has been tested with Pokémon Black 2 (German) on Windows with DeSmuME, and only up to the first gym. White 2 should work the same way but is untested, and other games may follow. Expect bugs: please report them as an [issue](https://github.com/hildlabs/SoulSync/issues) or on the [Discord](https://discord.gg/DKhuhJS8tJ), and pull requests are very welcome. Large parts of the code were written with AI assistance; all of it is open source, so you can read every line.
+> **SoulSync is an early hobby project.** So far it has been tested on Windows with DeSmuME with the German Pokémon Black 2 up to the first gym, and with the German White 2 in a duo run with Black 2 up to the first wild encounters. Other games may follow. Expect bugs: please report them as an [issue](https://github.com/hildlabs/SoulSync/issues) or on the [Discord](https://discord.gg/DKhuhJS8tJ), and pull requests are very welcome. Large parts of the code were written with AI assistance; all of it is open source, so you can read every line.
 
 ## What you need
 
@@ -51,7 +51,7 @@ A **Nuzlocke** is a challenge run with two core rules: you may only catch the fi
 
 - **A PC with Windows 10 or 11.** On a Mac, SoulSync runs DeSmuME through Wine, see [SoulSync on a Mac](docs/mac.md).
 - **[DeSmuME](https://desmume.org)**, the free Nintendo DS emulator (Windows build). Its Lua scripting is what lets SoulSync follow the game live.
-- **Your own copy of Pokémon Black 2 or White 2** as a ROM file. Black 2 is the tested one so far; White 2 should work the same way. SoulSync does not include or download games.
+- **Your own copy of Pokémon Black 2 or White 2** as a ROM file. Both have been tested in German, Black 2 the furthest. SoulSync does not include or download games.
 
 That's all: no account, and for Black 2 and White 2 no Java or separate randomizer either. Everyone in a Soul Link needs the same three things on their own PC.
 
@@ -141,7 +141,7 @@ No. SoulSync does not include, download or link to games. Every player uses a RO
 <details>
 <summary><b>Which games and languages work?</b></summary>
 <br>
-So far SoulSync has been tested with Pokémon Black 2 in German, up to the first gym. White 2 should work the same way, and Black and White and other languages are meant to work too, but none of them have been tested yet. If you try one, please tell us how it went. More games are on the <a href="#roadmap">roadmap</a>.
+So far SoulSync has been tested with Pokémon Black 2 in German up to the first gym, and with White 2 in German in a duo run with Black 2, up to the first wild encounters. Black and White and other languages are meant to work too, but none of them have been tested yet. If you try one, please tell us how it went. More games are on the <a href="#roadmap">roadmap</a>.
 </details>
 
 <details>

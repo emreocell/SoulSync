@@ -9,6 +9,16 @@ Write entries for players, not for developers: what they notice in the app.
 
 ## Unreleased
 
+### New
+- A new game is in the run from the start: you show as online when the game opens, and your name, game and place appear as soon as you can walk around, before the starter and without saving.
+- The 999 Rare Candies are in your bag right after the intro. Saving and restarting is no longer needed.
+- In a wild battle, the card says "Do not catch" when the area is used up for you or the link there is already lost.
+
+### Fixed
+- Running from a wild Pokémon now counts as a missed encounter right away, not only after the next battle.
+- A starting save made in the other version of the game no longer shows the wrong game in the run.
+- The empty save file DeSmuME creates for a new game no longer shows up as a nameless player or as an error.
+
 <!-- One line per change, newest first, for example:
 ### New
 - Catch odds now count the Dusk Ball at night.
