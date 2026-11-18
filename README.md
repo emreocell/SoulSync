@@ -229,6 +229,7 @@ A server that anyone can reach keeps itself usable with limits, each set by an e
 | `SOULSYNC_CONNECTIONS` | 20 | Connections one address may hold at once |
 | `SOULSYNC_MAX_RUNS` | 2000 | Runs the server keeps at most |
 | `SOULSYNC_IDLE_DAYS` | 60 | Days after which a run nobody changed is removed |
+| `SOULSYNC_MISSES_PER_HOUR` | 200 | Unknown run codes one address may ask for per hour before it is refused every run for the rest of the hour |
 | `SOULSYNC_TRUST_PROXY` | off | `1` takes the address from `X-Forwarded-For`; only behind a proxy nobody can bypass |
 
 `0` turns a limit off. The Docker setup sets `SOULSYNC_TRUST_PROXY=1`, since only the proxy reaches the server's port. A stored run takes about 1.5 MB of memory and 0.6 MB of disk, mostly the move and learnset data from each player's ROM, so the default of 2000 runs fits in 4 GB of RAM.

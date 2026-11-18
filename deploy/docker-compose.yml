@@ -39,6 +39,13 @@ services:
       SOULSYNC_CONNECTIONS: ${SOULSYNC_CONNECTIONS:-20}
       SOULSYNC_MAX_RUNS: ${SOULSYNC_MAX_RUNS:-2000}
       SOULSYNC_IDLE_DAYS: ${SOULSYNC_IDLE_DAYS:-60}
+      SOULSYNC_MISSES_PER_HOUR: ${SOULSYNC_MISSES_PER_HOUR:-200}
+    logging: &logs
+      # Logs never fill the disk: at most three files of 10 MB.
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     # Runs survive updates and restarts here.
     volumes:
       - runs:/data
@@ -56,6 +63,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
+    logging: *logs
 
 volumes:
   caddy_data:

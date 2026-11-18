@@ -91,11 +91,17 @@ pub fn modified(path: &Path) -> Option<SystemTime> {
 /// the task is aborted.
 pub fn hold_seat(url: String) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
+        // Waits longer after each failure, up to half a minute: a run that
+        // is gone must not be asked for every few seconds.
+        let mut wait = 3;
         loop {
             if let Ok((mut ws, _)) = tokio_tungstenite::connect_async(&url).await {
+                wait = 3;
                 while let Some(Ok(_)) = ws.next().await {}
+            } else {
+                wait = (wait * 2).min(30);
             }
-            tokio::time::sleep(Duration::from_secs(3)).await;
+            tokio::time::sleep(Duration::from_secs(wait)).await;
         }
     })
 }
