@@ -401,6 +401,23 @@ async fn dex(
     }
 }
 
+/// The secret of a player's app; see [`run::Run::may_change`].
+#[derive(Deserialize)]
+struct KeyQuery {
+    key: Option<String>,
+}
+
+/// Refuses a change to a run from someone who is not one of its players.
+fn refuse(run: &Run, key: &KeyQuery) -> Option<Response> {
+    (!run.may_change(key.key.as_deref())).then(|| {
+        (
+            StatusCode::FORBIDDEN,
+            "only the players of this run can change it",
+        )
+            .into_response()
+    })
+}
+
 #[derive(Deserialize)]
 struct AttemptQuery {
     /// The attempt the player is leaving. When every player of a run
@@ -413,6 +430,7 @@ async fn new_attempt(
     State(app): State<AppState>,
     Path(code): Path<String>,
     Query(q): Query<AttemptQuery>,
+    Query(key): Query<KeyQuery>,
 ) -> Response {
     let code = normalize(&code);
     let attempt = {
@@ -420,6 +438,9 @@ async fn new_attempt(
         let Some(e) = runs.get_mut(&code) else {
             return (StatusCode::NOT_FOUND, "run not found").into_response();
         };
+        if let Some(no) = refuse(&e.run, &key) {
+            return no;
+        }
         if q.from.map_or(true, |from| from == e.run.attempt) {
             e.run.restart(now_ms());
         }
@@ -441,6 +462,7 @@ async fn finish_attempt(
     State(app): State<AppState>,
     Path(code): Path<String>,
     Query(q): Query<FinishQuery>,
+    Query(key): Query<KeyQuery>,
 ) -> Response {
     let code = normalize(&code);
     {
@@ -448,6 +470,9 @@ async fn finish_attempt(
         let Some(e) = runs.get_mut(&code) else {
             return (StatusCode::NOT_FOUND, "run not found").into_response();
         };
+        if let Some(no) = refuse(&e.run, &key) {
+            return no;
+        }
         e.run.finish(q.outcome, now_ms());
     }
     tracing::info!(%code, outcome = ?q.outcome, "attempt finished");
@@ -467,6 +492,7 @@ async fn set_candies(
     State(app): State<AppState>,
     Path(code): Path<String>,
     Query(q): Query<CandiesQuery>,
+    Query(key): Query<KeyQuery>,
 ) -> Response {
     let code = normalize(&code);
     let candies = q.n.min(soulsync_core::bag::MAX_COUNT);
@@ -475,6 +501,9 @@ async fn set_candies(
         let Some(e) = runs.get_mut(&code) else {
             return (StatusCode::NOT_FOUND, "run not found").into_response();
         };
+        if let Some(no) = refuse(&e.run, &key) {
+            return no;
+        }
         let Some(r) = e.run.settings.randomizer.as_mut() else {
             return (StatusCode::CONFLICT, "run has no randomizer settings").into_response();
         };
@@ -488,6 +517,7 @@ async fn set_candies(
 #[derive(Deserialize)]
 struct WsQuery {
     player: Option<String>,
+    key: Option<String>,
 }
 
 async fn ws(
@@ -513,7 +543,7 @@ async fn ws(
     upgrade
         .max_message_size(MAX_MESSAGE)
         .on_upgrade(move |socket| async move {
-            session(app, code, q.player, socket).await;
+            session(app, code, q.player, q.key, socket).await;
             drop(connection);
         })
 }
@@ -524,12 +554,18 @@ async fn send(socket: &mut WebSocket, msg: &ServerMsg) -> bool {
 }
 
 /// One WebSocket connection: a player (with `player`) or a read-only viewer.
-async fn session(app: AppState, code: String, player: Option<String>, mut socket: WebSocket) {
+async fn session(
+    app: AppState,
+    code: String,
+    player: Option<String>,
+    key: Option<String>,
+    mut socket: WebSocket,
+) {
     let joined = {
         let mut runs = app.runs.lock().unwrap();
         let Some(e) = runs.get_mut(&code) else { return };
         let joined = match &player {
-            Some(name) => e.run.join(name).map(|()| true),
+            Some(name) => e.run.join(name, key.as_deref()).map(|()| true),
             None => Ok(false),
         };
         joined.map(|j| (j, e.tx.subscribe(), state_json(&e.run)))
@@ -974,7 +1010,7 @@ mod tests {
         {
             let mut runs = first.runs.lock().unwrap();
             let run = &mut runs.get_mut(&code).unwrap().run;
-            run.join("Hannes").unwrap();
+            run.join("Hannes", None).unwrap();
             run.update("Hannes", snap(20), 1);
             run.update("Hannes", snap(0), 2);
         }
@@ -1097,6 +1133,51 @@ mod tests {
         assert!(closed);
     }
 
+    #[tokio::test]
+    async fn only_players_change_a_run() {
+        let state = AppState::default();
+        let code = state.create(RunSettings::default()).unwrap().code;
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move { axum::serve(listener, app(state)).await.unwrap() });
+        let key = "app-secret-0123456789";
+        let url = format!("ws://{addr}/api/runs/{code}/ws?player=Hannes&key={key}");
+        let (mut ws, _) = tokio_tungstenite::connect_async(&url).await.unwrap();
+        next_state(&mut ws).await;
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let post = |path: String| async move {
+            let mut tcp = tokio::net::TcpStream::connect(addr).await.unwrap();
+            let req = format!(
+                "POST {path} HTTP/1.1\r\nHost: x\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+            );
+            tcp.write_all(req.as_bytes()).await.unwrap();
+            let mut resp = String::new();
+            tcp.read_to_string(&mut resp).await.unwrap();
+            resp
+        };
+        let resp = post(format!("/api/runs/{code}/attempt")).await;
+        assert!(resp.starts_with("HTTP/1.1 403"), "{resp}");
+        let resp = post(format!(
+            "/api/runs/{code}/finish?outcome=lost&key=wrong-wrong-wrong-wrong"
+        ))
+        .await;
+        assert!(resp.starts_with("HTTP/1.1 403"), "{resp}");
+        let resp = post(format!("/api/runs/{code}/attempt?key={key}")).await;
+        assert!(resp.starts_with("HTTP/1.1 200"), "{resp}");
+
+        // Someone else under Hannes' name is turned away.
+        let fake = format!("ws://{addr}/api/runs/{code}/ws?player=Hannes");
+        let (mut other, _) = tokio_tungstenite::connect_async(&fake).await.unwrap();
+        let refused = loop {
+            if let WsMsg::Text(t) = other.next().await.unwrap().unwrap() {
+                if let ServerMsg::Error { message } = serde_json::from_str(&t).unwrap() {
+                    break message;
+                }
+            }
+        };
+        assert!(refused.contains("another player"), "{refused}");
+    }
+
     const BOXES_FOR_TEST: usize = 24 * 30 + 1;
 
     #[test]
@@ -1110,7 +1191,7 @@ mod tests {
         {
             let mut runs = state.runs.lock().unwrap();
             let run = &mut runs.get_mut(&played).unwrap().run;
-            run.join("Hannes").unwrap();
+            run.join("Hannes", None).unwrap();
             run.update("Hannes", snap(20), now_ms());
         }
         let now = now_ms();

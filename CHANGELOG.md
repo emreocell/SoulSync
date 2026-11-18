@@ -9,19 +9,22 @@ Write entries for players, not for developers: what they notice in the app.
 
 ## Unreleased
 
-### New
-- The dashboard is now also available in French (FR button next to EN and DE). Pokémon and place names fall back to English for now.
-- The command-line tool now speaks Spanish: use `--lang es`, or set `SOULSYNC_LANG=es`.
-
-### Fixed
-- Losing with your whole party now ends the attempt. Only the first fight against your rival may be lost with just the starter.
-
 <!-- One line per change, newest first, for example:
 ### New
 - Catch odds now count the Dusk Ball at night.
 ### Fixed
 - The run list no longer jumps when a partner joins.
 -->
+
+## 0.3.8
+
+### New
+- Only the players of a run can change it now. Someone who knows the code, for example from a stream, can still watch the dashboard, but can no longer start a new attempt, end the run or play under your name. Your app keeps its secret in its settings, so play each run from the same computer.
+- The dashboard is now also available in French (FR button next to EN and DE). Pokémon and place names fall back to English for now.
+- The command-line tool now speaks Spanish: use `--lang es`, or set `SOULSYNC_LANG=es`.
+
+### Fixed
+- Losing with your whole party now ends the attempt. Only the first fight against your rival may be lost with just the starter.
 
 ## 0.3.7
 

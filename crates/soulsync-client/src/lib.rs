@@ -44,6 +44,22 @@ pub fn ws_url(server: &str, code: &str, name: &str) -> String {
     )
 }
 
+/// A new secret for an app: the server lets only the app that took a seat
+/// take it again, and only the players' apps change a run.
+pub fn new_key() -> String {
+    use rand::distr::{Alphanumeric, SampleString};
+    Alphanumeric.sample_string(&mut rand::rng(), 32)
+}
+
+/// A seat's address from [`ws_url`] with the app's secret.
+pub fn with_key(url: String, key: &str) -> String {
+    if key.is_empty() {
+        url
+    } else {
+        format!("{url}&key={key}")
+    }
+}
+
 /// Asks a server for a new run. Blocks.
 pub fn create_run(server: &str, settings: &RunSettings) -> Result<NewRun, Error> {
     Ok(ureq::post(&format!("{}/api/runs", base(server)))
@@ -441,6 +457,22 @@ pub async fn session(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn keys_are_long_and_url_safe() {
+        let k = new_key();
+        assert_eq!(k.len(), 32);
+        assert!(k.bytes().all(|b| b.is_ascii_alphanumeric()));
+        assert_ne!(k, new_key());
+        assert_eq!(
+            with_key("ws://x/ws?player=A".into(), "k1"),
+            "ws://x/ws?player=A&key=k1"
+        );
+        assert_eq!(
+            with_key("ws://x/ws?player=A".into(), ""),
+            "ws://x/ws?player=A"
+        );
+    }
 
     #[test]
     fn builds_ws_urls() {

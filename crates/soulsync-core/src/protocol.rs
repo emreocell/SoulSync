@@ -1,9 +1,13 @@
 //! Messages between SoulSync clients and the run server.
 //!
-//! Players connect to `/api/runs/{code}/ws?player=<name>` and send
+//! Players connect to `/api/runs/{code}/ws?player=<name>&key=<secret>` and send
 //! [`ClientMsg::Snapshot`] whenever their save changes. Everyone connected to a
 //! run, players and dashboards alike, receives [`ServerMsg::State`] after
 //! every change.
+//!
+//! The key is a secret each app makes once. The seat goes to the app that
+//! took it, and changes to the run over HTTP (`attempt`, `finish`, `candies`)
+//! need one of the players' keys as `?key=`. The code alone lets anyone watch.
 
 use crate::events::Event;
 use crate::links::Link;
