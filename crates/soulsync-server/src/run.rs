@@ -220,6 +220,11 @@ impl Run {
         from_rom.or_else(|| soulsync_core::dex::species(species).map(|s| s.catch_rate))
     }
 
+    /// Whether nobody ever sent a save to this run.
+    pub fn unplayed(&self) -> bool {
+        self.history.is_empty() && self.players.iter().all(|p| p.snapshot.is_none())
+    }
+
     pub fn has_rom_data(&self) -> bool {
         self.catch_rates.is_some()
     }
@@ -231,7 +236,7 @@ impl Run {
     /// Registers a connection for `name`. A known name reconnects to its seat.
     pub fn join(&mut self, name: &str) -> Result<(), JoinError> {
         let name = name.trim();
-        if name.is_empty() || name.chars().count() > 24 {
+        if name.is_empty() || name.chars().count() > 24 || name.chars().any(char::is_control) {
             return Err(JoinError::BadName);
         }
         if let Some(p) = self.player_mut(name) {

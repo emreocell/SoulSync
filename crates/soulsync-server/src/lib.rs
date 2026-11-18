@@ -5,6 +5,7 @@
 //! they are also written there as one JSON file each, a few seconds after
 //! they change, and read back on the next start.
 
+mod check;
 mod limits;
 mod run;
 
@@ -31,7 +32,15 @@ use tokio::sync::broadcast;
 
 /// The dashboard page.
 pub const INDEX: &str = include_str!("../web/index.html");
-const MAX_MESSAGE: usize = 4 * 1024 * 1024;
+/// Largest WebSocket message; a full save or a ROM's dex is far below it.
+const MAX_MESSAGE: usize = 2 * 1024 * 1024;
+/// Messages a connection may send in a burst, and how many more each second
+/// after that. A player's app sends at most one a second.
+const BURST: f64 = 30.0;
+const PER_SECOND: f64 = 2.0;
+/// A run nobody ever played is removed after three days on a server with limits,
+/// so runs made and left do not fill it for weeks.
+const UNPLAYED_MS: u64 = 3 * 24 * 60 * 60 * 1000;
 
 struct Entry {
     run: Run,
@@ -109,6 +118,19 @@ fn normalize(code: &str) -> String {
 }
 
 pub fn app(state: AppState) -> Router {
+    // Everything that names a run by its code.
+    let runs = Router::new()
+        .route("/api/runs/{code}", get(get_run))
+        .route("/api/runs/{code}/species", get(species))
+        .route("/api/runs/{code}/dex", get(dex))
+        .route("/api/runs/{code}/attempt", post(new_attempt))
+        .route("/api/runs/{code}/finish", post(finish_attempt))
+        .route("/api/runs/{code}/candies", post(set_candies))
+        .route("/api/runs/{code}/ws", get(ws))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            known_run,
+        ));
     Router::new()
         .route("/", get(index))
         .route("/run/{code}", get(index))
@@ -120,15 +142,69 @@ pub fn app(state: AppState) -> Router {
         .route("/api/runs", post(create_run))
         .route("/api/presets", get(presets))
         .route("/api/species", get(species_names))
-        .route("/api/runs/{code}", get(get_run))
-        .route("/api/runs/{code}/species", get(species))
-        .route("/api/runs/{code}/dex", get(dex))
-        .route("/api/runs/{code}/attempt", post(new_attempt))
-        .route("/api/runs/{code}/finish", post(finish_attempt))
-        .route("/api/runs/{code}/candies", post(set_candies))
-        .route("/api/runs/{code}/ws", get(ws))
+        .merge(runs)
         .layer(axum::middleware::map_response(allow_any_origin))
         .with_state(state)
+}
+
+/// Lets a request for a run through only if the run exists, and counts the
+/// codes an address asks for that do not, so that codes cannot be tried one
+/// after another until one fits.
+async fn known_run(
+    State(app): State<AppState>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Response {
+    let peer = req
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|c| c.0);
+    let ip = app.limits.client(peer, req.headers());
+    let now = now_ms();
+    if app.limits.too_many_misses(ip, now) {
+        return (
+            StatusCode::TOO_MANY_REQUESTS,
+            "too many unknown run codes from your address; try again in an hour",
+        )
+            .into_response();
+    }
+    let code = req
+        .uri()
+        .path()
+        .strip_prefix("/api/runs/")
+        .and_then(|rest| rest.split('/').next())
+        .unwrap_or("");
+    let code = percent_decoded(code);
+    if !app.has_run(&code) {
+        app.limits.missed(ip, now);
+        return (StatusCode::NOT_FOUND, "run not found").into_response();
+    }
+    next.run(req).await
+}
+
+/// A path segment with its %XX escapes undone, as the `Path` extractor does.
+fn percent_decoded(s: &str) -> String {
+    let b = s.as_bytes();
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        let hex = |c: u8| (c as char).to_digit(16);
+        match (
+            b[i],
+            b.get(i + 1).copied().and_then(hex),
+            b.get(i + 2).copied().and_then(hex),
+        ) {
+            (b'%', Some(h), Some(l)) => {
+                out.push((h * 16 + l) as u8);
+                i += 3;
+            }
+            (c, _, _) => {
+                out.push(c);
+                i += 1;
+            }
+        }
+    }
+    String::from_utf8_lossy(&out).into_owned()
 }
 
 /// A dashboard served by the desktop app reads runs from another server.
@@ -472,6 +548,8 @@ async fn session(app: AppState, code: String, player: Option<String>, mut socket
         }
     };
     let name = player.unwrap_or_default();
+    let mut allowance = BURST;
+    let mut last = std::time::Instant::now();
     if is_player {
         tracing::info!(%code, player = %name, "player connected");
         app.broadcast(&code);
@@ -483,17 +561,35 @@ async fn session(app: AppState, code: String, player: Option<String>, mut socket
         tokio::select! {
             incoming = socket.recv() => {
                 let Some(Ok(msg)) = incoming else { break };
+                let elapsed = last.elapsed().as_secs_f64();
+                last = std::time::Instant::now();
+                allowance = (allowance + elapsed * PER_SECOND).min(BURST) - 1.0;
+                if allowance < 0.0 {
+                    tracing::warn!(%code, player = %name, "too many messages, connection closed");
+                    let message = "too many messages".to_owned();
+                    send(&mut socket, &ServerMsg::Error { message }).await;
+                    break;
+                }
                 let Message::Text(text) = msg else { continue };
                 if !is_player {
                     continue;
                 }
-                match serde_json::from_str::<ClientMsg>(&text) {
+                let msg = serde_json::from_str::<ClientMsg>(&text).map_err(|e| e.to_string()).and_then(|m| {
+                    match &m {
+                        ClientMsg::Snapshot { snapshot } => check::snapshot(snapshot),
+                        ClientMsg::Dex { dex } => check::dex(dex),
+                        ClientMsg::CatchRates { .. } => Ok(()),
+                    }
+                    .map(|()| m)
+                    .map_err(str::to_owned)
+                });
+                match msg {
                     Ok(ClientMsg::Snapshot { snapshot }) => {
                         let n = {
                             let mut runs = app.runs.lock().unwrap();
                             runs.get_mut(&code).map_or(0, |e| e.run.update(&name, snapshot, now_ms()))
                         };
-                        tracing::info!(%code, player = %name, events = n, "snapshot");
+                        tracing::debug!(%code, player = %name, events = n, "snapshot");
                         app.broadcast(&code);
                     }
                     Ok(ClientMsg::Dex { dex }) => {
@@ -517,6 +613,7 @@ async fn session(app: AppState, code: String, player: Option<String>, mut socket
                         }
                     }
                     Err(e) => {
+                        tracing::warn!(%code, player = %name, "refused message: {e}");
                         let message = format!("invalid message: {e}");
                         if !send(&mut socket, &ServerMsg::Error { message }).await {
                             break;
@@ -569,7 +666,11 @@ impl AppState {
             let idle: Vec<String> = runs
                 .iter()
                 .filter(|(_, e)| {
-                    e.tx.receiver_count() == 0 && self.limits.is_idle(e.run.touched, now)
+                    let unplayed = self.limits.idle_days > 0
+                        && e.run.unplayed()
+                        && e.run.touched + UNPLAYED_MS < now;
+                    e.tx.receiver_count() == 0
+                        && (unplayed || self.limits.is_idle(e.run.touched, now))
                 })
                 .map(|(code, _)| code.clone())
                 .collect();
@@ -921,6 +1022,105 @@ mod tests {
         state.create(RunSettings::default()).unwrap();
         let resp = post().await;
         assert!(resp.starts_with("HTTP/1.1 503"), "{resp}");
+    }
+
+    #[tokio::test]
+    async fn guessing_run_codes_locks_an_address_out() {
+        let state = AppState::default().with_limits(Limits {
+            misses_per_hour: 3,
+            ..Limits::default()
+        });
+        let real = state.create(RunSettings::default()).unwrap().code;
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let service = app(state.clone()).into_make_service_with_connect_info::<SocketAddr>();
+        tokio::spawn(async move { axum::serve(listener, service).await.unwrap() });
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let get = |code: String| async move {
+            let mut tcp = tokio::net::TcpStream::connect(addr).await.unwrap();
+            let req =
+                format!("GET /api/runs/{code} HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n");
+            tcp.write_all(req.as_bytes()).await.unwrap();
+            let mut resp = String::new();
+            tcp.read_to_string(&mut resp).await.unwrap();
+            resp
+        };
+        assert!(get(real.to_lowercase()).await.starts_with("HTTP/1.1 200"));
+        for n in 0..3 {
+            let resp = get(format!("PIKACHU-{n:04}")).await;
+            assert!(resp.starts_with("HTTP/1.1 404"), "{resp}");
+        }
+        // Now even the right code is refused, so a hit cannot be told apart.
+        let resp = get(real.clone()).await;
+        assert!(resp.starts_with("HTTP/1.1 429"), "{resp}");
+        let resp = get(format!("{real}/attempt")).await;
+        assert!(resp.starts_with("HTTP/1.1 429"), "{resp}");
+    }
+
+    #[tokio::test]
+    async fn oversized_saves_and_floods_are_refused() {
+        let state = AppState::default();
+        let code = state.create(RunSettings::default()).unwrap().code;
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move { axum::serve(listener, app(state)).await.unwrap() });
+        let url = format!("ws://{addr}/api/runs/{code}/ws?player=Mallory");
+        let (mut ws, _) = tokio_tungstenite::connect_async(&url).await.unwrap();
+        next_state(&mut ws).await;
+        let mut big = snap(20);
+        big.boxes = vec![big.boxes[0].clone(); BOXES_FOR_TEST];
+        let text = serde_json::to_string(&ClientMsg::Snapshot { snapshot: big }).unwrap();
+        ws.send(WsMsg::Text(text.into())).await.unwrap();
+        let refused = loop {
+            if let WsMsg::Text(t) = ws.next().await.unwrap().unwrap() {
+                if let ServerMsg::Error { message } = serde_json::from_str(&t).unwrap() {
+                    break message;
+                }
+            }
+        };
+        assert!(refused.contains("larger"), "{refused}");
+
+        // Far more messages than any app sends: the server hangs up.
+        let ping = WsMsg::Text("{}".into());
+        for _ in 0..100 {
+            if ws.send(ping.clone()).await.is_err() {
+                break;
+            }
+        }
+        let closed = loop {
+            match ws.next().await {
+                None | Some(Err(_)) | Some(Ok(WsMsg::Close(_))) => break true,
+                Some(Ok(WsMsg::Text(t))) if t.contains("too many messages") => break true,
+                Some(Ok(_)) => {}
+            }
+        };
+        assert!(closed);
+    }
+
+    const BOXES_FOR_TEST: usize = 24 * 30 + 1;
+
+    #[test]
+    fn runs_nobody_played_go_after_three_days() {
+        let state = AppState::default().with_limits(Limits {
+            idle_days: 60,
+            ..Limits::default()
+        });
+        let empty = state.create(RunSettings::default()).unwrap().code;
+        let played = state.create(RunSettings::default()).unwrap().code;
+        {
+            let mut runs = state.runs.lock().unwrap();
+            let run = &mut runs.get_mut(&played).unwrap().run;
+            run.join("Hannes").unwrap();
+            run.update("Hannes", snap(20), now_ms());
+        }
+        let now = now_ms();
+        assert_eq!(state.prune(now + 2 * 24 * 60 * 60 * 1000), 0);
+        assert_eq!(state.prune(now + 4 * 24 * 60 * 60 * 1000), 1);
+        assert!(!state.has_run(&empty) && state.has_run(&played));
+        // The desktop app's own server keeps every run.
+        let local = AppState::default();
+        local.create(RunSettings::default()).unwrap();
+        assert_eq!(local.prune(now + 400 * 24 * 60 * 60 * 1000), 0);
     }
 
     #[test]
