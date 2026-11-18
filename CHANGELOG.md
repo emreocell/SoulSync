@@ -15,6 +15,7 @@ Write entries for players, not for developers: what they notice in the app.
 - In a wild battle, the card says "Do not catch" when the area is used up for you or the link there is already lost.
 
 ### Fixed
+- Dashboard accessibility: Pokémon buttons, option lists, the language buttons and dialogs now have names for screen readers, secondary text has more contrast, and the jump to the run settings no longer scrolls smoothly with reduced motion.
 - Running from a wild Pokémon now counts as a missed encounter right away, not only after the next battle.
 - A starting save made in the other version of the game no longer shows the wrong game in the run.
 - The empty save file DeSmuME creates for a new game no longer shows up as a nameless player or as an error.
