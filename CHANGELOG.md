@@ -10,6 +10,7 @@ Write entries for players, not for developers: what they notice in the app.
 ## Unreleased
 
 ### New
+- The dashboard is now also available in French (FR button next to EN and DE). Pokémon and place names fall back to English for now.
 - A new game is in the run from the start: you show as online when the game opens, and your name, game and place appear as soon as you can walk around, before the starter and without saving.
 - The 999 Rare Candies are in your bag right after the intro. Saving and restarting is no longer needed.
 - In a wild battle, the card says "Do not catch" when the area is used up for you or the link there is already lost.
