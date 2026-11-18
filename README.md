@@ -15,6 +15,7 @@
   <a href="https://github.com/hildlabs/SoulSync/releases/latest"><img src="https://img.shields.io/github/v/tag/hildlabs/SoulSync?filter=v*&label=version&color=ff8d4d" alt="Latest release"></a>
   <a href="https://github.com/hildlabs/SoulSync/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hildlabs/SoulSync/ci.yml?branch=main&label=build" alt="Build status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-56c2f0" alt="License: GPL-3.0"></a>
+  <a href="https://discord.gg/DKhuhJS8tJ"><img src="https://img.shields.io/badge/discord-join%20the%20community-5865F2?logo=discord&logoColor=white" alt="Join the SoulSync Discord"></a>
 </p>
 
 **SoulSync keeps track of your Nuzlocke or Soul Link run for you, live from the emulator.** You play Pokémon Black 2 or White 2 in DeSmuME as usual. SoulSync reads the game while you play and keeps the run up to date for everyone in it: catches, faints, links, badges and the rules. No spreadsheets, no bookkeeping in Discord.
@@ -178,7 +179,7 @@ Next up, roughly in this order:
 - [ ] More languages tested, Black and White checked end to end
 - [ ] More games (Platinum, HeartGold/SoulSilver) and emulators (melonDS, BizHawk)
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the bigger picture. Ideas and bug reports are welcome in the [issues](https://github.com/hildlabs/SoulSync/issues).
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the bigger picture. Ideas and bug reports are welcome in the [issues](https://github.com/hildlabs/SoulSync/issues) and on the [Discord](https://discord.gg/DKhuhJS8tJ).
 
 ## Hosting your own server
 

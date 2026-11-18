@@ -134,14 +134,15 @@ jobs:
           gh api "repos/${{ github.repository }}/git/refs" -f ref="refs/tags/v$SOULSYNC_VERSION" -f sha="${{ github.sha }}"
       # Patch notes for the Discord server, as a post in #announcements. Needs a
       # DISCORD_WEBHOOK secret (Discord: channel settings › Integrations ›
-      # Webhooks › Copy URL); DISCORD_ROLE, a role id to ping, is optional.
+      # Webhooks › Copy URL). It pings the Release Pings role (DISCORD_ROLE
+      # overrides the id).
       # Without the secret this does nothing, and it never fails the release.
       - name: Announce on Discord
         if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK || secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD }}
-          DISCORD_ROLE: ${{ vars.DISCORD_ROLE || secrets.DISCORD_ROLE }}
+          DISCORD_ROLE: ${{ vars.DISCORD_ROLE || '1572404256474923058' }}
           PYTHONUTF8: "1"
         run: python .github/scripts/release_notes.py discord "$SOULSYNC_VERSION" "https://github.com/${{ github.repository }}/releases/tag/build-${{ github.run_number }}"
 
