@@ -16,7 +16,7 @@
   --night:#0B0B15;--glass:rgba(20,19,36,.62);--glass-hi:rgba(34,31,58,.72);
   --ovc:255,255,255;--ov-0:rgba(var(--ovc),.02);--ov-1:rgba(var(--ovc),.045);--ov-2:rgba(var(--ovc),.08);--ov-3:rgba(var(--ovc),.12);
   --edge:rgba(var(--ovc),.08);--edge-hi:rgba(var(--ovc),.16);
-  --text:#F1EEF8;--muted:#A7A2BD;--faint:#77728E;
+  --text:#F1EEF8;--muted:#A7A2BD;--faint:#8A85A1;
   --a:#FF8D4D;--b:#56C2F0;--p3:#B79CFF;--p4:#EBC34A;--ok:#5FD38D;--danger:#F2617A;--warn:#F2B544;--up:#5FD38D;--dn:#F2617A;
   --solid:#14131F;--pillbg:#1D1B2F;--ring-in:#151424;--toast:#1D1B2E;--dlg-bg:rgba(20,19,36,.94);--tymix:#FFFFFF;--inverse:#F1EEF8;--inverse-text:#0B0B15;
   --shade:11,11,21;--sky1:#090B14;--sky2:#141530;--sky3:#2A1C3F;--sky4:#4A2440;--hill1:#231A36;--hill2:#18142A;--hill3:#0F0E1B;--ground:#0B0B15;--moon:#CFEFFF;--stars:1;
@@ -28,7 +28,7 @@
 @media (prefers-color-scheme:light){:root:not([data-theme=dark]){
   color-scheme:light;--night:#E9ECF5;--glass:rgba(255,255,255,.74);--glass-hi:rgba(255,255,255,.95);
   --ovc:40,32,80;--edge:rgba(40,32,80,.1);--edge-hi:rgba(40,32,80,.2);
-  --text:#1B1830;--muted:#57536F;--faint:#8C88A3;
+  --text:#1B1830;--muted:#57536F;--faint:#67637F;
   --a:#E8681F;--b:#1A8CC6;--p3:#6A4BD1;--p4:#9A7400;--ok:#1C9A55;--danger:#D23655;--warn:#B87800;--up:#1C9A55;--dn:#D23655;
   --solid:#FFFFFF;--pillbg:#FFFFFF;--ring-in:#FFFFFF;--toast:#FFFFFF;--dlg-bg:rgba(250,250,253,.97);--tymix:#000000;--inverse:#1B1830;--inverse-text:#FFFFFF;
   --shade:233,236,245;--sky1:#8DBDEB;--sky2:#B9D5F2;--sky3:#F3D3C4;--sky4:#F6B796;--hill1:#B8B0D8;--hill2:#9A92C6;--hill3:#7B74AA;--ground:#6F689C;--moon:#FFF4CC;--stars:0;
@@ -36,7 +36,7 @@
 :root[data-theme=light]{
   color-scheme:light;--night:#E9ECF5;--glass:rgba(255,255,255,.74);--glass-hi:rgba(255,255,255,.95);
   --ovc:40,32,80;--edge:rgba(40,32,80,.1);--edge-hi:rgba(40,32,80,.2);
-  --text:#1B1830;--muted:#57536F;--faint:#8C88A3;
+  --text:#1B1830;--muted:#57536F;--faint:#67637F;
   --a:#E8681F;--b:#1A8CC6;--p3:#6A4BD1;--p4:#9A7400;--ok:#1C9A55;--danger:#D23655;--warn:#B87800;--up:#1C9A55;--dn:#D23655;
   --solid:#FFFFFF;--pillbg:#FFFFFF;--ring-in:#FFFFFF;--toast:#FFFFFF;--dlg-bg:rgba(250,250,253,.97);--tymix:#000000;--inverse:#1B1830;--inverse-text:#FFFFFF;
   --shade:233,236,245;--sky1:#8DBDEB;--sky2:#B9D5F2;--sky3:#F3D3C4;--sky4:#F6B796;--hill1:#B8B0D8;--hill2:#9A92C6;--hill3:#7B74AA;--ground:#6F689C;--moon:#FFF4CC;--stars:0;
@@ -1214,7 +1214,7 @@ function topBar() {
     ${run ? `<span class="status" id="status"><i></i><span></span></span>
     <span class="chip"><span class="mono" id="code">${esc(codeFromPath.toUpperCase())}</span><button type="button" id="copy">${t().copy}</button></span>
     <span class="avatars" id="avatars"></span>` : ""}
-    <span class="pair" id="lang"><button type="button" data-l="en" aria-pressed="${lang === "en"}">EN</button><button type="button" data-l="de" aria-pressed="${lang === "de"}">DE</button></span>
+    <span class="pair" id="lang"><button type="button" data-l="en" lang="en" aria-label="English" aria-pressed="${lang === "en"}">EN</button><button type="button" data-l="de" lang="de" aria-label="Deutsch" aria-pressed="${lang === "de"}">DE</button></span>
     <button type="button" class="icon-btn" id="theme" aria-label="${t().theme}" title="${t().theme}">${ICON.moon}${ICON.sun}</button>
     ${run ? `<button type="button" class="icon-btn" id="gear" data-v="settings" aria-label="${t().tabs.settings}" title="${t().tabs.settings}">${ICON.gear}</button>` : ""}
   </header>`;
@@ -1609,7 +1609,7 @@ function randoHtml(base, r, where) {
 const rdlg = { group: "traits", q: "", src: null };
 function randoDialog() {
   let d = $("#rdlg");
-  if (!d) { d = document.createElement("dialog"); d.id = "rdlg"; d.className = "rdlg"; document.body.appendChild(d); d.addEventListener("click", randoClick); d.addEventListener("change", randoChange); d.addEventListener("input", e => { if (e.target.id === "rq") { rdlg.q = e.target.value; randoList(); } }); }
+  if (!d) { d = document.createElement("dialog"); d.id = "rdlg"; d.className = "rdlg"; d.setAttribute("aria-labelledby", "rdlg-title"); document.body.appendChild(d); d.addEventListener("click", randoClick); d.addEventListener("change", randoChange); d.addEventListener("input", e => { if (e.target.id === "rq") { rdlg.q = e.target.value; randoList(); } }); }
   return d;
 }
 function randoRows(base, r, rows, all) {
@@ -1618,12 +1618,12 @@ function randoRows(base, r, rows, all) {
     const chg = rChanged(base, r, id);
     if (need && base && !all && !chg && !need(e)) return "";
     const now = e(id), num = choices && !Array.isArray(choices);
-    const ctl = num && choices.pick ? `<select data-rn="${id}">${base ? "" : `<option value="">${T.std("–")}</option>`}${Array.from({ length: choices.max + 1 }, (_, v) => `<option value="${v}"${(base ? rClamp(id, now) : r[id]) === v ? " selected" : ""}>${esc(choices.f(v))}</option>`).join("")}</select>`
+    const ctl = num && choices.pick ? `<select data-rn="${id}" aria-label="${esc(T.opt[id])}">${base ? "" : `<option value="">${T.std("–")}</option>`}${Array.from({ length: choices.max + 1 }, (_, v) => `<option value="${v}"${(base ? rClamp(id, now) : r[id]) === v ? " selected" : ""}>${esc(choices.f(v))}</option>`).join("")}</select>`
       : num ? `<div class="rn"><button type="button" data-rs="${id}" data-d="-1" aria-label="−"${base && rClamp(id, now) <= choices.min ? " disabled" : ""}>−</button>${choices.pre ? `<i>${choices.pre}</i>` : ""}<input type="number" data-rn="${id}" min="${choices.min}" max="${choices.max}" value="${base ? rClamp(id, now) : r[id] != null ? r[id] : ""}" placeholder="–" aria-label="${esc(T.opt[id])}">${choices.suf ? `<i>${choices.suf}</i>` : ""}<button type="button" data-rs="${id}" data-d="1" aria-label="+"${base && rClamp(id, now) >= choices.max ? " disabled" : ""}>+</button></div>`
-      : !base ? `<select data-rc="${id}"><option value="">${T.std("–")}</option>${(choices || [true, false]).map(c => `<option value="${c}"${r[id] === c ? " selected" : ""}>${rVal(id, c)}</option>`).join("")}</select>`
-      : choices ? `<select data-rc="${id}">${choices.map(c => `<option value="${c}"${now === c ? " selected" : ""}>${rVal(id, c)}</option>`).join("")}</select>`
+      : !base ? `<select data-rc="${id}" aria-label="${esc(T.opt[id])}"><option value="">${T.std("–")}</option>${(choices || [true, false]).map(c => `<option value="${c}"${r[id] === c ? " selected" : ""}>${rVal(id, c)}</option>`).join("")}</select>`
+      : choices ? `<select data-rc="${id}" aria-label="${esc(T.opt[id])}">${choices.map(c => `<option value="${c}"${now === c ? " selected" : ""}>${rVal(id, c)}</option>`).join("")}</select>`
       : `<button type="button" class="sw" role="switch" aria-checked="${now === true}" aria-label="${esc(T.opt[id])}" data-rf="${id}"></button>`;
-    return `<div class="ro${chg ? " chg" : ""}${need ? " sub" : ""}"><span>${T.opt[id]}</span>${chg ? `<button type="button" class="rback" data-rb="${id}" title="${esc(T.back)}">↺</button>` : ""}${ctl}</div>`;
+    return `<div class="ro${chg ? " chg" : ""}${need ? " sub" : ""}"><span>${T.opt[id]}</span>${chg ? `<button type="button" class="rback" data-rb="${id}" title="${esc(T.back)}" aria-label="${esc(T.back)}">↺</button>` : ""}${ctl}</div>`;
   }).join("");
 }
 // A group as blocks: an option with what hangs on it, or the plain
@@ -1652,7 +1652,7 @@ function randoList() {
 }
 function openRando(src) {
   const d = randoDialog(), T = t().rando; rdlg.src = src; rdlg.q = "";
-  d.innerHTML = `<div class="rdh"><div><h2>${T.title}</h2><p>${T.lead}</p></div><input type="search" id="rq" placeholder="${esc(T.search)}" autocomplete="off"><button type="button" class="x" data-rx aria-label="${esc(T.close)}">×</button></div>
+  d.innerHTML = `<div class="rdh"><div><h2 id="rdlg-title">${T.title}</h2><p>${T.lead}</p></div><input type="search" id="rq" placeholder="${esc(T.search)}" autocomplete="off"><button type="button" class="x" data-rx aria-label="${esc(T.close)}">×</button></div>
     <div class="rdb"><nav class="rnav"></nav><div class="rdl"><div class="rdc"></div></div></div>
     <div class="rdf"><span class="rcount"></span><button type="button" class="btn2" data-rall>${T.reset}</button><button type="button" class="btn2 hot" data-rx>${T.done}</button></div>`;
   randoList();
@@ -1716,9 +1716,9 @@ function rulesField(u) {
 }
 function openRules(u, rom, done) {
   let d = $("#ruledlg");
-  if (!d) { d = document.createElement("dialog"); d.id = "ruledlg"; d.className = "rdlg rules"; document.body.appendChild(d); }
+  if (!d) { d = document.createElement("dialog"); d.id = "ruledlg"; d.className = "rdlg rules"; d.setAttribute("aria-labelledby", "ruledlg-title"); document.body.appendChild(d); }
   const fill = () => {
-    d.innerHTML = `<div class="rdh"><div><h2>${t().pickRules}</h2><p>${t().rulesLead}</p></div><button type="button" class="x" data-rx aria-label="${esc(t().rando.close)}">×</button></div>
+    d.innerHTML = `<div class="rdh"><div><h2 id="ruledlg-title">${t().pickRules}</h2><p>${t().rulesLead}</p></div><button type="button" class="x" data-rx aria-label="${esc(t().rando.close)}">×</button></div>
       <div class="rdl">${ruleChecks(u.rules, capPicker(u.capOn, rom), u.players === 1)}</div>
       <div class="rdf"><span class="rcount">${t().rulesOn(rulesOn(u).length, RULES.filter(id => !(u.players === 1 && LINK_RULES.includes(id))).length)}</span><button type="button" class="btn2 hot" data-rx>${t().rando.done}</button></div>`;
   };
@@ -1894,7 +1894,7 @@ function mount() {
     <div class="view" data-view="timeline" hidden>${head("timeline")}<div class="glass scroll tl" id="tl"></div></div>
     <div class="view" data-view="types" hidden>${head("types")}<div class="glass scroll types" id="types"></div></div>
     <div class="view" data-view="rules" hidden>${head("rules")}<div class="scroll rules" id="rules"></div></div>
-    <div class="view" data-view="settings" hidden>${head("settings")}<div class="scroll"><div id="settings"></div></div></div>`) + `<dialog class="mon" id="mon"></dialog>`;
+    <div class="view" data-view="settings" hidden>${head("settings")}<div class="scroll"><div id="settings"></div></div></div>`) + `<dialog class="mon" id="mon" aria-labelledby="mon-title"></dialog>`;
   bindChrome();
   $("#efilt").onclick = e => { const b = e.target.closest("button"); if (b) { encUi.f = b.dataset.f; updateEncounters(); } };
   const find = $("#efind"); find.value = encUi.q;
@@ -2015,7 +2015,7 @@ function updateEncounters() {
     const p = s.pokemon, b = p.battle;
     const mine = local && s.status === "missed" && state.players[i] && state.players[i].name === local.name;
     const drop = mine ? `<button class="forget${forgetArmed === p.pid ? " sure" : ""}" data-forget="${p.pid}" title="${esc(t().forgetTip)}">${forgetArmed === p.pid ? esc(t().forgetSure) : esc(t().forget)}</button>` : "";
-    return `<span class="ecell" style="--c:${col(i)}"><span class="slot sm" data-mon="${p.pid}" data-seat="${i}" role="button" tabindex="0">${spriteImg(p)}</span><span style="min-width:0"><b>${esc(label(p))}</b><small>${esc(p.is_nicknamed && p.nickname ? species(p) + " · " : "")}${s.status === "missed" ? t().missed : b ? `${t().lv} ${b.level}` : t().box(p.place.box ?? "")}</small></span>${drop}</span>`;
+    return `<span class="ecell" style="--c:${col(i)}"><span class="slot sm" data-mon="${p.pid}" data-seat="${i}" role="button" tabindex="0" aria-label="${esc(label(p))}">${spriteImg(p)}</span><span style="min-width:0"><b>${esc(label(p))}</b><small>${esc(p.is_nicknamed && p.nickname ? species(p) + " · " : "")}${s.status === "missed" ? t().missed : b ? `${t().lv} ${b.level}` : t().box(p.place.box ?? "")}</small></span>${drop}</span>`;
   };
   const q = u.q.trim().toLowerCase();
   const hit = m => !q || locName(m.link).toLowerCase().includes(q) || m.sides.some(s => s && (label(s.pokemon).toLowerCase().includes(q) || species(s.pokemon).toLowerCase().includes(q)));
@@ -2387,7 +2387,7 @@ function patchTile(el, m) {
   el.classList.toggle("lost", m.dead);
   const why = fallen ? t().evFainted(label(fallen.pokemon)).replace(/<[^>]+>/g, "").replace(/\.$/, "") : missed ? `${species(missed.pokemon)} ${t().missed.toLowerCase()}` : "";
   const sub = locName(m.link) + (why ? "  ·  " + why : "");
-  const slot = (p, i) => p ? `<span class="slot sm" data-mon="${p.pid}" data-seat="${i}" role="button" tabindex="0">${spriteImg(p)}</span>` : `<span class="slot sm empty"></span>`;
+  const slot = (p, i) => p ? `<span class="slot sm" data-mon="${p.pid}" data-seat="${i}" role="button" tabindex="0" aria-label="${esc(label(p))}">${spriteImg(p)}</span>` : `<span class="slot sm empty"></span>`;
   const names = mons.filter(Boolean);
   el.innerHTML = `<span class="duo">${mons.map((p, i) => (i ? `<u style="--l:${col(i - 1)};--r:${col(i)}"></u>` : "") + slot(p, i)).join("")}</span><span class="tt"><b>${names.map(p => esc(label(p))).join(` ${t().and} `)}</b><small>${esc(sub)}</small></span>`;
   el.title = names.map(species).join(` ${t().and} `);
@@ -2491,7 +2491,7 @@ function cardHtml(seat, p, dex) {
   const head = `<header class="dh">
     <div class="dstage">${spriteImg(p)}</div>
     <div class="did"><p class="who"><i></i>${foe ? esc(t().foeOf(pl ? pl.name : seatName(seat))) : `${esc(pl ? pl.name : seatName(seat))}  ·  ${esc(c.met(p.met_location_name ? nameOf(p.met_location_name) : "#" + p.met_location, p.met_level))}`}</p>
-      <h2>${esc(label(p))}${b ? `<small>${t().lv} ${b.level}</small>` : ""}</h2>
+      <h2 id="mon-title">${esc(label(p))}${b ? `<small>${t().lv} ${b.level}</small>` : ""}</h2>
       ${p.is_nicknamed ? `<div class="spc">${esc(species(p))}</div>` : ""}
       <div class="tys">${monTypes(p, dex).map(tyChip).join("")}${ail}</div>
       ${b ? hpLine(b) : ""}</div>
@@ -2997,7 +2997,7 @@ function updateActions() {
   };
   const go = (v, then) => { view = v; try { history.replaceState(null, "", "#" + v); } catch {} showView(); if (then) nextFrame(then); };
   const gf = $("#gofresh", el);
-  if (gf) gf.onclick = () => go("settings", () => { const s = $("#runsec"); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  if (gf) gf.onclick = () => go("settings", () => { const s = $("#runsec"); if (s) s.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
   $("#gotypes", el).onclick = () => go("types");
 }
 
