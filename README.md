@@ -187,6 +187,18 @@ Next up, roughly in this order:
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the bigger picture. Ideas and bug reports are welcome in the [issues](https://github.com/hildlabs/SoulSync/issues) and on the [Discord](https://discord.gg/DKhuhJS8tJ).
 
+**Where help is needed most right now:**
+
+| Area | What | Needs the game? |
+| --- | --- | --- |
+| Testing | Play Black or White, or Black 2 / White 2 in another language, and report how it went | Yes |
+| Translations | French, Spanish, Italian… for the dashboard and the command line | No |
+| Streaming | An OBS overlay for a run | No, the demo is enough |
+| New games | Platinum, HeartGold and SoulSilver | Yes |
+| Emulators | The live script in BizHawk | Yes |
+
+Each of these has an issue with the files to look at: see [good first issues](https://github.com/hildlabs/SoulSync/labels/good%20first%20issue) and [help wanted](https://github.com/hildlabs/SoulSync/labels/help%20wanted).
+
 ## Hosting your own server
 
 The public server is fine for most groups. To run your own:
@@ -283,7 +295,7 @@ cargo test
 cargo run -p soulsync-server   # then open http://localhost:3000/demo
 ```
 
-The demo plays a scripted run, so you can work on the dashboard without a game. Please keep game assets out of the repository: no ROMs, saves, RAM dumps or sprites. [CONTRIBUTING.md](CONTRIBUTING.md) has the details and good places to start.
+The demo plays a scripted run, so you can work on the dashboard without a game. Please keep game assets out of the repository: no ROMs, saves, RAM dumps or sprites. [CONTRIBUTING.md](CONTRIBUTING.md) explains how the parts fit together and how to send a pull request. Issues labelled [good first issue](https://github.com/hildlabs/SoulSync/labels/good%20first%20issue) are a good way in.
 
 <details>
 <summary><b>Crates and releasing</b></summary>
