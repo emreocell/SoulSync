@@ -55,6 +55,9 @@ jobs:
           [[ "$SOULSYNC_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "A version looks like 0.1.0"; exit 1; }
           [ "$GITHUB_REF" = refs/heads/main ] || { echo "Releases are made from main"; exit 1; }
       - uses: actions/checkout@v4
+        with:
+          # Releases need the tags to find what changed since the last version.
+          fetch-depth: ${{ github.event_name == 'workflow_dispatch' && '0' || '1' }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --release -p soulsync-app
@@ -104,8 +107,15 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          PYTHONUTF8: "1"
         run: |
           {
+            echo "## What's new"
+            echo
+            python .github/scripts/release_notes.py notes "$SOULSYNC_VERSION"
+            echo
+            echo "## Download"
+            echo
             echo "SoulSync $SOULSYNC_VERSION for Windows. Download **SoulSync.exe** and start it; later versions install from inside the app. New here? See [Getting started](https://github.com/${{ github.repository }}#getting-started)."
             echo
             echo "> [!NOTE]"
@@ -122,6 +132,18 @@ jobs:
             --notes-file notes.md \
             --latest
           gh api "repos/${{ github.repository }}/git/refs" -f ref="refs/tags/v$SOULSYNC_VERSION" -f sha="${{ github.sha }}"
+      # Patch notes for the Discord server, as a post in #announcements. Needs a
+      # DISCORD_WEBHOOK secret (Discord: channel settings › Integrations ›
+      # Webhooks › Copy URL); DISCORD_ROLE, a role id to ping, is optional.
+      # Without the secret this does nothing, and it never fails the release.
+      - name: Announce on Discord
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_ROLE: ${{ vars.DISCORD_ROLE }}
+          PYTHONUTF8: "1"
+        run: python .github/scripts/release_notes.py discord "$SOULSYNC_VERSION" "https://github.com/${{ github.repository }}/releases/tag/build-${{ github.run_number }}"
 
   # The desktop app for macOS, one app for Apple Silicon and Intel Macs. It
   # is attached to the release the Windows job made; the app on a Mac does
