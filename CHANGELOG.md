@@ -11,6 +11,7 @@ Write entries for players, not for developers: what they notice in the app.
 
 ### New
 - The dashboard is now also available in French (FR button next to EN and DE). Pokémon and place names fall back to English for now.
+- The command-line tool now speaks Spanish: use `--lang es`, or set `SOULSYNC_LANG=es`.
 
 ### Fixed
 - Losing with your whole party now ends the attempt. Only the first fight against your rival may be lost with just the starter.

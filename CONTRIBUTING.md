@@ -44,7 +44,7 @@ DeSmuME + soulsync.lua  ──file──▶  desktop app  ──WebSocket──�
 
 Look for issues labelled [**good first issue**](https://github.com/hildlabs/SoulSync/labels/good%20first%20issue) or [**help wanted**](https://github.com/hildlabs/SoulSync/labels/help%20wanted). Each one says which files to look at and how to check your change. Many need no copy of the game at all: the demo and the tests are enough.
 
-- **Translations:** dashboard text is in the `T` object in `web/index.html`, command-line text in `crates/soulsync-cli/src/i18n.rs` (English and German so far).
+- **Translations:** dashboard text is in the `T` object in `web/index.html`, command-line text in `crates/soulsync-cli/src/i18n.rs` (English, German and Spanish so far).
 - **Testing:** play a game or language that has not been tested yet and report what works and what does not. No code needed.
 - **Dashboard polish**, following `docs/design.md`.
 - Anything on the [roadmap](docs/ROADMAP.md). For bigger features, open an issue first so we can agree on the approach before you spend time on it.

@@ -280,7 +280,7 @@ Party (1)
   Party 1      Metang · Lv 5 · HP 21/21 · met at Aspertia City
 ```
 
-Output is available in English and German. Use `--lang de`, or set `SOULSYNC_LANG=de`.
+Output is available in English, German and Spanish. Use `--lang de` or `--lang es`, or set `SOULSYNC_LANG=es`.
 
 </details>
 
