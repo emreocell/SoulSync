@@ -9,6 +9,9 @@ Write entries for players, not for developers: what they notice in the app.
 
 ## Unreleased
 
+### New
+- The command-line tool now speaks Spanish: use `--lang es`, or set `SOULSYNC_LANG=es`.
+
 ### Fixed
 - Losing with your whole party now ends the attempt. Only the first fight against your rival may be lost with just the starter.
 
