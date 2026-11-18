@@ -19,6 +19,12 @@ const BAG_CRC_COPY: usize = 0x25F32;
 const TABLE: usize = 0x25F00;
 const TABLE_LEN: usize = 0x94;
 const TABLE_CRC: usize = 0x25FA2;
+/// The trainer block, its checksums and the byte that names the game.
+const TRAINER: usize = 0x19400;
+const TRAINER_LEN: usize = 0xB0;
+const TRAINER_CRC: usize = 0x194B2;
+const TRAINER_CRC_COPY: usize = 0x25F36;
+const TRAINER_VERSION: usize = 0x1F;
 
 /// The items pocket, first in the bag: 310 slots of item number and count.
 /// Poké Balls are kept there.
@@ -159,9 +165,65 @@ pub fn set_medicine(save: &mut [u8], item: u16, count: u16) -> Result<(), SaveEr
     Ok(())
 }
 
+/// Whether the game has written this file: the trainer block and the table
+/// of checksums are intact. The file DeSmuME makes before the first save is
+/// empty or noise and fails this.
+pub fn trainer_intact(save: &[u8]) -> bool {
+    save.len() >= SAVE_SIZE && {
+        let crc = crc16(&save[TRAINER..TRAINER + TRAINER_LEN]);
+        crc == u16_at(save, TRAINER_CRC)
+            && crc == u16_at(save, TRAINER_CRC_COPY)
+            && crc16(&save[TABLE..TABLE + TABLE_LEN]) == u16_at(save, TABLE_CRC)
+    }
+}
+
+/// Marks a save as written by `game`. A starting save can come from the
+/// other version: Black 2 and White 2 load each other's saves and keep the
+/// byte they find, so the run would show the wrong game for good.
+pub fn set_game(save: &mut [u8], game: crate::game::Game) -> Result<(), SaveError> {
+    if save.len() < SAVE_SIZE {
+        return Err(SaveError::TooSmall(save.len()));
+    }
+    if !trainer_intact(save) {
+        return Err(SaveError::NotB2W2);
+    }
+    save[TRAINER + TRAINER_VERSION] = game.save_version();
+    let new = crc16(&save[TRAINER..TRAINER + TRAINER_LEN]);
+    put_u16(save, TRAINER_CRC, new);
+    put_u16(save, TRAINER_CRC_COPY, new);
+    let table = crc16(&save[TABLE..TABLE + TABLE_LEN]);
+    put_u16(save, TABLE_CRC, table);
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn marks_a_save_as_the_other_version() {
+        use crate::game::Game;
+        let mut s = vec![0u8; SAVE_SIZE + 122];
+        s[TRAINER + TRAINER_VERSION] = Game::Black2.save_version();
+        let crc = crc16(&s[TRAINER..TRAINER + TRAINER_LEN]);
+        put_u16(&mut s, TRAINER_CRC, crc);
+        put_u16(&mut s, TRAINER_CRC_COPY, crc);
+        seal(&mut s);
+        set_game(&mut s, Game::White2).unwrap();
+        assert_eq!(
+            crate::parse_b2w2(&s).unwrap().trainer.game,
+            Some(Game::White2)
+        );
+        let crc = crc16(&s[TRAINER..TRAINER + TRAINER_LEN]);
+        assert_eq!(u16_at(&s, TRAINER_CRC), crc);
+        assert_eq!(u16_at(&s, TRAINER_CRC_COPY), crc);
+        assert_eq!(crc16(&s[TABLE..TABLE + TABLE_LEN]), u16_at(&s, TABLE_CRC));
+        // Not a save: left alone.
+        s[TRAINER] ^= 1;
+        let before = s.clone();
+        assert_eq!(set_game(&mut s, Game::Black2), Err(SaveError::NotB2W2));
+        assert_eq!(s, before);
+    }
 
     /// An empty save whose bag and table checksums are right.
     fn blank() -> Vec<u8> {

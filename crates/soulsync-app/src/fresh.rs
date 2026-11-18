@@ -289,6 +289,16 @@ fn java(plan: &Plan, fresh: &Path) -> Result<(), Failure> {
     Ok(())
 }
 
+/// The game a ROM is, from its header.
+fn game_of(rom: &Path) -> Option<soulsync_core::Game> {
+    use std::io::Read;
+    let mut header = [0u8; soulsync_core::ROM_HEADER_LEN];
+    std::fs::File::open(rom)
+        .and_then(|mut f| f.read_exact(&mut header))
+        .ok()?;
+    soulsync_core::read_rom_header(&header)?.game
+}
+
 /// Randomizes the ROM anew and puts the starting save in place.
 pub fn run(plan: &Plan) -> Result<(), Failure> {
     let own = own(plan);
@@ -315,6 +325,10 @@ pub fn run(plan: &Plan) -> Result<(), Failure> {
         Some(template) => {
             let mut save =
                 std::fs::read(template).map_err(|e| (Why::Write, Some(e.to_string())))?;
+            // The starting save may come from the other version of the game.
+            if let Some(game) = game_of(&plan.original) {
+                let _ = soulsync_core::bag::set_game(&mut save, game);
+            }
             if plan.candies > 0 {
                 soulsync_core::bag::set_medicine(
                     &mut save,

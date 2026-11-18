@@ -25,6 +25,16 @@ impl Game {
         }
     }
 
+    /// The version byte this game writes into its trainer data.
+    pub fn save_version(self) -> u8 {
+        match self {
+            Game::White => 20,
+            Game::Black => 21,
+            Game::White2 => 22,
+            Game::Black2 => 23,
+        }
+    }
+
     /// The first three letters of a cartridge game code such as `IRED`.
     pub fn from_game_code(code: &str) -> Option<Game> {
         match code.get(..3)? {

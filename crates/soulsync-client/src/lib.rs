@@ -63,8 +63,41 @@ pub fn load(path: &Path) -> Result<SaveSnapshot, Error> {
     Ok(parse_b2w2(&data)?)
 }
 
+/// Reads a save the game has really written. `None` for what DeSmuME puts
+/// there before the first save, which may even parse.
+pub fn load_played(path: &Path) -> Result<SaveSnapshot, Error> {
+    let data = std::fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    // A new game also formats the file during the intro: valid, but with
+    // nobody in it yet.
+    let snap = soulsync_core::bag::trainer_intact(&data)
+        .then(|| parse_b2w2(&data).ok())
+        .flatten()
+        .filter(|s| !s.trainer.name.is_empty());
+    snap.ok_or_else(|| "the game has not been saved yet".into())
+}
+
+/// The game a running emulator reports in `file`, for a new game without a
+/// save.
+pub fn load_live(file: &Path) -> Option<SaveSnapshot> {
+    LiveReport::parse(&std::fs::read(file).ok()?)?.snapshot()
+}
+
 pub fn modified(path: &Path) -> Option<SystemTime> {
     std::fs::metadata(path).and_then(|m| m.modified()).ok()
+}
+
+/// Keeps the player's seat in a run taken while there is nothing to send yet,
+/// so that the others see them from the moment the game is started. Ends when
+/// the task is aborted.
+pub fn hold_seat(url: String) -> tokio::task::JoinHandle<()> {
+    tokio::spawn(async move {
+        loop {
+            if let Ok((mut ws, _)) = tokio_tungstenite::connect_async(&url).await {
+                while let Some(Ok(_)) = ws.next().await {}
+            }
+            tokio::time::sleep(Duration::from_secs(3)).await;
+        }
+    })
 }
 
 /// What a [`session`] reports while it runs.
@@ -223,10 +256,14 @@ impl Live {
         if foreign {
             *self.place.lock().unwrap() = None;
         }
-        let live = report
-            .as_ref()
-            .filter(|_| !foreign)
-            .and_then(|r| Some((r, base.with_live_party(r.party())?)));
+        let live = report.as_ref().filter(|_| !foreign).and_then(|r| {
+            let party = if r.no_party() && base.party.is_empty() {
+                base.clone()
+            } else {
+                base.with_live_party(r.party())?
+            };
+            Some((r, party))
+        });
         let mut changed = false;
         for pid in self.forget.lock().unwrap().drain(..) {
             changed |= self.encounters.forget(pid);
@@ -259,7 +296,15 @@ impl Live {
             for raw in fresh {
                 self.note(&snap, raw, place);
             }
-            snap.wild = report.wild(&snap).map(Box::new);
+            // Where the battle takes place, for the dashboard to tell whether
+            // this Pokémon may be caught at all.
+            snap.wild = report.wild(&snap).map(|mut wild| {
+                if let Some(name) = place.and_then(soulsync_core::dex::location) {
+                    wild.met_location = place.unwrap_or_default();
+                    wild.met_location_name = Some(name.clone());
+                }
+                Box::new(wild)
+            });
             // A trainer battle: who the trainer has, unless a wild one is out.
             snap.foes = if snap.wild.is_some() {
                 Vec::new()
@@ -328,7 +373,12 @@ pub async fn session(
     }
     on(Update::Connected);
     // What the save file says, without the live party.
-    let mut base = load(path).unwrap_or_else(|_| last.clone());
+    // Before the first save the game is known from the emulator alone.
+    let mut unsaved = false;
+    let mut base = load_played(path).unwrap_or_else(|_| {
+        unsaved = true;
+        last.clone()
+    });
     let mut stamp = None;
     let mut live_stamp = None;
     let mut tick = tokio::time::interval(Duration::from_secs(1));
@@ -344,8 +394,12 @@ pub async fn session(
                 if now != stamp {
                     // DeSmuME does not write the file atomically.
                     tokio::time::sleep(Duration::from_millis(300)).await;
-                    match load(path) {
-                        Ok(snap) => base = snap,
+                    match load_played(path) {
+                        Ok(snap) => {
+                            base = snap;
+                            unsaved = false;
+                        }
+                        Err(_) if unsaved => {}
                         Err(_) => continue,
                     }
                     stamp = now;

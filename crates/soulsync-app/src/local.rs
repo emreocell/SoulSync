@@ -8,7 +8,7 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
-use soulsync_client::{create_run, load, session, ws_url, End, Live, Update};
+use soulsync_client::{create_run, load, load_played, session, ws_url, End, Live, Update};
 use soulsync_core::protocol::{RunRandomizer, RunSettings};
 use soulsync_core::{
     read_catch_rates, read_dex, read_level_caps, read_map_locations, read_rom_header, Lang,
@@ -490,6 +490,16 @@ fn install_autoload(save: &Path, script: &str) -> LuaSetup {
     }
 }
 
+/// Whether `save` is the file DeSmuME makes before the game first saves:
+/// too short, or the same byte all through.
+fn unwritten(save: &Path) -> bool {
+    std::fs::read(save).is_ok_and(|d| {
+        let body = &d[..d.len().min(0x80000)];
+        // It starts out shorter than a save, until DeSmuME knows the size.
+        body.len() < 0x80000 || body.iter().all(|x| *x == body[0])
+    })
+}
+
 /// Whether the Lua script wrote the party a moment ago.
 fn live_active(out: &Path) -> bool {
     soulsync_client::modified(out)
@@ -869,24 +879,34 @@ impl Local {
             // time. Until then the script must not look for the party of the
             // game before, whose trainer it was told about.
             let trainer_note = live_party_path().map(|out| out.with_file_name("live-trainer.txt"));
+            let seat = soulsync_client::hold_seat(url.clone());
             let mut last = loop {
-                match load(&save) {
-                    Ok(s) => break s,
-                    Err(e) => {
-                        // Not there yet, or not a save yet: an emulator may
-                        // create the file before the game first writes it.
-                        let missing = !save.exists();
-                        if missing {
-                            if let Some(note) = &trainer_note {
-                                let _ = std::fs::remove_file(note);
-                            }
-                        }
-                        let why = (!missing).then(|| e.to_string());
-                        me.set_phase(Phase::Waiting, why);
-                        tokio::time::sleep(Duration::from_secs(2)).await;
+                // DeSmuME creates an empty file before the game first saves:
+                // it reads as a save without a trainer, and is none yet.
+                if let Ok(s) = load_played(&save) {
+                    break s;
+                }
+                // A new game shows as soon as the emulator knows the player.
+                if let Some(s) = live_party_path()
+                    .filter(|p| live_active(p))
+                    .and_then(|p| soulsync_client::load_live(&p))
+                {
+                    break s;
+                }
+                let (found, why) = match load(&save) {
+                    Ok(_) => (true, None),
+                    Err(_) if unwritten(&save) => (true, None),
+                    Err(e) => (save.exists(), Some(e.to_string())),
+                };
+                if !found || why.is_none() {
+                    if let Some(note) = &trainer_note {
+                        let _ = std::fs::remove_file(note);
                     }
                 }
+                me.set_phase(Phase::Waiting, why.filter(|_| found));
+                tokio::time::sleep(Duration::from_secs(2)).await;
             };
+            seat.abort();
             me.set_phase(Phase::Connecting, None);
             let mut backoff = 1u64;
             loop {
@@ -1302,6 +1322,17 @@ fn begin_fresh(
         .await;
         let progress = match done {
             Ok(Ok(())) => {
+                // A game begun without a starting save has no bag to fill
+                // yet: the script does that once the player walks around.
+                // Asked only now, when the last game's save is out of the way.
+                if plan.template.is_none() && plan.candies > 0 {
+                    let mut inner = worker.inner.lock().unwrap();
+                    inner.config.candies_due = Some(CandiesDue {
+                        save: plan.save.clone(),
+                        count: plan.candies,
+                    });
+                    write_config(&inner.config);
+                }
                 let played = plan
                     .emulator
                     .as_deref()
@@ -1357,7 +1388,9 @@ async fn await_template(local: Local, save: PathBuf) {
             continue;
         }
         seen = modified;
-        let Ok(snap) = load(&save) else { continue };
+        let Ok(snap) = load_played(&save) else {
+            continue;
+        };
         if snap.all_pokemon().next().is_some() {
             break;
         }
@@ -1379,13 +1412,22 @@ async fn await_template(local: Local, save: PathBuf) {
     local.inner.lock().unwrap().awaiting_template = false;
 }
 
-/// Puts the Rare Candies due into the save once DeSmuME is closed, once.
-/// A save that has some already keeps what it has.
+/// The file that asks the Lua script for Rare Candies.
+fn candy_request() -> Option<PathBuf> {
+    data_dir().map(|d| d.join("live-candies.txt"))
+}
+
+/// Gets the Rare Candies due into the game, once: the Lua script puts them
+/// into the bag of the running game, and once DeSmuME is closed a save
+/// without any gets them directly. A save that has some is done.
 fn give_due_candies(local: &Local) {
     let (due, emulator) = {
         let inner = local.inner.lock().unwrap();
         let c = &inner.config;
         let Some(due) = c.candies_due.clone() else {
+            if let Some(file) = candy_request() {
+                let _ = std::fs::remove_file(file);
+            }
             return;
         };
         let emulator = c
@@ -1395,20 +1437,24 @@ fn give_due_candies(local: &Local) {
             .or_else(|| desmume_exe(&due.save));
         (due, emulator)
     };
-    if emulator.as_deref().is_some_and(crate::fresh::running) {
-        return;
+    if let Some(file) = candy_request() {
+        let _ = std::fs::write(file, format!("{}\n", due.count));
     }
     use soulsync_core::bag::{medicine, set_medicine, RARE_CANDY};
+    let running = emulator.as_deref().is_some_and(crate::fresh::running);
     let given = match std::fs::read(&due.save) {
-        Ok(mut save) if medicine(&save, RARE_CANDY) == 0 => {
+        Ok(save) if medicine(&save, RARE_CANDY) > 0 => true,
+        Ok(mut save) if !running => {
             set_medicine(&mut save, RARE_CANDY, due.count).is_ok()
                 && std::fs::write(&due.save, &save).is_ok()
         }
-        // Has some, or the game is gone: nothing more to give.
-        Ok(_) => true,
-        Err(e) => e.kind() == std::io::ErrorKind::NotFound,
+        // Not saved yet: the script sees to it.
+        _ => false,
     };
     if given {
+        if let Some(file) = candy_request() {
+            let _ = std::fs::remove_file(file);
+        }
         let mut inner = local.inner.lock().unwrap();
         if inner.config.candies_due.as_ref() == Some(&due) {
             inner.config.candies_due = None;
