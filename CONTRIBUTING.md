@@ -39,5 +39,6 @@ The demo plays a scripted run, so most dashboard work needs no game at all. `/de
 
 - **No game assets in the repository:** no ROMs, saves, RAM dumps, sprites or other Nintendo graphics. Data has to come from the player's own ROM at runtime. Never link to places to download ROMs, in code, docs or issues.
 - The randomizer port must stay byte-identical to Universal Pokémon Randomizer ZX for the same settings and seed. If you change it, check against the original.
+- A change players will notice gets a line under **Unreleased** in [CHANGELOG.md](CHANGELOG.md); releases turn it into the patch notes on GitHub and Discord.
 - Code, comments and docs are in English. `cargo fmt` and `cargo clippy` should be clean.
 - By contributing you agree that your work is licensed under GPL-3.0-or-later, like the rest of the project.
