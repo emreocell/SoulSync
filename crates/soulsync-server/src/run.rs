@@ -273,6 +273,8 @@ impl Run {
         if p.snapshot.is_none() {
             p.met.extend(snapshot.encounters.iter().map(|w| w.pid));
         }
+        // The moment a player's whole party goes down.
+        let blacked_out = snapshot.wiped() && p.snapshot.as_ref().is_some_and(|old| !old.wiped());
         let met = &mut p.met;
         events.retain(|e| match e {
             Event::Encountered { pokemon } => met.insert(pokemon.pid),
@@ -325,6 +327,9 @@ impl Run {
             });
         }
         self.log.truncate(LOG_LIMIT);
+        if blacked_out && self.finished.is_none() {
+            self.finish(Outcome::Lost, now);
+        }
         n
     }
 
@@ -398,6 +403,7 @@ mod tests {
             wild: None,
             foes: vec![],
             balls: None,
+            starter_at_stake: false,
         }
     }
 
@@ -447,6 +453,32 @@ mod tests {
         let s = r.state();
         assert!(!s.log.iter().any(|l| matches!(l.event, Event::Gone { .. })));
         assert_eq!(caught(&r), 1);
+    }
+
+    #[test]
+    fn a_blackout_ends_the_attempt() {
+        let mut r = Run::new("ZORUA-1234".into(), 7, RunSettings::default());
+        r.join("Hannes").unwrap();
+        let alone = |hp, stake| {
+            let mut s = snap(hp);
+            s.boxes.clear();
+            s.starter_at_stake = stake;
+            s
+        };
+        r.update("Hannes", alone(20, false), 1);
+        // The first fight against the rival may be lost.
+        r.update("Hannes", alone(0, false), 2);
+        assert_eq!(r.state().finished, None);
+        r.update("Hannes", alone(20, true), 3);
+        r.update("Hannes", alone(0, true), 4);
+        let s = r.state();
+        assert_eq!(s.finished, Some(Outcome::Lost));
+        assert_eq!(s.history.len(), 1);
+        assert!(s.links.iter().any(|l| l.is_dead()));
+        // Starting over is not undone by the same state again.
+        r.restart(5);
+        r.update("Hannes", alone(0, true), 6);
+        assert_eq!(r.state().finished, None);
     }
 
     #[test]

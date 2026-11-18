@@ -732,6 +732,7 @@ mod tests {
             wild: None,
             foes: vec![],
             balls: None,
+            starter_at_stake: false,
         }
     }
 

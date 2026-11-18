@@ -85,6 +85,10 @@ pub struct SaveSnapshot {
     /// from clients before this field.
     #[serde(default)]
     pub balls: Option<Vec<(u16, u16)>>,
+    /// The first trainer battle is over, so the starter counts even as the
+    /// only Pokémon. See [`Self::only_starter`].
+    #[serde(default)]
+    pub starter_at_stake: bool,
 }
 
 impl SaveSnapshot {
@@ -93,11 +97,17 @@ impl SaveSnapshot {
         self.party.iter().chain(&self.boxes).filter(|p| !p.is_egg)
     }
 
-    /// The player has nothing but their starter yet. The run begins with the
-    /// first catch: a faint before it, like in the first fight against the
-    /// rival, does not count.
+    /// The player has nothing but their starter, in the first fight against
+    /// the rival at most. A faint there does not count: the game goes on.
     pub fn only_starter(&self) -> bool {
-        self.all_pokemon().count() <= 1
+        !self.starter_at_stake && self.all_pokemon().count() <= 1
+    }
+
+    /// Every Pokémon of the party is down, in a way that counts: the player
+    /// blacks out, and the attempt is lost.
+    pub fn wiped(&self) -> bool {
+        let mut team = self.party.iter().filter(|p| !p.is_egg).peekable();
+        team.peek().is_some() && team.all(Pokemon::is_fainted) && !self.only_starter()
     }
 
     /// Whether the player has this Pokémon, eggs included.
@@ -145,6 +155,7 @@ impl SaveSnapshot {
             wild: None,
             foes: vec![],
             balls: self.balls.clone(),
+            starter_at_stake: self.starter_at_stake,
         };
         for old in &self.party {
             live.keep(old);
@@ -228,6 +239,7 @@ pub fn parse_b2w2(data: &[u8]) -> Result<SaveSnapshot, SaveError> {
         wild: None,
         foes: vec![],
         balls: crate::bag::items_pocket(b).and_then(crate::bag::balls),
+        starter_at_stake: false,
     })
 }
 

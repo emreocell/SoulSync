@@ -173,6 +173,7 @@ impl<'a> LiveReport<'a> {
             wild: None,
             foes: vec![],
             balls: None,
+            starter_at_stake: false,
         };
         if self.no_party() {
             Some(empty)
@@ -237,6 +238,13 @@ pub struct Encounters {
     /// went to a box the save does not show yet.
     #[serde(default)]
     unsaved: Vec<Pokemon>,
+    /// A trainer battle is going on.
+    #[serde(default)]
+    in_trainer_battle: bool,
+    /// The first trainer battle is over and the party is well again: from
+    /// now on the starter counts.
+    #[serde(default)]
+    first_battle_over: bool,
 }
 
 impl Encounters {
@@ -327,6 +335,18 @@ impl Encounters {
     pub fn complete(&mut self, snapshot: &mut SaveSnapshot, live: bool) -> bool {
         self.of(&snapshot.trainer);
         let mut changed = false;
+        if live && !snapshot.foes.is_empty() {
+            changed |= !self.in_trainer_battle;
+            self.in_trainer_battle = true;
+        } else if live && self.in_trainer_battle && !snapshot.party.iter().any(Pokemon::is_fainted)
+        {
+            // Lost or won, the rival's first fight does not end the run; what
+            // comes after it does. Not before the game has healed the party.
+            self.in_trainer_battle = false;
+            self.first_battle_over = true;
+            changed = true;
+        }
+        snapshot.starter_at_stake = self.first_battle_over || snapshot.trainer.badges > 0;
         if live {
             for p in &snapshot.party {
                 match self.unsaved.iter_mut().find(|u| u.pid == p.pid) {
@@ -404,6 +424,7 @@ mod tests {
             wild: None,
             foes: vec![],
             balls: None,
+            starter_at_stake: false,
         }
     }
 
@@ -538,6 +559,40 @@ mod tests {
             .unwrap()
             .foes(&snapshot(vec![]))
             .is_empty());
+    }
+
+    #[test]
+    fn the_starter_counts_after_the_first_trainer_battle() {
+        let mon = |hp| {
+            let stats = BattleStats {
+                level: 5,
+                hp,
+                max_hp: 20,
+            };
+            pk5::parse(
+                &build_raw(1, 495, "", 117, 5, Some(&stats)),
+                Place::Party { slot: 0 },
+            )
+            .unwrap()
+        };
+        let mut e = Encounters::default();
+        let view = |e: &mut Encounters, hp, fighting: bool| {
+            let mut s = snapshot(vec![mon(hp)]);
+            if fighting {
+                s.foes = vec![mon(20)];
+            }
+            e.complete(&mut s, true);
+            s
+        };
+        // Loses the first fight: nothing counts, also while still down.
+        assert!(view(&mut e, 0, true).only_starter());
+        let down = view(&mut e, 0, false);
+        assert!(down.only_starter() && down.fallen.is_empty() && !down.wiped());
+        // Healed, the fight is over. The next defeat ends the attempt.
+        assert!(!view(&mut e, 20, false).only_starter());
+        let lost = view(&mut e, 0, false);
+        assert!(lost.wiped());
+        assert_eq!(lost.fallen.len(), 1);
     }
 
     #[test]
