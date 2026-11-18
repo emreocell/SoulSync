@@ -40,7 +40,7 @@
 A **Nuzlocke** is a challenge run with two core rules: you may only catch the first Pokémon you meet on each route, and a Pokémon that faints is gone for good. In a **Soul Link**, two or more friends play a Nuzlocke side by side. The catches they make on the same route are linked, and if one of them faints, its partners are lost too. Keeping all of that straight by hand gets tedious fast. SoulSync does it for you, solo or with up to four players.
 
 > [!NOTE]
-> **SoulSync is young.** It has been played on Windows with DeSmuME, solo and with friends, mostly with German copies of Black 2 and White 2. Other languages and Black/White should work but have seen little or no testing. Expect rough edges, and please [report what breaks](https://github.com/hildlabs/SoulSync/issues).
+> **SoulSync is an early hobby project.** So far it has been tested with Pokémon Black 2 (German) on Windows with DeSmuME, and only up to the first gym. White 2 should work the same way but is untested, and other games may follow. Expect bugs: please report them as an [issue](https://github.com/hildlabs/SoulSync/issues) or on the [Discord](https://discord.gg/DKhuhJS8tJ), and pull requests are very welcome. Large parts of the code were written with AI assistance; all of it is open source, so you can read every line.
 
 ## What you need
 
@@ -51,7 +51,7 @@ A **Nuzlocke** is a challenge run with two core rules: you may only catch the fi
 
 - **A PC with Windows 10 or 11.** On a Mac, SoulSync runs DeSmuME through Wine, see [SoulSync on a Mac](docs/mac.md).
 - **[DeSmuME](https://desmume.org)**, the free Nintendo DS emulator (Windows build). Its Lua scripting is what lets SoulSync follow the game live.
-- **Your own copy of Pokémon Black 2 or White 2** as a ROM file. Black and White work too, with less testing so far. SoulSync does not include or download games.
+- **Your own copy of Pokémon Black 2 or White 2** as a ROM file. Black 2 is the tested one so far; White 2 should work the same way. SoulSync does not include or download games.
 
 That's all: no account, and for Black 2 and White 2 no Java or separate randomizer either. Everyone in a Soul Link needs the same three things on their own PC.
 
@@ -141,7 +141,7 @@ No. SoulSync does not include, download or link to games. Every player uses a RO
 <details>
 <summary><b>Which games and languages work?</b></summary>
 <br>
-The generation 5 games: Pokémon Black 2 and White 2, and Black and White. Black 2 and White 2 in German have been played the most; other languages and Black/White should work but have seen less testing. More games are on the <a href="#roadmap">roadmap</a>.
+So far SoulSync has been tested with Pokémon Black 2 in German, up to the first gym. White 2 should work the same way, and Black and White and other languages are meant to work too, but none of them have been tested yet. If you try one, please tell us how it went. More games are on the <a href="#roadmap">roadmap</a>.
 </details>
 
 <details>
@@ -160,6 +160,12 @@ Yes. The dashboard is a web page on the run server, so anyone with the link can 
 <summary><b>Does it work with melonDS, mGBA or a real DS?</b></summary>
 <br>
 Not yet. Live tracking needs DeSmuME's Lua scripting. Other emulators are on the <a href="#roadmap">roadmap</a>. On a Mac without Wine you can play in any emulator and pick its save; the dashboard then only updates when you save in-game.
+</details>
+
+<details>
+<summary><b>Was it made with AI?</b></summary>
+<br>
+Partly. SoulSync is a hobby project, and large parts of the code were written with AI assistance and then tested in real runs. It is all open source under GPL-3.0, so you can read, check and improve every line. The hope is to get open-source work on Nuzlocke tools rolling, so contributions of any size are welcome.
 </details>
 
 <details>
@@ -266,6 +272,8 @@ Output is available in English and German. Use `--lang de`, or set `SOULSYNC_LAN
 </details>
 
 ## Contributing
+
+SoulSync is meant as a starting point for open-source Nuzlocke tools, so help of any kind is welcome: bug reports, testing other games and languages, ideas and pull requests. Talk to us in the [issues](https://github.com/hildlabs/SoulSync/issues) or on the [Discord](https://discord.gg/DKhuhJS8tJ).
 
 SoulSync is written in Rust; the dashboard is a single HTML file without a build step. You need [Rust](https://rustup.rs) 1.75 or newer.
 
