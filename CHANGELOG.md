@@ -16,6 +16,9 @@ Write entries for players, not for developers: what they notice in the app.
 - The run list no longer jumps when a partner joins.
 -->
 
+### New
+- The Team tab has a button to copy a player's team as Pokémon Showdown text, to paste into Showdown's team builder (Import) or a damage calculator. Species and nature are in English; moves, item and ability use the names of that player's game.
+
 ## 0.3.8
 
 ### New
